@@ -1,4 +1,6 @@
-import pygame, random, math, time
+import pygame
+import math
+import time
 
 WIDTH = 800
 HEIGHT = 600
@@ -15,10 +17,13 @@ clock = pygame.time.Clock()
 # Ocultar el cursor del mouse
 pygame.mouse.set_visible(False)
 
+
 class Tank(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.original_image = pygame.image.load("assets/Retina/tankBody_blue_outline.png").convert_alpha()  # Imagen original
+        self.original_image = pygame.image.load(
+            "assets/Retina/tankBody_blue_outline.png"
+        ).convert_alpha()  # Imagen original
         self.image = self.original_image
         self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH // 2
@@ -46,7 +51,7 @@ class Tank(pygame.sprite.Sprite):
 
         # Normalizar la velocidad en caso de movimiento diagonal
         if self.speed_x != 0 and self.speed_y != 0:
-            diagonal_speed = 5 / (2 ** 0.5)  # Velocidad ajustada para movimiento diagonal
+            diagonal_speed = 5 / (2**0.5)  # Velocidad ajustada para movimiento diagonal
             self.speed_x = self.speed_x / abs(self.speed_x) * diagonal_speed
             self.speed_y = self.speed_y / abs(self.speed_y) * diagonal_speed
 
@@ -106,24 +111,33 @@ class Tank(pygame.sprite.Sprite):
         if self.rect.top < 0:
             self.rect.top = 0
 
+
 class TankCannon(pygame.sprite.Sprite):
     def __init__(self, tank):
         super().__init__()
         self.tank = tank  # Referencia al tanque base
-        self.original_image = pygame.image.load("assets/Retina/tankBlue_barrel1_outline.png").convert_alpha()
+        self.original_image = pygame.image.load(
+            "assets/Retina/tankBlue_barrel1_outline.png"
+        ).convert_alpha()
         self.image = self.original_image
         self.rect = self.image.get_rect(center=self.tank.rect.center)
         self.angle = 0
 
         # Calcular el desplazamiento desde el centro del cañón hasta su base
-        self.offset = int(self.rect.height * 0.4)  # Asume que la base está en el centro inferior del sprite
-        
+        self.offset = int(
+            self.rect.height * 0.4
+        )  # Asume que la base está en el centro inferior del sprite
 
     def update(self):
         # Rotar hacia el cursor
         mouse_x, mouse_y = pygame.mouse.get_pos()
-        rel_x, rel_y = mouse_x - self.tank.rect.centerx, mouse_y - self.tank.rect.centery
-        self.angle = math.degrees(math.atan2(-rel_y, rel_x)) + 90  # Calcular ángulo hacia el cursor
+        rel_x, rel_y = (
+            mouse_x - self.tank.rect.centerx,
+            mouse_y - self.tank.rect.centery,
+        )
+        self.angle = (
+            math.degrees(math.atan2(-rel_y, rel_x)) + 90
+        )  # Calcular ángulo hacia el cursor
 
         # Rotar la imagen del cañón
         self.image = pygame.transform.rotate(self.original_image, self.angle)
@@ -138,11 +152,16 @@ class TankCannon(pygame.sprite.Sprite):
 # Crear un grupo para los rastros
 tracks_group = pygame.sprite.Group()
 
+
 class Track(pygame.sprite.Sprite):
     def __init__(self, position):
         super().__init__()
-        self.image = pygame.Surface((20, 10), pygame.SRCALPHA)  # Superficie transparente
-        pygame.draw.rect(self.image, (100, 100, 100, 150), (0, 0, 20, 10))  # Rectángulo semitransparente
+        self.image = pygame.Surface(
+            (20, 10), pygame.SRCALPHA
+        )  # Superficie transparente
+        pygame.draw.rect(
+            self.image, (100, 100, 100, 150), (0, 0, 20, 10)
+        )  # Rectángulo semitransparente
         self.rect = self.image.get_rect(center=position)
         self.spawn_time = time.time()  # Registrar el tiempo de creación
 
@@ -150,6 +169,7 @@ class Track(pygame.sprite.Sprite):
         # Eliminar el rastro después de 2 segundos
         if time.time() - self.spawn_time > 2:
             self.kill()
+
 
 # Crear tanque y cañón
 tank = Tank()  # Tu clase de tanque
@@ -175,8 +195,8 @@ while running:
         track = Track(previous_tank_position)
         tracks_group.add(track)
         # Actualizar la posición anterior del tanque
-        previous_tank_position = tank.rect.center    
-    
+        previous_tank_position = tank.rect.center
+
     all_sprites.update()
 
     screen.fill(WHITE)
@@ -186,8 +206,20 @@ while running:
     # Dibujar la mira personalizada
     mouse_pos = pygame.mouse.get_pos()
     pygame.draw.circle(screen, RED, mouse_pos, 10, 2)  # Círculo exterior
-    pygame.draw.line(screen, RED, (mouse_pos[0] - 15, mouse_pos[1]), (mouse_pos[0] + 15, mouse_pos[1]), 2)  # Línea horizontal
-    pygame.draw.line(screen, RED, (mouse_pos[0], mouse_pos[1] - 15), (mouse_pos[0], mouse_pos[1] + 15), 2)  # Línea vertical
+    pygame.draw.line(
+        screen,
+        RED,
+        (mouse_pos[0] - 15, mouse_pos[1]),
+        (mouse_pos[0] + 15, mouse_pos[1]),
+        2,
+    )  # Línea horizontal
+    pygame.draw.line(
+        screen,
+        RED,
+        (mouse_pos[0], mouse_pos[1] - 15),
+        (mouse_pos[0], mouse_pos[1] + 15),
+        2,
+    )  # Línea vertical
 
     pygame.display.flip()
 pygame.quit()
