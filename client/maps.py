@@ -14,12 +14,11 @@ class Map:
         blocks = pygame.sprite.Group()
         for y, row in enumerate(self.layout):
             for x, block_data in enumerate(row):
-                if block_data["solid"]:
-                    block = Block(
-                        x * Block.BLOCK_SIZE,
-                        y * Block.BLOCK_SIZE,
-                        block_data["image_name"],
-                        block_data["solid"],
-                    )
-                    blocks.add(block)
+                block = Block(
+                    x * Block.BLOCK_SIZE,
+                    y * Block.BLOCK_SIZE,
+                    block_data["image_name"],
+                    block_data["solid"],
+                )
+                blocks.add(block)
         return blocks

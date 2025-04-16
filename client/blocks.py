@@ -25,7 +25,7 @@ class BlockTypes:
 class Block(pygame.sprite.Sprite):
     """Block class"""
 
-    BLOCK_SIZE = 32  # Size of the block in pixels
+    BLOCK_SIZE = 64  # Size of the block in pixels
 
     def __init__(self, x: int, y: int, image_name: str, solid: bool = True):
         """
@@ -39,6 +39,9 @@ class Block(pygame.sprite.Sprite):
 
         # Load image
         self.image = pygame.image.load(f"assets/Retina/{image_name}").convert_alpha()
+        self.image = pygame.transform.scale(
+            self.image, (self.BLOCK_SIZE, self.BLOCK_SIZE)
+        )
 
         # Block position
         self.rect = self.image.get_rect()

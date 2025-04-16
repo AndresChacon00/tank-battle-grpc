@@ -2,6 +2,8 @@ import pygame
 from tank import Tank, TankCannon, Track
 from colors import Colors
 from config import Config
+from blocks import BlockTypes
+from maps import Map
 
 pygame.init()
 pygame.mixer.init()
@@ -25,6 +27,36 @@ previous_tank_position = tank.rect.center
 # Crear un grupo para los rastros del tanque
 tracks_group = pygame.sprite.Group()
 
+# Crear mapa
+MAP_LAYOUT = [
+    [
+        BlockTypes.GRASS_BACKGROUND,
+        BlockTypes.GRASS_BACKGROUND,
+        BlockTypes.GRASS_BACKGROUND,
+        BlockTypes.GRASS_BACKGROUND,
+    ],
+    [
+        BlockTypes.GRASS_BACKGROUND,
+        BlockTypes.GREEN_TREE,
+        BlockTypes.SAND_BACKGROUND,
+        BlockTypes.GRASS_BACKGROUND,
+    ],
+    [
+        BlockTypes.SAND_BACKGROUND,
+        BlockTypes.SAND_BACKGROUND,
+        BlockTypes.BROWN_TREE,
+        BlockTypes.GRASS_BACKGROUND,
+    ],
+    [
+        BlockTypes.GRASS_BACKGROUND,
+        BlockTypes.GRASS_BACKGROUND,
+        BlockTypes.GRASS_BACKGROUND,
+        BlockTypes.GRASS_BACKGROUND,
+    ],
+]
+map = Map("test_map", MAP_LAYOUT)
+blocks = map.generate_map()
+
 running = True
 while running:
     clock.tick(60)
@@ -43,6 +75,7 @@ while running:
 
     screen.fill(Colors.WHITE)
 
+    blocks.draw(screen)  # Dibujar bloques
     tank_sprites.draw(screen)
 
     # Dibujar la mira personalizada
