@@ -19,14 +19,30 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	GameService_UpdateState_FullMethodName = "/game.GameService/UpdateState"
+	GameService_UpdateState_FullMethodName     = "/game.GameService/UpdateState"
+	GameService_RegisterPlayer_FullMethodName  = "/game.GameService/RegisterPlayer"
+	GameService_RemovePlayer_FullMethodName    = "/game.GameService/RemovePlayer"
+	GameService_GetGameState_FullMethodName    = "/game.GameService/GetGameState"
+	GameService_PerformAction_FullMethodName   = "/game.GameService/PerformAction"
+	GameService_StreamGameState_FullMethodName = "/game.GameService/StreamGameState"
 )
 
 // GameServiceClient is the client API for GameService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type GameServiceClient interface {
+	// Actualiza el estado del jugador y envia una actualizacion
 	UpdateState(ctx context.Context, in *PlayerState, opts ...grpc.CallOption) (*GameState, error)
+	// Registra a un jugador
+	RegisterPlayer(ctx context.Context, in *PlayerInfo, opts ...grpc.CallOption) (*RegisterResponse, error)
+	// Elimina a un jugador
+	RemovePlayer(ctx context.Context, in *PlayerId, opts ...grpc.CallOption) (*RemoveResponse, error)
+	// Obtener estado del juego
+	GetGameState(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GameState, error)
+	// Realiza una accion
+	PerformAction(ctx context.Context, in *ActionRequest, opts ...grpc.CallOption) (*ActionResponse, error)
+	// Devuelve actualizaciones en tiempo real
+	StreamGameState(ctx context.Context, in *Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GameState], error)
 }
 
 type gameServiceClient struct {
@@ -47,11 +63,81 @@ func (c *gameServiceClient) UpdateState(ctx context.Context, in *PlayerState, op
 	return out, nil
 }
 
+func (c *gameServiceClient) RegisterPlayer(ctx context.Context, in *PlayerInfo, opts ...grpc.CallOption) (*RegisterResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RegisterResponse)
+	err := c.cc.Invoke(ctx, GameService_RegisterPlayer_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameServiceClient) RemovePlayer(ctx context.Context, in *PlayerId, opts ...grpc.CallOption) (*RemoveResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RemoveResponse)
+	err := c.cc.Invoke(ctx, GameService_RemovePlayer_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameServiceClient) GetGameState(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GameState, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GameState)
+	err := c.cc.Invoke(ctx, GameService_GetGameState_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameServiceClient) PerformAction(ctx context.Context, in *ActionRequest, opts ...grpc.CallOption) (*ActionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ActionResponse)
+	err := c.cc.Invoke(ctx, GameService_PerformAction_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameServiceClient) StreamGameState(ctx context.Context, in *Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GameState], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &GameService_ServiceDesc.Streams[0], GameService_StreamGameState_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[Empty, GameState]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type GameService_StreamGameStateClient = grpc.ServerStreamingClient[GameState]
+
 // GameServiceServer is the server API for GameService service.
 // All implementations must embed UnimplementedGameServiceServer
 // for forward compatibility.
 type GameServiceServer interface {
+	// Actualiza el estado del jugador y envia una actualizacion
 	UpdateState(context.Context, *PlayerState) (*GameState, error)
+	// Registra a un jugador
+	RegisterPlayer(context.Context, *PlayerInfo) (*RegisterResponse, error)
+	// Elimina a un jugador
+	RemovePlayer(context.Context, *PlayerId) (*RemoveResponse, error)
+	// Obtener estado del juego
+	GetGameState(context.Context, *Empty) (*GameState, error)
+	// Realiza una accion
+	PerformAction(context.Context, *ActionRequest) (*ActionResponse, error)
+	// Devuelve actualizaciones en tiempo real
+	StreamGameState(*Empty, grpc.ServerStreamingServer[GameState]) error
 	mustEmbedUnimplementedGameServiceServer()
 }
 
@@ -64,6 +150,21 @@ type UnimplementedGameServiceServer struct{}
 
 func (UnimplementedGameServiceServer) UpdateState(context.Context, *PlayerState) (*GameState, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateState not implemented")
+}
+func (UnimplementedGameServiceServer) RegisterPlayer(context.Context, *PlayerInfo) (*RegisterResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RegisterPlayer not implemented")
+}
+func (UnimplementedGameServiceServer) RemovePlayer(context.Context, *PlayerId) (*RemoveResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemovePlayer not implemented")
+}
+func (UnimplementedGameServiceServer) GetGameState(context.Context, *Empty) (*GameState, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetGameState not implemented")
+}
+func (UnimplementedGameServiceServer) PerformAction(context.Context, *ActionRequest) (*ActionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PerformAction not implemented")
+}
+func (UnimplementedGameServiceServer) StreamGameState(*Empty, grpc.ServerStreamingServer[GameState]) error {
+	return status.Errorf(codes.Unimplemented, "method StreamGameState not implemented")
 }
 func (UnimplementedGameServiceServer) mustEmbedUnimplementedGameServiceServer() {}
 func (UnimplementedGameServiceServer) testEmbeddedByValue()                     {}
@@ -104,6 +205,89 @@ func _GameService_UpdateState_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GameService_RegisterPlayer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlayerInfo)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServiceServer).RegisterPlayer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameService_RegisterPlayer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServiceServer).RegisterPlayer(ctx, req.(*PlayerInfo))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GameService_RemovePlayer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlayerId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServiceServer).RemovePlayer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameService_RemovePlayer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServiceServer).RemovePlayer(ctx, req.(*PlayerId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GameService_GetGameState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServiceServer).GetGameState(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameService_GetGameState_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServiceServer).GetGameState(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GameService_PerformAction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ActionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServiceServer).PerformAction(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameService_PerformAction_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServiceServer).PerformAction(ctx, req.(*ActionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GameService_StreamGameState_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(GameServiceServer).StreamGameState(m, &grpc.GenericServerStream[Empty, GameState]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type GameService_StreamGameStateServer = grpc.ServerStreamingServer[GameState]
+
 // GameService_ServiceDesc is the grpc.ServiceDesc for GameService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -115,7 +299,29 @@ var GameService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "UpdateState",
 			Handler:    _GameService_UpdateState_Handler,
 		},
+		{
+			MethodName: "RegisterPlayer",
+			Handler:    _GameService_RegisterPlayer_Handler,
+		},
+		{
+			MethodName: "RemovePlayer",
+			Handler:    _GameService_RemovePlayer_Handler,
+		},
+		{
+			MethodName: "GetGameState",
+			Handler:    _GameService_GetGameState_Handler,
+		},
+		{
+			MethodName: "PerformAction",
+			Handler:    _GameService_PerformAction_Handler,
+		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "StreamGameState",
+			Handler:       _GameService_StreamGameState_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "game.proto",
 }

@@ -5,8 +5,8 @@ import (
 	"log"
 	"net"
 	"sync"
-
 	"tank-battle-grpc/game"
+	"time"
 
 	"google.golang.org/grpc"
 )
@@ -32,6 +32,44 @@ func (s *gameServer) UpdateState(ctx context.Context, state *game.PlayerState) (
 
 	return gameState, nil
 
+}
+
+func (s *gameServer) PerformAction(ctx context.Context, action *game.ActionRequest) (*game.ActionResponse, error) {
+    s.mu.Lock()
+    defer s.mu.Unlock()
+
+    player, exists := s.players[action.PlayerId]
+    if !exists {
+        return &game.ActionResponse{
+            Success: false,
+            Message: "Player not found",
+        }, nil
+    }
+
+    // Aquí puedes implementar la lógica para manejar la acción (ejemplo: disparar)
+    log.Printf("Player %s performed action %s targeting (%f, %f)", action.PlayerId, action.ActionType, action.TargetX, action.TargetY)
+
+    return &game.ActionResponse{
+        Success: true,
+        Message: "Action performed successfully",
+    }, nil
+}
+
+func (s *gameServer) StreamGameState(empty *game.Empty, stream game.GameService_StreamGameStateServer) error {
+    for {
+        s.mu.Lock()
+        gameState := &game.GameState{}
+        for _, player := range s.players {
+            gameState.Players = append(gameState.Players, player)
+        }
+        s.mu.Unlock()
+
+        if err := stream.Send(gameState); err != nil {
+            return err
+        }
+
+        time.Sleep(1 * time.Second) // Enviar actualizaciones cada segundo
+    }
 }
 
 func main() {

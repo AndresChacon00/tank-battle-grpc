@@ -4,9 +4,25 @@ package game;
 option go_package = "/game";
 
 service GameService {
+    // Actualiza el estado del jugador y envia una actualizacion
     rpc UpdateState (PlayerState) returns (GameState);
-}
 
+    // Registra a un jugador
+    rpc RegisterPlayer (PlayerInfo) returns (RegisterResponse);
+
+    // Elimina a un jugador
+    rpc RemovePlayer (PlayerId) returns (RemoveResponse);
+
+    // Obtener estado del juego
+    rpc GetGameState (Empty) returns (GameState);
+
+    // Realiza una accion 
+    rpc PerformAction (ActionRequest) returns (ActionResponse);
+
+    // Devuelve actualizaciones en tiempo real
+    rpc StreamGameState (Empty) returns (stream GameState);
+}
+// Estado de juego y jugador
 message PlayerState {
     string player_id = 1;
     float x = 2;
@@ -17,3 +33,39 @@ message GameState {
     repeated PlayerState players = 1;
 }
 
+// Registrar jugador
+message PlayerInfo {
+    string player_id = 1;
+    string name = 2;
+}
+
+message RegisterResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+// Eliminar un jugador
+message PlayerId {
+    string player_id = 1;
+}
+
+message RemoveResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+// Obtener estado
+message Empty {}
+
+// Realizar accion
+message ActionRequest {
+    string player_id = 1;
+    string action_type = 2; // Ejemplo: "shoot", "boost"
+    float target_x = 3;
+    float target_y = 4;
+}
+
+message ActionResponse {
+    bool success = 1;
+    string message = 2;
+}
