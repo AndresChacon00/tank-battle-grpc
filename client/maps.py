@@ -18,7 +18,7 @@ class Map:
                     x * Block.BLOCK_SIZE,
                     y * Block.BLOCK_SIZE,
                     block_data["image_name"],
-                    block_data["solid"],
+                    solid=block_data["solid"],
                 )
                 blocks.add(block)
         return blocks

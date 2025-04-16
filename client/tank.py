@@ -21,7 +21,7 @@ class Tank(pygame.sprite.Sprite):
         self.angle = 0
         self.target_angle = 0  # Nuevo: Ángulo objetivo
 
-    def update(self):
+    def update(self, blocks: pygame.sprite.Group):
         self.speed_x = 0
         self.speed_y = 0
         keystate = pygame.key.get_pressed()
@@ -81,9 +81,20 @@ class Tank(pygame.sprite.Sprite):
         if abs(angle_difference) < rotation_speed:
             self.angle = self.target_angle
 
+        # Guardar la posición anterior
+        previous_x = self.rect.x
+        previous_y = self.rect.y
+
         # Actualizar posición
         self.rect.x += self.speed_x
         self.rect.y += self.speed_y
+
+        # Detectar colisiones con bloques sólidos
+        colliding_blocks = pygame.sprite.spritecollide(self, blocks, False)
+        if any([block.solid for block in colliding_blocks]):
+            # Revertir posición si hay colisión
+            self.rect.x = previous_x
+            self.rect.y = previous_y
 
         # Rotar la imagen usando la original
         self.image = pygame.transform.rotate(self.original_image, self.angle)

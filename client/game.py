@@ -29,30 +29,16 @@ tracks_group = pygame.sprite.Group()
 
 # Crear mapa
 MAP_LAYOUT = [
-    [
-        BlockTypes.GRASS_BACKGROUND,
-        BlockTypes.GRASS_BACKGROUND,
-        BlockTypes.GRASS_BACKGROUND,
-        BlockTypes.GRASS_BACKGROUND,
-    ],
-    [
-        BlockTypes.GRASS_BACKGROUND,
-        BlockTypes.GREEN_TREE,
-        BlockTypes.SAND_BACKGROUND,
-        BlockTypes.GRASS_BACKGROUND,
-    ],
-    [
-        BlockTypes.SAND_BACKGROUND,
-        BlockTypes.SAND_BACKGROUND,
-        BlockTypes.BROWN_TREE,
-        BlockTypes.GRASS_BACKGROUND,
-    ],
-    [
-        BlockTypes.GRASS_BACKGROUND,
-        BlockTypes.GRASS_BACKGROUND,
-        BlockTypes.GRASS_BACKGROUND,
-        BlockTypes.GRASS_BACKGROUND,
-    ],
+    [BlockTypes.GRASS_BACKGROUND] * 12,
+    [BlockTypes.GRASS_BACKGROUND, BlockTypes.GREEN_TREE] + [BlockTypes.SAND_BACKGROUND] * 9 + [BlockTypes.GRASS_BACKGROUND],
+    [BlockTypes.SAND_BACKGROUND] * 2 + [BlockTypes.BROWN_TREE] + [BlockTypes.GRASS_BACKGROUND] * 9,
+    [BlockTypes.GRASS_BACKGROUND] * 12,
+    [BlockTypes.GRASS_BACKGROUND] * 12,
+    [BlockTypes.GRASS_BACKGROUND] * 12,
+    [BlockTypes.GRASS_BACKGROUND] * 12,
+    [BlockTypes.GRASS_BACKGROUND] * 12,
+    [BlockTypes.GRASS_BACKGROUND] * 12,
+    [BlockTypes.GRASS_BACKGROUND] * 12,
 ]
 map = Map("test_map", MAP_LAYOUT)
 blocks = map.generate_map()
@@ -71,7 +57,8 @@ while running:
         # Actualizar la posición anterior del tanque
         previous_tank_position = tank.rect.center
 
-    tank_sprites.update()
+    tank.update(blocks)
+    cannon.update()
 
     screen.fill(Colors.WHITE)
 
