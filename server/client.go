@@ -23,7 +23,7 @@ func main() {
 	for{
 		//Enviar el estado del jugador
 		playerState := &game.PlayerState{
-			PlayerId: "player1",
+			PlayerId: "player2",
 			X: 10.0,
 			Y: 20.0,
 		}

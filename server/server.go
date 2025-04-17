@@ -38,7 +38,7 @@ func (s *gameServer) PerformAction(ctx context.Context, action *game.ActionReque
     s.mu.Lock()
     defer s.mu.Unlock()
 
-    player, exists := s.players[action.PlayerId]
+    _, exists := s.players[action.PlayerId]
     if !exists {
         return &game.ActionResponse{
             Success: false,
