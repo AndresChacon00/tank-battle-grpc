@@ -21,9 +21,11 @@ func main() {
 	client := game.NewGameServiceClient(conn)
 
 	for{
+
+		start := time.Now()
 		//Enviar el estado del jugador
 		playerState := &game.PlayerState{
-			PlayerId: "player2",
+			PlayerId: "player1",
 			X: 10.0,
 			Y: 20.0,
 		}
@@ -32,6 +34,10 @@ func main() {
 		if err != nil {
 			log.Fatal("Error calling UpdateState: %v", err)
 		}
+
+		elapsed := time.Since(start)
+
+		log.Printf("Latency: %v", elapsed)
 
 		log.Println("Game State:")
 		for _, player := range gameState.Players {
