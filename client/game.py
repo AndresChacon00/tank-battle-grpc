@@ -75,7 +75,7 @@ while running:
 
             # Calcular la posición inicial de la bala (parte superior del cañón)            
             bullet_start_x = tank_pos[0] + cannon_length * direction[0]
-            bullet_start_y = tank_pos[1] + cannon_length * direction[1]git add .
+            bullet_start_y = tank_pos[1] + cannon_length * direction[1]
             bullet_start_pos = (bullet_start_x, bullet_start_y)
 
             # Crear una bala con la rotación del cañón
