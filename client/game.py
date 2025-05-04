@@ -7,6 +7,7 @@ from blocks import BlockTypes
 from maps import Map
 from bullet import Bullet
 from muzzleFlash import MuzzleFlash
+from menu import MainMenu
 
 # pygame.init()
 # pygame.mixer.init()
@@ -150,10 +151,18 @@ class Game:
     def __init__(self):
         pygame.init()
         self.running, self.playing = True, False
+        self.UP, self.DOWN, self.LEFT, self.RIGHT, self.START = (
+            False,
+            False,
+            False,
+            False,
+            False,
+        )
         self.screen = pygame.Surface((Config.WIDTH, Config.HEIGHT))
         self.clock = pygame.time.Clock()
         self.window = pygame.display.set_mode((Config.WIDTH, Config.HEIGHT))
         self.font_name = pygame.font.get_default_font()
+        self.current_menu = MainMenu(self)
 
     def game_loop(self):
         """Bucle principal del juego."""
@@ -163,15 +172,39 @@ class Game:
             self.draw_text("Hola mundo", 64, Config.WIDTH // 2, Config.HEIGHT // 2)
             self.window.blit(self.screen, (0, 0))
             pygame.display.update()
+            self.reset_keys()
 
     def check_events(self):
         """Gestión de eventos de entrada del usuario."""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running, self.playing = False, False
+                self.current_menu.run_display = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    self.UP = True
+                elif event.key == pygame.K_DOWN:
+                    self.DOWN = True
+                elif event.key == pygame.K_LEFT:
+                    self.LEFT = True
+                elif event.key == pygame.K_RIGHT:
+                    self.RIGHT = True
+                elif event.key == pygame.K_RETURN:
+                    self.START = True
 
     def draw_text(self, text: str, size: int, x: int, y: int):
+        """Dibuja texto en la pantalla."""
         font = pygame.font.Font(self.font_name, size)
-        text_surface = font.render(text, True, Colors.BLACK)
+        text_surface = font.render(text, True, Colors.WHITE)
         text_rect = text_surface.get_rect(center=(x, y))
         self.screen.blit(text_surface, text_rect)
+
+    def reset_keys(self):
+        """Reinicia las teclas de movimiento."""
+        self.UP, self.DOWN, self.LEFT, self.RIGHT, self.START = (
+            False,
+            False,
+            False,
+            False,
+            False,
+        )
