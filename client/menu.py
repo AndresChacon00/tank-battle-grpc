@@ -1,12 +1,17 @@
+from typing import TYPE_CHECKING
 import pygame
 from config import Config
 from colors import Colors
+
+if TYPE_CHECKING:
+    from game import Game
 
 
 class Menu:
     """Clase base que representa un menú"""
 
-    def __init__(self, game):
+    def __init__(self, game: "Game"):
+        pygame.mouse.set_visible(True)
         self.game = game
         self.mid_w, self.mid_h = Config.WIDTH // 2, Config.HEIGHT // 2
         self.run_display = True
@@ -30,12 +35,12 @@ class MainMenu(Menu):
     MENU_START = "Empezar"
     MENU_QUIT = "Salir"
 
-    def __init__(self, game):
+    def __init__(self, game: "Game"):
         super().__init__(game)
         self.state = self.MENU_START
-        self.start_x, self.start_y = self.mid_w, self.mid_h + 30
+        self.start_x, self.start_y = self.mid_w, self.mid_h + 40
         self.play_button = pygame.Rect(self.mid_w - 50, self.mid_h + 50, 100, 50)
-        self.quit_x, self.quit_y = self.mid_w, self.mid_h + 80
+        self.quit_x, self.quit_y = self.mid_w, self.mid_h + 90
         self.quit_button = pygame.Rect(self.mid_w - 50, self.mid_h + 80, 100, 50)
         self.cursor_rect.midtop = (self.start_x + self.offset, self.start_y + 5)
 
@@ -75,5 +80,8 @@ class MainMenu(Menu):
         if self.game.START:
             if self.state == self.MENU_START:
                 self.game.playing = True
+            elif self.state == self.MENU_QUIT:
+                self.game.running = False
+                self.game.playing = False
 
             self.run_display = False
