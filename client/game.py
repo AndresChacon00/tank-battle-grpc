@@ -50,6 +50,7 @@ class Game:
         self.main_menu = MainMenu(self)
         self.current_menu = self.main_menu
         # Game variables
+        self.click_pos = None
         self.tank = Tank()
         self.cannon = TankCannon(self.tank)
         self.tank_sprites = pygame.sprite.Group()
@@ -103,61 +104,54 @@ class Game:
 
     def check_events(self):
         """Gestión de eventos de entrada del usuario."""
+        self.click_pos = None
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 # Salir del juego
                 self.running, self.playing = False, False
                 self.current_menu.run_display = False
 
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                # Disparar
-                mouse_pos = pygame.mouse.get_pos()
-                tank_pos = self.tank.rect.center
+            if self.playing:
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    # Disparar
+                    mouse_pos = pygame.mouse.get_pos()
+                    tank_pos = self.tank.rect.center
 
-                # Calcular el ángulo del cañón en relación al mouse
-                dx, dy = mouse_pos[0] - tank_pos[0], mouse_pos[1] - tank_pos[1]
-                cannon_angle = math.degrees(
-                    math.atan2(-dy, dx)
-                )  # Invertir dy para corregir el eje Y
+                    # Calcular el ángulo del cañón en relación al mouse
+                    dx, dy = mouse_pos[0] - tank_pos[0], mouse_pos[1] - tank_pos[1]
+                    cannon_angle = math.degrees(
+                        math.atan2(-dy, dx)
+                    )  # Invertir dy para corregir el eje Y
 
-                # Calcular la dirección normalizada
-                distance = math.hypot(dx, dy)
-                direction = (dx / distance, dy / distance)  # Vector unitario
+                    # Calcular la dirección normalizada
+                    distance = math.hypot(dx, dy)
+                    direction = (dx / distance, dy / distance)  # Vector unitario
 
-                # Calcular la posición inicial de la bala (parte superior del cañón)
-                cannon_length = self.cannon.rect.height
-                bullet_start_x = tank_pos[0] + cannon_length * direction[0]
-                bullet_start_y = tank_pos[1] + cannon_length * direction[1]
-                bullet_start_pos = (bullet_start_x, bullet_start_y)
+                    # Calcular la posición inicial de la bala (parte superior del cañón)
+                    cannon_length = self.cannon.rect.height
+                    bullet_start_x = tank_pos[0] + cannon_length * direction[0]
+                    bullet_start_y = tank_pos[1] + cannon_length * direction[1]
+                    bullet_start_pos = (bullet_start_x, bullet_start_y)
 
-                # Crear una bala con la rotación del cañón
-                bullet = Bullet(bullet_start_pos, direction)
-                bullet.image = pygame.transform.rotate(
-                    bullet.image, cannon_angle - 90
-                )  # Rotar la bala
-                self.bullets_group.add(bullet)
+                    # Crear una bala con la rotación del cañón
+                    bullet = Bullet(bullet_start_pos, direction)
+                    bullet.image = pygame.transform.rotate(
+                        bullet.image, cannon_angle - 90
+                    )  # Rotar la bala
+                    self.bullets_group.add(bullet)
 
-                # Crear un muzzle flash en la posición inicial de la bala
-                muzzle_flash = MuzzleFlash(bullet_start_pos)
-                muzzle_flash.image = pygame.transform.rotate(
-                    muzzle_flash.image, cannon_angle + 90
-                )  # Rotar el muzzle flash
-                self.explosions_group.add(
-                    muzzle_flash
-                )  # Agregar el muzzle flash al grupo de explosiones
+                    # Crear un muzzle flash en la posición inicial de la bala
+                    muzzle_flash = MuzzleFlash(bullet_start_pos)
+                    muzzle_flash.image = pygame.transform.rotate(
+                        muzzle_flash.image, cannon_angle + 90
+                    )  # Rotar el muzzle flash
+                    self.explosions_group.add(
+                        muzzle_flash
+                    )  # Agregar el muzzle flash al grupo de explosiones
 
-            elif event.type == pygame.KEYDOWN:
-                # Moverse en el menú
-                if event.key == pygame.K_UP:
-                    self.UP = True
-                elif event.key == pygame.K_DOWN:
-                    self.DOWN = True
-                elif event.key == pygame.K_LEFT:
-                    self.LEFT = True
-                elif event.key == pygame.K_RIGHT:
-                    self.RIGHT = True
-                elif event.key == pygame.K_RETURN:
-                    self.START = True
+            else:
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    self.click_pos = pygame.mouse.get_pos()
 
     def draw_text(self, text: str, size: int, x: int, y: int):
         """Dibuja texto en la pantalla."""
