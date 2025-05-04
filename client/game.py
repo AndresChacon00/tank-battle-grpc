@@ -34,6 +34,7 @@ class Game:
         pygame.init()
         pygame.mixer.init()
         pygame.display.set_caption("Tank Game")
+        pygame.display.set_icon(pygame.image.load("assets/menu/game-logo.png"))
         self.running, self.playing = True, False
         self.UP, self.DOWN, self.LEFT, self.RIGHT, self.START = (
             False,
@@ -153,10 +154,10 @@ class Game:
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     self.click_pos = pygame.mouse.get_pos()
 
-    def draw_text(self, text: str, size: int, x: int, y: int):
+    def draw_text(self, text: str, size: int, x: int, y: int, color=Colors.WHITE):
         """Dibuja texto en la pantalla."""
         font = pygame.font.Font(self.font_name, size)
-        text_surface = font.render(text, True, Colors.WHITE)
+        text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect(center=(x, y))
         self.screen.blit(text_surface, text_rect)
 

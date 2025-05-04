@@ -29,12 +29,11 @@ class MainMenu(Menu):
     def __init__(self, game: "Game"):
         super().__init__(game)
         self.start_x, self.start_y = self.mid_w, self.mid_h + 40
-        self.play_button = pygame.Rect(self.mid_w - 50, self.mid_h + 50, 100, 50)
-        self.quit_x, self.quit_y = (
-            self.mid_w,
-            self.mid_h + 120,
-        )  # Increased vertical spacing
-        self.quit_button = pygame.Rect(self.mid_w - 50, self.mid_h + 110, 100, 50)
+        self.play_button = pygame.Rect(self.mid_w - 50, self.mid_h + 150, 100, 50)
+        self.quit_x, self.quit_y = self.mid_w, self.mid_h + 120
+        self.quit_button = pygame.Rect(self.mid_w - 50, self.mid_h + 210, 100, 50)
+        self.logo = pygame.image.load("assets/menu/game-logo.png")
+        self.logo_rect = self.logo.get_rect(center=(self.mid_w, self.mid_h - 90))
 
     def display_menu(self):
         """Muestra el menú principal"""
@@ -42,25 +41,23 @@ class MainMenu(Menu):
         while self.run_display:
             self.game.check_events()
             self.check_input()
-            self.game.screen.fill(Colors.BLACK)
-            self.game.draw_text("TANKS", 25, self.mid_w, self.mid_h - 25)
-            pygame.draw.rect(
-                self.game.screen, Colors.WHITE, self.play_button, 2
-            )  # Border for play button
+            self.game.screen.fill(Colors.PALE_YELLOW)
+            self.game.screen.blit(self.logo, self.logo_rect)
+            pygame.draw.rect(self.game.screen, Colors.BLACK, self.play_button, 2)
             self.game.draw_text(
                 "Empezar",
                 20,
                 self.play_button.centerx,
                 self.play_button.centery,
+                color=Colors.BLACK,
             )
-            pygame.draw.rect(
-                self.game.screen, Colors.WHITE, self.quit_button, 2
-            )  # Border for quit button
+            pygame.draw.rect(self.game.screen, Colors.BLACK, self.quit_button, 2)
             self.game.draw_text(
                 "Salir",
                 20,
                 self.quit_button.centerx,
                 self.quit_button.centery,
+                color=Colors.BLACK,
             )
             self.blit_screen()
 
