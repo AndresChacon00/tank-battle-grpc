@@ -33,7 +33,18 @@ func (s *gameServer) UpdateState(ctx context.Context, state *game.PlayerState) (
 
 }
 
+func (s *gameServer) GetGameState(ctx context.Context, empty *game.Empty) (*game.GameState, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
+	// Construir el estado del juego
+	gameState := &game.GameState{}
+	for _, player := range s.players {
+		gameState.Players = append(gameState.Players, player)
+	}
+
+	return gameState, nil
+}
 
 func main() {
 	lis, err := net.Listen("tcp", ":9000")
