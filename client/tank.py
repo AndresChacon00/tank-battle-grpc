@@ -20,6 +20,7 @@ class Tank(pygame.sprite.Sprite):
         self.speed_y = 0
         self.angle = 0
         self.target_angle = 0  # Nuevo: Ángulo objetivo
+        self.max_speed = 3  # Velocidad máxima del tanque (ajustada)
 
     def update(self, blocks: pygame.sprite.Group):
         self.speed_x = 0
@@ -27,19 +28,19 @@ class Tank(pygame.sprite.Sprite):
         keystate = pygame.key.get_pressed()
         # Movimiento en el eje X
         if keystate[pygame.K_a]:
-            self.speed_x = -5
+            self.speed_x = -self.max_speed
         if keystate[pygame.K_d]:
-            self.speed_x = 5
+            self.speed_x = self.max_speed
 
         # Movimiento en el eje Y
         if keystate[pygame.K_w]:
-            self.speed_y = -5
+            self.speed_y = -self.max_speed
         if keystate[pygame.K_s]:
-            self.speed_y = 5
+            self.speed_y = self.max_speed
 
         # Normalizar la velocidad en caso de movimiento diagonal
         if self.speed_x != 0 and self.speed_y != 0:
-            diagonal_speed = 5 / (2**0.5)  # Velocidad ajustada para movimiento diagonal
+            diagonal_speed = self.max_speed / (2**0.5)  # Velocidad ajustada para movimiento diagonal
             self.speed_x = self.speed_x / abs(self.speed_x) * diagonal_speed
             self.speed_y = self.speed_y / abs(self.speed_y) * diagonal_speed
 

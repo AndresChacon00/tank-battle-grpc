@@ -63,7 +63,7 @@ while running:
         # Detectar clic izquierdo para disparar
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Clic izquierdo
             mouse_pos = pygame.mouse.get_pos()
-            tank_pos = tank.rect.center  # Suponiendo que el tanque tiene un rectángulo
+            tank_pos = tank.rect.center  # Centro del tanque
 
             # Calcular el ángulo del cañón en relación al mouse
             dx, dy = mouse_pos[0] - tank_pos[0], mouse_pos[1] - tank_pos[1]
@@ -71,22 +71,19 @@ while running:
 
             # Calcular la dirección normalizada
             distance = math.hypot(dx, dy)
-            direction = (dx / distance, dy / distance)  # Vector unitario            
+            direction = (dx / distance, dy / distance)  # Vector unitario
 
-            # Calcular la posición inicial de la bala (parte superior del cañón)            
-            bullet_start_x = tank_pos[0] + cannon_length * direction[0]
-            bullet_start_y = tank_pos[1] + cannon_length * direction[1]
+            # Calcular la posición inicial de la bala (alrededor de un círculo)
+            circle_radius = cannon_length  # Radio del círculo alrededor del tanque
+            rad_angle = math.radians(cannon_angle)  # Convertir el ángulo del cañón a radianes
+            bullet_start_x = tank.rect.centerx + circle_radius * math.cos(rad_angle)
+            bullet_start_y = tank.rect.centery - circle_radius * math.sin(rad_angle)
             bullet_start_pos = (bullet_start_x, bullet_start_y)
 
             # Crear una bala con la rotación del cañón
-            bullet = Bullet(bullet_start_pos, direction)
-            bullet.image = pygame.transform.rotate(bullet.image, cannon_angle - 90)  # Rotar la bala
+            bullet = Bullet(bullet_start_pos, direction, blocks, explosions_group)  # Pasar el grupo de explosiones
+            bullet.image = pygame.transform.rotate(bullet.image, cannon_angle)  # Rotar la bala
             bullets_group.add(bullet)
-
-            # Crear un muzzle flash en la posición inicial de la bala
-            muzzle_flash = MuzzleFlash(bullet_start_pos)
-            muzzle_flash.image = pygame.transform.rotate(muzzle_flash.image, cannon_angle + 90)  # Rotar el muzzle flash
-            explosions_group.add(muzzle_flash)  # Agregar el muzzle flash al grupo de explosiones
 
     # Detectar si el tanque se ha movido
     if tank.rect.center != previous_tank_position:
@@ -101,12 +98,22 @@ while running:
 
     # Actualizar las balas
     bullets_group.update()
-    explosions_group.update()  # Actualizar el grupo de explosiones
 
+    # Actualizar los efectos de disparo (MuzzleFlash)
+    explosions_group.update()
+
+    # Limpiar la pantalla
     screen.fill(Colors.WHITE)
 
-    blocks.draw(screen)  # Dibujar bloques
+    # Dibujar bloques, tanque y cañón
+    blocks.draw(screen)
     tank_sprites.draw(screen)
+
+    # Dibujar las balas
+    bullets_group.draw(screen)
+
+    # Dibujar los efectos de disparo (MuzzleFlash)
+    explosions_group.draw(screen)
 
     # Dibujar la mira personalizada
     mouse_pos = pygame.mouse.get_pos()
@@ -125,7 +132,7 @@ while running:
         (mouse_pos[0], mouse_pos[1] + 15),
         2,
     )  # Línea vertical
-    bullets_group.draw(screen)
-    explosions_group.draw(screen)  # Dibujar el grupo de explosiones
+
+    # Actualizar la pantalla
     pygame.display.flip()
 pygame.quit()
