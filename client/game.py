@@ -1,4 +1,9 @@
 import pygame, math
+import grpc 
+from game.game_pb2 import Empty
+from game.game_pb2_grpc import GameServiceStub
+from game.game_pb2 import PlayerState
+from game.game_pb2_grpc import GameServiceStub
 from tank import Tank, TankCannon, Track
 from colors import Colors
 from config import Config
@@ -54,6 +59,27 @@ bullets_group = pygame.sprite.Group()
 # Longitud fija del cañón (ajusta este valor según el diseño de tu tanque)
 cannon_length = cannon.rect.height
 
+# Cosas del servidor
+# Establecer conexion gRPC
+channel = grpc.insecure_channel("localhost:9000")
+client = GameServiceStub(channel)
+
+# Identificador único para el jugador
+PLAYER_ID = "player2"
+
+# Función para enviar el estado del jugador al servidor
+def send_player_state(tank):
+    player_state = PlayerState(
+        player_id=PLAYER_ID,
+        x=tank.rect.centerx,
+        y=tank.rect.centery,
+        angle=tank.angle,  # Suponiendo que el tanque tiene un atributo 'angle'
+    )
+    try:
+        client.UpdateState(player_state)
+    except grpc.RpcError as e:
+        print(f"Error al enviar el estado del jugador: {e}")
+
 running = True
 while running:
     clock.tick(60)
@@ -95,6 +121,9 @@ while running:
         tracks_group.add(track)
         # Actualizar la posición anterior del tanque
         previous_tank_position = tank.rect.center
+
+    # Enviar el estado del jugador al servidor
+    send_player_state(tank)
 
     tank.update(blocks)
     cannon.update()
