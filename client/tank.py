@@ -22,7 +22,7 @@ class Tank(pygame.sprite.Sprite):
         self.target_angle = 0  # Nuevo: Ángulo objetivo
         self.max_speed = 3  # Velocidad máxima del tanque (ajustada)
 
-    def update(self, blocks: pygame.sprite.Group):
+    def update(self, blocks: pygame.sprite.Group, bullets_group: pygame.sprite.Group):
         self.speed_x = 0
         self.speed_y = 0
         keystate = pygame.key.get_pressed()
@@ -111,6 +111,10 @@ class Tank(pygame.sprite.Sprite):
         if self.rect.top < 0:
             self.rect.top = 0
 
+        # Detectar colisiones con balas
+        if pygame.sprite.spritecollide(self, bullets_group, True):  # Elimina la bala al colisionar
+            self.is_destroyed = True  # Marcar el tanque como destruido
+            self.kill()  # Eliminar el tanque enemigo del juego
 
 class TankCannon(pygame.sprite.Sprite):
     """Cannon attached to a tank body"""
@@ -169,3 +173,26 @@ class Track(pygame.sprite.Sprite):
         # Eliminar el rastro después de 2 segundos
         if time.time() - self.spawn_time > 2:
             self.kill()
+
+class EnemyTank(Tank):
+    """Clase para el tanque enemigo"""
+
+    def __init__(self, x, y):
+        super().__init__()
+        self.rect.centerx = x
+        self.rect.centery = y
+        self.original_image = pygame.image.load(
+            "assets/Retina/tankBody_red_outline.png"
+        ).convert_alpha()
+        self.image = self.original_image
+        self.is_destroyed = False  # Estado del tanque enemigo
+
+    def update(self, blocks: pygame.sprite.Group, bullets_group: pygame.sprite.Group):
+        """Actualizar el tanque enemigo"""
+        if self.is_destroyed:
+            return  # Si está destruido, no hacer nada
+
+        # Detectar colisiones con balas
+        if pygame.sprite.spritecollide(self, bullets_group, True):  # Elimina la bala al colisionar
+            self.is_destroyed = True  # Marcar el tanque como destruido
+            self.kill()  # Eliminar el tanque enemigo del juego

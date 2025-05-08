@@ -1,11 +1,10 @@
 import pygame, math
-from tank import Tank, TankCannon, Track
+from tank import Tank, TankCannon, Track, EnemyTank
 from colors import Colors
 from config import Config
 from blocks import BlockTypes
 from maps import Map
 from bullet import Bullet
-from muzzleFlash import MuzzleFlash
 
 pygame.init()
 pygame.mixer.init()
@@ -20,9 +19,15 @@ pygame.mouse.set_visible(False)
 tank = Tank()
 cannon = TankCannon(tank)
 
+# Crear tanque enemigo
+enemy_tank = EnemyTank(Config.WIDTH // 2, Config.HEIGHT // 2)  # Posición inicial del tanque enemigo
+enemy_cannon = TankCannon(enemy_tank)
+
 tank_sprites = pygame.sprite.Group()
 tank_sprites.add(tank)
 tank_sprites.add(cannon)
+tank_sprites.add(enemy_tank)  # Agregar el tanque enemigo al grupo
+tank_sprites.add(enemy_cannon)  # Agregar el cañón del tanque enemigo al grupo
 
 previous_tank_position = tank.rect.center
 
@@ -52,7 +57,7 @@ blocks = map.generate_map()
 bullets_group = pygame.sprite.Group()
 
 # Longitud fija del cañón (ajusta este valor según el diseño de tu tanque)
-cannon_length = cannon.rect.height
+cannon_length = cannon.rect.height + 1
 
 running = True
 while running:
@@ -74,13 +79,13 @@ while running:
             direction = (dx / distance, dy / distance)  # Vector unitario
 
             # Calcular la posición inicial de la bala (alrededor de un círculo)
-            circle_radius = cannon_length  # Radio del círculo alrededor del tanque
+            circle_radius = cannon_length   #Radio del círculo alrededor del tanque
             rad_angle = math.radians(cannon_angle)  # Convertir el ángulo del cañón a radianes
             bullet_start_x = tank.rect.centerx + circle_radius * math.cos(rad_angle)
             bullet_start_y = tank.rect.centery - circle_radius * math.sin(rad_angle)
             bullet_start_pos = (bullet_start_x, bullet_start_y)
 
-            # Crear una bala con la rotación del cañón
+            # Crear una bala con la rotación del cañón            
             bullet = Bullet(bullet_start_pos, direction, blocks, explosions_group)  # Pasar el grupo de explosiones
             bullet.image = pygame.transform.rotate(bullet.image, cannon_angle)  # Rotar la bala
             bullets_group.add(bullet)
@@ -93,8 +98,10 @@ while running:
         # Actualizar la posición anterior del tanque
         previous_tank_position = tank.rect.center
 
-    tank.update(blocks)
+    # Actualizar los tanques y cañones
+    tank.update(blocks, bullets_group)
     cannon.update()
+    enemy_tank.update(blocks, bullets_group)  # Pasar el grupo de balas al tanque enemigo
 
     # Actualizar las balas
     bullets_group.update()
