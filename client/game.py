@@ -5,30 +5,13 @@ from config import Config
 from menu import MainMenu
 from tank import Tank, TankCannon
 from bullet import Bullet
-from blocks import BlockTypes
-from maps import Map
+from maps import Map, MAP_1_LAYOUT
+from blocks import Block
 from muzzleFlash import MuzzleFlash
 
 
 class Game:
     """Clase que gestiona la ventana de juego."""
-
-    MAP_LAYOUT = [
-        [BlockTypes.GRASS_BACKGROUND] * 12,
-        [BlockTypes.GRASS_BACKGROUND, BlockTypes.GREEN_TREE]
-        + [BlockTypes.SAND_BACKGROUND] * 9
-        + [BlockTypes.GRASS_BACKGROUND],
-        [BlockTypes.SAND_BACKGROUND] * 2
-        + [BlockTypes.BROWN_TREE]
-        + [BlockTypes.GRASS_BACKGROUND] * 9,
-        [BlockTypes.GRASS_BACKGROUND] * 12,
-        [BlockTypes.GRASS_BACKGROUND] * 12,
-        [BlockTypes.GRASS_BACKGROUND] * 12,
-        [BlockTypes.GRASS_BACKGROUND] * 12,
-        [BlockTypes.GRASS_BACKGROUND] * 12,
-        [BlockTypes.GRASS_BACKGROUND] * 12,
-        [BlockTypes.GRASS_BACKGROUND] * 12,
-    ]
 
     def __init__(self):
         pygame.init()
@@ -47,6 +30,10 @@ class Game:
         self.clock = pygame.time.Clock()
         self.window = pygame.display.set_mode((Config.WIDTH, Config.HEIGHT))
         self.font_name = pygame.font.get_default_font()
+        self.background_image = pygame.image.load("assets/Retina/tileGrass1.png")
+        self.background_image = pygame.transform.scale(
+            self.background_image, (Block.BLOCK_SIZE, Block.BLOCK_SIZE)
+        )
         # Menu variables
         self.main_menu = MainMenu(self)
         self.current_menu = self.main_menu
@@ -59,7 +46,7 @@ class Game:
         self.tank_sprites.add(self.cannon)
         self.explosions_group = pygame.sprite.Group()
         self.bullets_group = pygame.sprite.Group()
-        self.map = Map("test_map", self.MAP_LAYOUT)
+        self.map = Map("test_map", MAP_1_LAYOUT)
         self.blocks = self.map.generate_map()
 
     def game_loop(self):
@@ -75,7 +62,9 @@ class Game:
             self.bullets_group.update()
             self.explosions_group.update()
             # Dibujar entidades
-            self.screen.fill(Colors.WHITE)
+            for x in range(0, Config.WIDTH, Block.BLOCK_SIZE):
+                for y in range(0, Config.HEIGHT, Block.BLOCK_SIZE):
+                    self.screen.blit(self.background_image, (x, y))
             self.blocks.draw(self.screen)
             self.tank_sprites.draw(self.screen)
             self.bullets_group.draw(self.screen)

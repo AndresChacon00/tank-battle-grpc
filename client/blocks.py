@@ -10,7 +10,7 @@ class BlockTypes:
     }
     SAND_BACKGROUND = {
         "image_name": "tileSand1.png",
-        "solid": False,
+        "solid": True,
     }
     GREEN_TREE = {
         "image_name": "treeGreen_large.png",
@@ -25,7 +25,7 @@ class BlockTypes:
 class Block(pygame.sprite.Sprite):
     """Block class"""
 
-    BLOCK_SIZE = 64  # Size of the block in pixels
+    BLOCK_SIZE = 48  # Size of the block in pixels
 
     def __init__(self, x: int, y: int, image_name: str, solid: bool = True):
         """

@@ -7,11 +7,16 @@ from config import Config
 class Tank(pygame.sprite.Sprite):
     """Tank body class"""
 
+    TANK_SIZE = 56  # Size of the tank in pixels
+
     def __init__(self):
         super().__init__()
         self.original_image = pygame.image.load(
             "assets/Retina/tankBody_blue_outline.png"
         ).convert_alpha()  # Imagen original
+        self.original_image = pygame.transform.scale(
+            self.original_image, (self.TANK_SIZE, self.TANK_SIZE)
+        )
         self.image = self.original_image
         self.rect = self.image.get_rect()
         self.rect.centerx = Config.WIDTH // 2
@@ -114,12 +119,18 @@ class Tank(pygame.sprite.Sprite):
 class TankCannon(pygame.sprite.Sprite):
     """Cannon attached to a tank body"""
 
+    CANNON_HEIGHT = 46
+    CANNON_WIDTH = 25
+
     def __init__(self, tank):
         super().__init__()
         self.tank = tank  # Referencia al tanque base
         self.original_image = pygame.image.load(
             "assets/Retina/tankBlue_barrel1_outline.png"
         ).convert_alpha()
+        self.original_image = pygame.transform.scale(
+            self.original_image, (self.CANNON_WIDTH, self.CANNON_HEIGHT)
+        )
         self.image = self.original_image
         self.rect = self.image.get_rect(center=self.tank.rect.center)
         self.angle = 0
