@@ -120,14 +120,34 @@ while running:
     # Dibujar los tanques
     tank_sprites.draw(screen)
 
+    # Crear un diccionario para rastrear las balas existentes por su bullet_id
+    existing_bullets = {bullet.bullet_id: bullet for bullet in bullets_group}
+
+    # Crear un conjunto de IDs de balas activas desde el estado del servidor
+    active_bullet_ids = {bullet_state.bullet_id for bullet_state in game_state.bullets}
+
+    # Eliminar balas que ya no están activas en el servidor
+    bullets_group = pygame.sprite.Group([bullet for bullet in bullets_group if bullet.bullet_id in active_bullet_ids])
+
+    # Mantener un conjunto de IDs de balas ya procesadas
+    if 'processed_bullet_ids' not in globals():
+        processed_bullet_ids = set()
+
+    # Procesar el evento de disparo recibido del servidor
+    for bullet_state in game_state.bullets:
+        if bullet_state.bullet_id not in existing_bullets and bullet_state.bullet_id not in processed_bullet_ids:
+            # Crear una nueva bala si no existe y no ha sido procesada
+            bullet = Bullet((bullet_state.x, bullet_state.y), (bullet_state.dx, bullet_state.dy))
+            bullet.bullet_id = bullet_state.bullet_id  # Asignar el bullet_id
+            bullets_group.add(bullet)
+            processed_bullet_ids.add(bullet_state.bullet_id)
+            print("Se ha disparado una bala " + bullet_state.bullet_id)
+
+    # Actualizar las balas existentes usando su método update
+    bullets_group.update()
+
     # Dibujar las balas
-    for bullet in game_state.bullets:
-        pygame.draw.circle(
-            screen,
-            Colors.RED,  # Color de la bala
-            (int(bullet.x), int(bullet.y)),  # Posición de la bala
-            5,  # Radio de la bala
-        )
+    bullets_group.draw(screen)
 
     pygame.display.flip()
 

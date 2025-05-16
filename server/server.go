@@ -17,20 +17,17 @@ type gameServer struct {
     bullets map[string]*game.BulletState // Mapa para almacenar las balas activas
 }
 
+// Eliminar la lógica de actualización de balas en UpdateState
 func (s *gameServer) UpdateState(ctx context.Context, state *game.PlayerState) (*game.GameState, error) {
     s.mu.Lock()
-    defer s.mu.Unlock()
 
     // Actualizar el estado del jugador
     s.players[state.PlayerId] = state
 
-    // Actualizar la posición de las balas existentes
+    // Eliminar balas que salgan de los límites del mapa (ejemplo: 800x600)
     for id, bullet := range s.bullets {
-        bullet.X += bullet.Dx
-        bullet.Y += bullet.Dy
-
-        // Eliminar balas que salgan de los límites del mapa (ejemplo: 800x600)
         if bullet.X < 0 || bullet.X > 800 || bullet.Y < 0 || bullet.Y > 600 {
+            log.Printf("Eliminando bala fuera de límites: ID=%s, Posición=(%f, %f)", id, bullet.X, bullet.Y)
             delete(s.bullets, id)
         }
     }
@@ -44,22 +41,36 @@ func (s *gameServer) UpdateState(ctx context.Context, state *game.PlayerState) (
         gameState.Bullets = append(gameState.Bullets, bullet)
     }
 
+    // Depuración para verificar el estado del juego antes de devolverlo
+    //log.Printf("Estado del juego antes de devolverlo: Jugadores=%v, Balas=%v", gameState.Players, gameState.Bullets)
+	
+    defer s.mu.Unlock()
     return gameState, nil
 }
 
+// Modificar AddBullet para solo registrar la posición inicial de las balas
 func (s *gameServer) AddBullet(ctx context.Context, bullet *game.BulletState) (*game.Empty, error) {
     s.mu.Lock()
-    defer s.mu.Unlock()
+    
 
-    // Agregar una nueva bala al mapa de balas
-    s.bullets[bullet.BulletId] = bullet
+    // Registrar la acción de disparar una bala
+    log.Printf("Bala disparada por el jugador %s en la posición inicial (%f, %f)", bullet.OwnerId, bullet.X, bullet.Y)
 
+    // Registrar la posición inicial de la bala
+    s.bullets[bullet.BulletId] = &game.BulletState{
+        BulletId: bullet.BulletId,
+        X:       bullet.X,
+        Y:       bullet.Y,
+        Dx:      bullet.Dx,
+        Dy:      bullet.Dy,
+        OwnerId: bullet.OwnerId,
+    }
+	defer s.mu.Unlock()
     return &game.Empty{}, nil
 }
 
 func (s *gameServer) GetGameState(ctx context.Context, empty *game.Empty) (*game.GameState, error) {
     s.mu.Lock()
-    defer s.mu.Unlock()
 
     // Construir el estado del juego
     gameState := &game.GameState{}
@@ -70,6 +81,8 @@ func (s *gameServer) GetGameState(ctx context.Context, empty *game.Empty) (*game
         gameState.Bullets = append(gameState.Bullets, bullet)
     }
 
+	
+    defer s.mu.Unlock()
     return gameState, nil
 }
 

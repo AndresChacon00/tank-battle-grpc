@@ -127,7 +127,7 @@ while running:
             bullet.image = pygame.transform.rotate(bullet.image, cannon_angle - 90)  # Rotar la bala
             bullets_group.add(bullet)
 
-            # Enviar la bala al servidor
+            # Enviar la bala al servidor una sola vez
             send_bullet(bullet)
 
             # Crear un muzzle flash en la posición inicial de la bala
