@@ -88,68 +88,40 @@ def get_game_state():
         print(f"Error al obtener el estado del juego: {e}")
         return None
 
+# Obtener el estado del juego desde el servidor y reconstruir la pantalla
 running = True
 while running:
     clock.tick(60)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        # Detectar clic izquierdo para disparar
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Clic izquierdo
-            mouse_pos = pygame.mouse.get_pos()
-            tank_pos = tank.rect.center  # Suponiendo que el tanque tiene un rectángulo
-
-            # Calcular el ángulo del cañón en relación al mouse
-            dx, dy = mouse_pos[0] - tank_pos[0], mouse_pos[1] - tank_pos[1]
-            cannon_angle = math.degrees(math.atan2(-dy, dx))  # Invertir dy para corregir el eje Y
-
-            # Calcular la dirección normalizada
-            distance = math.hypot(dx, dy)
-            direction = (dx / distance, dy / distance)  # Vector unitario            
-
-            # Calcular la posición inicial de la bala (parte superior del cañón)            
-            bullet_start_x = tank_pos[0] + cannon_length * direction[0]
-            bullet_start_y = tank_pos[1] + cannon_length * direction[1]
-            bullet_start_pos = (bullet_start_x, bullet_start_y)
-
-            # Crear una bala con la rotación del cañón
-            bullet = Bullet(bullet_start_pos, direction)
-            bullet.image = pygame.transform.rotate(bullet.image, cannon_angle - 90)  # Rotar la bala
-            bullets_group.add(bullet)
-
-            # Crear un muzzle flash en la posición inicial de la bala
-            muzzle_flash = MuzzleFlash(bullet_start_pos)
-            muzzle_flash.image = pygame.transform.rotate(muzzle_flash.image, cannon_angle + 90)  # Rotar el muzzle flash
-            explosions_group.add(muzzle_flash)  # Agregar el muzzle flash al grupo de explosiones
 
     # Obtener el estado del juego desde el servidor
     game_state = get_game_state()
     if not game_state:
         continue
 
-    # Dibujar el estado del juego
+    # Dibujar el fondo
     screen.fill(Colors.WHITE)
-    for player in game_state.players:
-        # Dibujar el tanque
-        tank_rect = pygame.Rect(player.x, player.y, 50, 50)  # Suponiendo un tamaño de 50x50 para el tanque
-        pygame.draw.rect(screen, Colors.GREEN, tank_rect)
+    blocks.draw(screen)
 
-        # Dibujar la dirección del tanque
-        angle = player.angle
-        pygame.draw.line(
-            screen,
-            Colors.RED,
-            (player.x + 25, player.y + 25),  # Centro del tanque
-            (
-                player.x + 25 + 50 * math.cos(math.radians(angle)),
-                player.y + 25 - 50 * math.sin(math.radians(angle)),
-            ),
-            2,
-        )
+    # Crear tanque y cañón basado en el estado del juego
+    tank_sprites = pygame.sprite.Group()
+    for player in game_state.players:
+        tank = Tank()
+        tank.rect.center = (player.x, player.y)
+        tank.angle = player.angle  # Suponiendo que el tanque tiene un atributo 'angle'
+        # Rotar la imagen del tanque y mantener el centro
+        original_center = tank.rect.center
+        tank.image = pygame.transform.rotate(tank.original_image, player.angle)
+        tank.rect = tank.image.get_rect(center=original_center)
+        tank_sprites.add(tank)
+
+    # Dibujar los tanques
+    tank_sprites.draw(screen)
 
     # Dibujar las balas
     for bullet in game_state.bullets:
-        # Dibujar cada bala como un pequeño círculo
         pygame.draw.circle(
             screen,
             Colors.RED,  # Color de la bala
