@@ -1,5 +1,6 @@
 import pygame, math
 import grpc 
+import uuid
 from game.game_pb2 import Empty
 from game.game_pb2_grpc import GameServiceStub
 from game.game_pb2 import PlayerState, BulletState
@@ -70,7 +71,7 @@ PLAYER_ID = "player1"
 # Función para enviar una bala al servidor
 def send_bullet(bullet):
     bullet_state = BulletState(
-        bullet_id=str(id(bullet)),  # Usar el ID único del objeto como identificador
+        bullet_id=str(uuid.uuid4()),  # Usar el ID único del objeto como identificador
         x=bullet.rect.centerx,
         y=bullet.rect.centery,
         dx=bullet.direction[0],

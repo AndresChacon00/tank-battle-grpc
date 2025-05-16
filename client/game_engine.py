@@ -135,6 +135,7 @@ while running:
 
     # Procesar el evento de disparo recibido del servidor
     for bullet_state in game_state.bullets:
+        print(len(game_state.bullets))
         if bullet_state.bullet_id not in existing_bullets and bullet_state.bullet_id not in processed_bullet_ids:
             # Crear una nueva bala si no existe y no ha sido procesada
             bullet = Bullet((bullet_state.x, bullet_state.y), (bullet_state.dx, bullet_state.dy))

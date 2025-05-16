@@ -52,19 +52,25 @@ func (s *gameServer) UpdateState(ctx context.Context, state *game.PlayerState) (
 func (s *gameServer) AddBullet(ctx context.Context, bullet *game.BulletState) (*game.Empty, error) {
     s.mu.Lock()
     
+    // Verificar si el BulletId ya existe antes de agregarlo
+    if _, exists := s.bullets[bullet.BulletId]; exists {
+        log.Printf("Advertencia: Se intentó registrar una bala con un BulletId duplicado: %s", bullet.BulletId)
+    } else {
+        s.bullets[bullet.BulletId] = &game.BulletState{
+            BulletId: bullet.BulletId,
+            X:       bullet.X,
+            Y:       bullet.Y,
+            Dx:      bullet.Dx,
+            Dy:      bullet.Dy,
+            OwnerId: bullet.OwnerId,
+        }
+        log.Printf("Bala registrada correctamente: ID=%s, Total de balas activas: %d", bullet.BulletId, len(s.bullets))
+    }
 
     // Registrar la acción de disparar una bala
     log.Printf("Bala disparada por el jugador %s en la posición inicial (%f, %f)", bullet.OwnerId, bullet.X, bullet.Y)
-
-    // Registrar la posición inicial de la bala
-    s.bullets[bullet.BulletId] = &game.BulletState{
-        BulletId: bullet.BulletId,
-        X:       bullet.X,
-        Y:       bullet.Y,
-        Dx:      bullet.Dx,
-        Dy:      bullet.Dy,
-        OwnerId: bullet.OwnerId,
-    }
+	log.Printf("Total de balas activas: %d", len(s.bullets))
+    
 	defer s.mu.Unlock()
     return &game.Empty{}, nil
 }
