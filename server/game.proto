@@ -12,6 +12,9 @@ service GameService {
 
     // Devuelve actualizaciones en tiempo real
     rpc StreamGameState (Empty) returns (stream GameState);
+
+    // Agregar una bala al servidor
+    rpc AddBullet (BulletState) returns (Empty);
 }
 // Estado de juego y jugador
 message PlayerState {
@@ -21,8 +24,20 @@ message PlayerState {
     float angle = 4;
 }
 
+// Estado de una bala
+message BulletState {
+    string bullet_id = 1; // Identificador único de la bala
+    float x = 2;          // Posición X de la bala
+    float y = 3;          // Posición Y de la bala
+    float dx = 4;         // Dirección X de la bala
+    float dy = 5;         // Dirección Y de la bala
+    string owner_id = 6;  // ID del jugador que disparó la bala
+}
+
+// Estado del juego
 message GameState {
-    repeated PlayerState players = 1;
+    repeated PlayerState players = 1; // Lista de jugadores
+    repeated BulletState bullets = 2; // Lista de balas activas
 }
 
 

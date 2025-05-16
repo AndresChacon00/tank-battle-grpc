@@ -8,6 +8,7 @@ Compilar a python
 `pip install grpcio-tools`
 
 `python -m grpc_tools.protoc -I=server --python_out=server/game --grpc_python_out=server/game server/game.proto`
+
 ajustar el .py generado colocando
 from . import game_pb2 as game__pb2
 protoc --go_out=. --go-grpc_out=. server/game.proto

@@ -2,7 +2,7 @@ import pygame, math
 import grpc 
 from game.game_pb2 import Empty
 from game.game_pb2_grpc import GameServiceStub
-from game.game_pb2 import PlayerState
+from game.game_pb2 import PlayerState, BulletState
 from game.game_pb2_grpc import GameServiceStub
 from tank import Tank, TankCannon, Track
 from colors import Colors
@@ -65,7 +65,22 @@ channel = grpc.insecure_channel("localhost:9000")
 client = GameServiceStub(channel)
 
 # Identificador único para el jugador
-PLAYER_ID = "player2"
+PLAYER_ID = "player1"
+
+# Función para enviar una bala al servidor
+def send_bullet(bullet):
+    bullet_state = BulletState(
+        bullet_id=str(id(bullet)),  # Usar el ID único del objeto como identificador
+        x=bullet.rect.centerx,
+        y=bullet.rect.centery,
+        dx=bullet.direction[0],
+        dy=bullet.direction[1],
+        owner_id=PLAYER_ID,  # ID del jugador que disparó la bala
+    )
+    try:
+        client.AddBullet(bullet_state)  # Llamar al método AddBullet en el servidor
+    except grpc.RpcError as e:
+        print(f"Error al enviar la bala al servidor: {e}")
 
 # Función para enviar el estado del jugador al servidor
 def send_player_state(tank):
@@ -75,11 +90,14 @@ def send_player_state(tank):
         y=tank.rect.centery,
         angle=tank.angle,  # Suponiendo que el tanque tiene un atributo 'angle'
     )
+
+    # Enviar el estado del jugador al servidor
     try:
         client.UpdateState(player_state)
     except grpc.RpcError as e:
         print(f"Error al enviar el estado del jugador: {e}")
 
+# Bucle principal del juego
 running = True
 while running:
     clock.tick(60)
@@ -108,6 +126,9 @@ while running:
             bullet = Bullet(bullet_start_pos, direction)
             bullet.image = pygame.transform.rotate(bullet.image, cannon_angle - 90)  # Rotar la bala
             bullets_group.add(bullet)
+
+            # Enviar la bala al servidor
+            send_bullet(bullet)
 
             # Crear un muzzle flash en la posición inicial de la bala
             muzzle_flash = MuzzleFlash(bullet_start_pos)

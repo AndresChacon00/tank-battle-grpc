@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\ngame.proto\x12\x04game\"E\n\x0bPlayerState\x12\x11\n\tplayer_id\x18\x01 \x01(\t\x12\t\n\x01x\x18\x02 \x01(\x02\x12\t\n\x01y\x18\x03 \x01(\x02\x12\r\n\x05\x61ngle\x18\x04 \x01(\x02\"/\n\tGameState\x12\"\n\x07players\x18\x01 \x03(\x0b\x32\x11.game.PlayerState\"\x07\n\x05\x45mpty2\xa1\x01\n\x0bGameService\x12\x31\n\x0bUpdateState\x12\x11.game.PlayerState\x1a\x0f.game.GameState\x12,\n\x0cGetGameState\x12\x0b.game.Empty\x1a\x0f.game.GameState\x12\x31\n\x0fStreamGameState\x12\x0b.game.Empty\x1a\x0f.game.GameState0\x01\x42\x07Z\x05/gameb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\ngame.proto\x12\x04game\"E\n\x0bPlayerState\x12\x11\n\tplayer_id\x18\x01 \x01(\t\x12\t\n\x01x\x18\x02 \x01(\x02\x12\t\n\x01y\x18\x03 \x01(\x02\x12\r\n\x05\x61ngle\x18\x04 \x01(\x02\"`\n\x0b\x42ulletState\x12\x11\n\tbullet_id\x18\x01 \x01(\t\x12\t\n\x01x\x18\x02 \x01(\x02\x12\t\n\x01y\x18\x03 \x01(\x02\x12\n\n\x02\x64x\x18\x04 \x01(\x02\x12\n\n\x02\x64y\x18\x05 \x01(\x02\x12\x10\n\x08owner_id\x18\x06 \x01(\t\"S\n\tGameState\x12\"\n\x07players\x18\x01 \x03(\x0b\x32\x11.game.PlayerState\x12\"\n\x07\x62ullets\x18\x02 \x03(\x0b\x32\x11.game.BulletState\"\x07\n\x05\x45mpty2\xce\x01\n\x0bGameService\x12\x31\n\x0bUpdateState\x12\x11.game.PlayerState\x1a\x0f.game.GameState\x12,\n\x0cGetGameState\x12\x0b.game.Empty\x1a\x0f.game.GameState\x12\x31\n\x0fStreamGameState\x12\x0b.game.Empty\x1a\x0f.game.GameState0\x01\x12+\n\tAddBullet\x12\x11.game.BulletState\x1a\x0b.game.EmptyB\x07Z\x05/gameb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -34,10 +34,12 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._serialized_options = b'Z\005/game'
   _globals['_PLAYERSTATE']._serialized_start=20
   _globals['_PLAYERSTATE']._serialized_end=89
-  _globals['_GAMESTATE']._serialized_start=91
-  _globals['_GAMESTATE']._serialized_end=138
-  _globals['_EMPTY']._serialized_start=140
-  _globals['_EMPTY']._serialized_end=147
-  _globals['_GAMESERVICE']._serialized_start=150
-  _globals['_GAMESERVICE']._serialized_end=311
+  _globals['_BULLETSTATE']._serialized_start=91
+  _globals['_BULLETSTATE']._serialized_end=187
+  _globals['_GAMESTATE']._serialized_start=189
+  _globals['_GAMESTATE']._serialized_end=272
+  _globals['_EMPTY']._serialized_start=274
+  _globals['_EMPTY']._serialized_end=281
+  _globals['_GAMESERVICE']._serialized_start=284
+  _globals['_GAMESERVICE']._serialized_end=490
 # @@protoc_insertion_point(module_scope)

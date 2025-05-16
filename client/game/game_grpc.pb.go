@@ -22,6 +22,7 @@ const (
 	GameService_UpdateState_FullMethodName     = "/game.GameService/UpdateState"
 	GameService_GetGameState_FullMethodName    = "/game.GameService/GetGameState"
 	GameService_StreamGameState_FullMethodName = "/game.GameService/StreamGameState"
+	GameService_AddBullet_FullMethodName       = "/game.GameService/AddBullet"
 )
 
 // GameServiceClient is the client API for GameService service.
@@ -34,6 +35,8 @@ type GameServiceClient interface {
 	GetGameState(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GameState, error)
 	// Devuelve actualizaciones en tiempo real
 	StreamGameState(ctx context.Context, in *Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GameState], error)
+	// Agregar una bala al servidor
+	AddBullet(ctx context.Context, in *BulletState, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type gameServiceClient struct {
@@ -83,6 +86,16 @@ func (c *gameServiceClient) StreamGameState(ctx context.Context, in *Empty, opts
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type GameService_StreamGameStateClient = grpc.ServerStreamingClient[GameState]
 
+func (c *gameServiceClient) AddBullet(ctx context.Context, in *BulletState, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, GameService_AddBullet_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GameServiceServer is the server API for GameService service.
 // All implementations must embed UnimplementedGameServiceServer
 // for forward compatibility.
@@ -93,6 +106,8 @@ type GameServiceServer interface {
 	GetGameState(context.Context, *Empty) (*GameState, error)
 	// Devuelve actualizaciones en tiempo real
 	StreamGameState(*Empty, grpc.ServerStreamingServer[GameState]) error
+	// Agregar una bala al servidor
+	AddBullet(context.Context, *BulletState) (*Empty, error)
 	mustEmbedUnimplementedGameServiceServer()
 }
 
@@ -111,6 +126,9 @@ func (UnimplementedGameServiceServer) GetGameState(context.Context, *Empty) (*Ga
 }
 func (UnimplementedGameServiceServer) StreamGameState(*Empty, grpc.ServerStreamingServer[GameState]) error {
 	return status.Errorf(codes.Unimplemented, "method StreamGameState not implemented")
+}
+func (UnimplementedGameServiceServer) AddBullet(context.Context, *BulletState) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddBullet not implemented")
 }
 func (UnimplementedGameServiceServer) mustEmbedUnimplementedGameServiceServer() {}
 func (UnimplementedGameServiceServer) testEmbeddedByValue()                     {}
@@ -180,6 +198,24 @@ func _GameService_StreamGameState_Handler(srv interface{}, stream grpc.ServerStr
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type GameService_StreamGameStateServer = grpc.ServerStreamingServer[GameState]
 
+func _GameService_AddBullet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BulletState)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServiceServer).AddBullet(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameService_AddBullet_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServiceServer).AddBullet(ctx, req.(*BulletState))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GameService_ServiceDesc is the grpc.ServiceDesc for GameService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -194,6 +230,10 @@ var GameService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetGameState",
 			Handler:    _GameService_GetGameState_Handler,
+		},
+		{
+			MethodName: "AddBullet",
+			Handler:    _GameService_AddBullet_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

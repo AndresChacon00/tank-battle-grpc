@@ -90,16 +90,103 @@ func (x *PlayerState) GetAngle() float32 {
 	return 0
 }
 
+// Estado de una bala
+type BulletState struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	BulletId      string                 `protobuf:"bytes,1,opt,name=bullet_id,json=bulletId,proto3" json:"bullet_id,omitempty"` // Identificador único de la bala
+	X             float32                `protobuf:"fixed32,2,opt,name=x,proto3" json:"x,omitempty"`                             // Posición X de la bala
+	Y             float32                `protobuf:"fixed32,3,opt,name=y,proto3" json:"y,omitempty"`                             // Posición Y de la bala
+	Dx            float32                `protobuf:"fixed32,4,opt,name=dx,proto3" json:"dx,omitempty"`                           // Dirección X de la bala
+	Dy            float32                `protobuf:"fixed32,5,opt,name=dy,proto3" json:"dy,omitempty"`                           // Dirección Y de la bala
+	OwnerId       string                 `protobuf:"bytes,6,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`    // ID del jugador que disparó la bala
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BulletState) Reset() {
+	*x = BulletState{}
+	mi := &file_game_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BulletState) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BulletState) ProtoMessage() {}
+
+func (x *BulletState) ProtoReflect() protoreflect.Message {
+	mi := &file_game_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BulletState.ProtoReflect.Descriptor instead.
+func (*BulletState) Descriptor() ([]byte, []int) {
+	return file_game_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *BulletState) GetBulletId() string {
+	if x != nil {
+		return x.BulletId
+	}
+	return ""
+}
+
+func (x *BulletState) GetX() float32 {
+	if x != nil {
+		return x.X
+	}
+	return 0
+}
+
+func (x *BulletState) GetY() float32 {
+	if x != nil {
+		return x.Y
+	}
+	return 0
+}
+
+func (x *BulletState) GetDx() float32 {
+	if x != nil {
+		return x.Dx
+	}
+	return 0
+}
+
+func (x *BulletState) GetDy() float32 {
+	if x != nil {
+		return x.Dy
+	}
+	return 0
+}
+
+func (x *BulletState) GetOwnerId() string {
+	if x != nil {
+		return x.OwnerId
+	}
+	return ""
+}
+
+// Estado del juego
 type GameState struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Players       []*PlayerState         `protobuf:"bytes,1,rep,name=players,proto3" json:"players,omitempty"`
+	Players       []*PlayerState         `protobuf:"bytes,1,rep,name=players,proto3" json:"players,omitempty"` // Lista de jugadores
+	Bullets       []*BulletState         `protobuf:"bytes,2,rep,name=bullets,proto3" json:"bullets,omitempty"` // Lista de balas activas
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GameState) Reset() {
 	*x = GameState{}
-	mi := &file_game_proto_msgTypes[1]
+	mi := &file_game_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -111,7 +198,7 @@ func (x *GameState) String() string {
 func (*GameState) ProtoMessage() {}
 
 func (x *GameState) ProtoReflect() protoreflect.Message {
-	mi := &file_game_proto_msgTypes[1]
+	mi := &file_game_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -124,12 +211,19 @@ func (x *GameState) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GameState.ProtoReflect.Descriptor instead.
 func (*GameState) Descriptor() ([]byte, []int) {
-	return file_game_proto_rawDescGZIP(), []int{1}
+	return file_game_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *GameState) GetPlayers() []*PlayerState {
 	if x != nil {
 		return x.Players
+	}
+	return nil
+}
+
+func (x *GameState) GetBullets() []*BulletState {
+	if x != nil {
+		return x.Bullets
 	}
 	return nil
 }
@@ -143,7 +237,7 @@ type Empty struct {
 
 func (x *Empty) Reset() {
 	*x = Empty{}
-	mi := &file_game_proto_msgTypes[2]
+	mi := &file_game_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -155,7 +249,7 @@ func (x *Empty) String() string {
 func (*Empty) ProtoMessage() {}
 
 func (x *Empty) ProtoReflect() protoreflect.Message {
-	mi := &file_game_proto_msgTypes[2]
+	mi := &file_game_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -168,7 +262,7 @@ func (x *Empty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Empty.ProtoReflect.Descriptor instead.
 func (*Empty) Descriptor() ([]byte, []int) {
-	return file_game_proto_rawDescGZIP(), []int{2}
+	return file_game_proto_rawDescGZIP(), []int{3}
 }
 
 var File_game_proto protoreflect.FileDescriptor
@@ -181,14 +275,23 @@ const file_game_proto_rawDesc = "" +
 	"\tplayer_id\x18\x01 \x01(\tR\bplayerId\x12\f\n" +
 	"\x01x\x18\x02 \x01(\x02R\x01x\x12\f\n" +
 	"\x01y\x18\x03 \x01(\x02R\x01y\x12\x14\n" +
-	"\x05angle\x18\x04 \x01(\x02R\x05angle\"8\n" +
+	"\x05angle\x18\x04 \x01(\x02R\x05angle\"\x81\x01\n" +
+	"\vBulletState\x12\x1b\n" +
+	"\tbullet_id\x18\x01 \x01(\tR\bbulletId\x12\f\n" +
+	"\x01x\x18\x02 \x01(\x02R\x01x\x12\f\n" +
+	"\x01y\x18\x03 \x01(\x02R\x01y\x12\x0e\n" +
+	"\x02dx\x18\x04 \x01(\x02R\x02dx\x12\x0e\n" +
+	"\x02dy\x18\x05 \x01(\x02R\x02dy\x12\x19\n" +
+	"\bowner_id\x18\x06 \x01(\tR\aownerId\"e\n" +
 	"\tGameState\x12+\n" +
-	"\aplayers\x18\x01 \x03(\v2\x11.game.PlayerStateR\aplayers\"\a\n" +
-	"\x05Empty2\xa1\x01\n" +
+	"\aplayers\x18\x01 \x03(\v2\x11.game.PlayerStateR\aplayers\x12+\n" +
+	"\abullets\x18\x02 \x03(\v2\x11.game.BulletStateR\abullets\"\a\n" +
+	"\x05Empty2\xce\x01\n" +
 	"\vGameService\x121\n" +
 	"\vUpdateState\x12\x11.game.PlayerState\x1a\x0f.game.GameState\x12,\n" +
 	"\fGetGameState\x12\v.game.Empty\x1a\x0f.game.GameState\x121\n" +
-	"\x0fStreamGameState\x12\v.game.Empty\x1a\x0f.game.GameState0\x01B\aZ\x05/gameb\x06proto3"
+	"\x0fStreamGameState\x12\v.game.Empty\x1a\x0f.game.GameState0\x01\x12+\n" +
+	"\tAddBullet\x12\x11.game.BulletState\x1a\v.game.EmptyB\aZ\x05/gameb\x06proto3"
 
 var (
 	file_game_proto_rawDescOnce sync.Once
@@ -202,25 +305,29 @@ func file_game_proto_rawDescGZIP() []byte {
 	return file_game_proto_rawDescData
 }
 
-var file_game_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_game_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_game_proto_goTypes = []any{
 	(*PlayerState)(nil), // 0: game.PlayerState
-	(*GameState)(nil),   // 1: game.GameState
-	(*Empty)(nil),       // 2: game.Empty
+	(*BulletState)(nil), // 1: game.BulletState
+	(*GameState)(nil),   // 2: game.GameState
+	(*Empty)(nil),       // 3: game.Empty
 }
 var file_game_proto_depIdxs = []int32{
 	0, // 0: game.GameState.players:type_name -> game.PlayerState
-	0, // 1: game.GameService.UpdateState:input_type -> game.PlayerState
-	2, // 2: game.GameService.GetGameState:input_type -> game.Empty
-	2, // 3: game.GameService.StreamGameState:input_type -> game.Empty
-	1, // 4: game.GameService.UpdateState:output_type -> game.GameState
-	1, // 5: game.GameService.GetGameState:output_type -> game.GameState
-	1, // 6: game.GameService.StreamGameState:output_type -> game.GameState
-	4, // [4:7] is the sub-list for method output_type
-	1, // [1:4] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	1, // 1: game.GameState.bullets:type_name -> game.BulletState
+	0, // 2: game.GameService.UpdateState:input_type -> game.PlayerState
+	3, // 3: game.GameService.GetGameState:input_type -> game.Empty
+	3, // 4: game.GameService.StreamGameState:input_type -> game.Empty
+	1, // 5: game.GameService.AddBullet:input_type -> game.BulletState
+	2, // 6: game.GameService.UpdateState:output_type -> game.GameState
+	2, // 7: game.GameService.GetGameState:output_type -> game.GameState
+	2, // 8: game.GameService.StreamGameState:output_type -> game.GameState
+	3, // 9: game.GameService.AddBullet:output_type -> game.Empty
+	6, // [6:10] is the sub-list for method output_type
+	2, // [2:6] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_game_proto_init() }
@@ -234,7 +341,7 @@ func file_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_proto_rawDesc), len(file_game_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

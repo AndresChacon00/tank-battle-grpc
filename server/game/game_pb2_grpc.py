@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from . import game_pb2 as game__pb2
+import game_pb2 as game__pb2
 
 GRPC_GENERATED_VERSION = '1.71.0'
 GRPC_VERSION = grpc.__version__
@@ -49,6 +49,11 @@ class GameServiceStub(object):
                 request_serializer=game__pb2.Empty.SerializeToString,
                 response_deserializer=game__pb2.GameState.FromString,
                 _registered_method=True)
+        self.AddBullet = channel.unary_unary(
+                '/game.GameService/AddBullet',
+                request_serializer=game__pb2.BulletState.SerializeToString,
+                response_deserializer=game__pb2.Empty.FromString,
+                _registered_method=True)
 
 
 class GameServiceServicer(object):
@@ -75,6 +80,13 @@ class GameServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def AddBullet(self, request, context):
+        """Agregar una bala al servidor
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_GameServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -92,6 +104,11 @@ def add_GameServiceServicer_to_server(servicer, server):
                     servicer.StreamGameState,
                     request_deserializer=game__pb2.Empty.FromString,
                     response_serializer=game__pb2.GameState.SerializeToString,
+            ),
+            'AddBullet': grpc.unary_unary_rpc_method_handler(
+                    servicer.AddBullet,
+                    request_deserializer=game__pb2.BulletState.FromString,
+                    response_serializer=game__pb2.Empty.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -175,6 +192,33 @@ class GameService(object):
             '/game.GameService/StreamGameState',
             game__pb2.Empty.SerializeToString,
             game__pb2.GameState.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def AddBullet(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/game.GameService/AddBullet',
+            game__pb2.BulletState.SerializeToString,
+            game__pb2.Empty.FromString,
             options,
             channel_credentials,
             insecure,

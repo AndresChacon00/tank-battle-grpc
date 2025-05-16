@@ -80,7 +80,7 @@ def send_player_state(tank):
     except grpc.RpcError as e:
         print(f"Error al enviar el estado del jugador: {e}")
 
-# Función para obtener el estado del juego desde el servidor
+# Obtener el estado del juego desde el servidor
 def get_game_state():
     try:
         return client.GetGameState(Empty())
@@ -145,6 +145,16 @@ while running:
                 player.y + 25 - 50 * math.sin(math.radians(angle)),
             ),
             2,
+        )
+
+    # Dibujar las balas
+    for bullet in game_state.bullets:
+        # Dibujar cada bala como un pequeño círculo
+        pygame.draw.circle(
+            screen,
+            Colors.RED,  # Color de la bala
+            (int(bullet.x), int(bullet.y)),  # Posición de la bala
+            5,  # Radio de la bala
         )
 
     pygame.display.flip()
