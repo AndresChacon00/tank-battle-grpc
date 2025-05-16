@@ -2,7 +2,7 @@ import pygame
 import math
 from colors import Colors
 from config import Config
-from menu import MainMenu
+from menu import MainMenu, Menu, LobbyCreatorMenu, InputLobbyIPMenu, LobbyJoinerMenu
 from tank import Tank, TankCannon
 from bullet import Bullet
 from maps import Map, MAP_1_LAYOUT
@@ -36,7 +36,10 @@ class Game:
         )
         # Menu variables
         self.main_menu = MainMenu(self)
-        self.current_menu = self.main_menu
+        self.start_lobby_menu = LobbyCreatorMenu(self)
+        self.input_lobby_ip_menu = InputLobbyIPMenu(self)
+        self.lobby_joiner_menu = LobbyJoinerMenu(self)
+        self.current_menu: Menu = self.main_menu
         # Game variables
         self.click_pos = None
         self.tank = Tank()
