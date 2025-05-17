@@ -20,8 +20,8 @@ MAP_1_LAYOUT = [
 class Map:
     """Map class to generate the map based on a layout"""
 
-    def __init__(self, name: str, layout: list[list[dict]]):
-        self.name = name
+    def __init__(self, id: int, layout: list[list[dict]]):
+        self.id = id
         self.layout = layout
 
     def generate_map(self):

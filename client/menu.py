@@ -119,7 +119,8 @@ class LobbyCreatorMenu(Menu):
             s.connect(("8.8.8.8", 80))
             ip = s.getsockname()[0]
             s.close()
-            self.game.server_ip = ip
+            self.game.server_ip = "localhost"
+            self.game.join_server()
             return ip
         except Exception:
             return "127.0.0.1"
@@ -173,7 +174,7 @@ class LobbyCreatorMenu(Menu):
         """Actúa según la entrada del usuario"""
         if self.game.click_pos is not None:
             if self.play_button.collidepoint(self.game.click_pos):
-                self.game.join_server()
+                self.game.send_map_to_server(self.game.map.id)
                 self.game.playing = True
                 self.run_display = False
 

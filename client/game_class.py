@@ -4,7 +4,13 @@ import grpc
 import uuid
 from typing import Union
 from game.game_pb2_grpc import GameServiceStub
-from game.game_pb2 import PlayerState, BulletState
+from game.game_pb2 import (
+    Empty,
+    PlayerState,
+    BulletState,
+    MapRequest,
+    PlayerRequest,
+)
 from tank import Tank, TankCannon, Track
 from colors import Colors
 from config import Config
@@ -55,12 +61,14 @@ class Game:
         self.tank_sprites.add(self.tank)
         self.tank_sprites.add(self.cannon)
         self.previous_tank_position = self.tank.rect.center
+        self.player_id = None
+        self.player_name = "Jugador 0"
 
         self.explosions_group = pygame.sprite.Group()
         self.bullets_group = pygame.sprite.Group()
         self.tracks_group = pygame.sprite.Group()
 
-        self.map = Map("test_map", MAP_1_LAYOUT)
+        self.map = Map(1, MAP_1_LAYOUT)
         self.blocks = self.map.generate_map()
 
     def game_loop(self):
@@ -185,12 +193,31 @@ class Game:
         text_rect = text_surface.get_rect(center=(x, y))
         self.screen.blit(text_surface, text_rect)
 
+    def add_player_to_server(self, player_name):
+        """Agregar jugador al servidor"""
+        try:
+            response = self.client.AddPlayer(PlayerRequest(player_name=player_name))
+            print(f"Jugador añadido: Nombre={player_name}, ID={response.player_id}")
+            self.player_id = response.player_id
+            self.player_name = f"Jugador {self.player_id}"
+            return response.player_id
+        except grpc.RpcError as e:
+            print(f"Error al añadir el jugador al servidor: {e}")
+            return None
+
+    def send_map_to_server(self, map_id):
+        try:
+            self.client.SetMap(
+                MapRequest(map_number=map_id)
+            )  # Usar el nombre correcto del campo
+            print(f"Mapa {map_id} enviado al servidor correctamente.")
+        except grpc.RpcError as e:
+            print(f"Error al enviar el mapa al servidor: {e}")
+
     def join_server(self):
         """Establecer conexión con el servidor"""
-        self.channel = grpc.insecure_channel("localhost:9000")
+        self.channel = grpc.insecure_channel(f"{self.server_ip}:9000")
         self.client = GameServiceStub(self.channel)
-        # Identificador único para el jugador
-        self.player_id = "player1"
 
     def send_bullet(self, bullet: Bullet):
         """Enviar la bala al servidor"""
