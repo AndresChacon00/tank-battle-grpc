@@ -30,26 +30,33 @@ class InputBox:
         self.txt_surface = self.font.render(self.text, True, self.color)
         self.active = False
 
-    def handle_event(self, event: pygame.event.Event):
-        if (
-            event.type == pygame.MOUSEBUTTONDOWN
-            and self.parent.game.click_pos is not None
-        ):
+    def handle_event(self):
+        """Handle events for the input box"""
+        if self.parent.game.click_pos is not None:
             # Toggle the active variable if the user clicked on the input_box rect.
             if self.rect.collidepoint(self.parent.game.click_pos):
                 self.active = not self.active
             else:
                 self.active = False
             self.color = self.color_active if self.active else self.color_inactive
-        if event.type == pygame.KEYDOWN and self.active:
-            if event.key == pygame.K_RETURN:
-                return "submit"  # You can use this to trigger a submit action
-            elif event.key == pygame.K_BACKSPACE:
+
+        if self.parent.game.key_pressed is not None and self.active:
+            key_pressed = self.parent.game.key_pressed
+            if key_pressed == pygame.K_RETURN:
+                self.parent.game.key_pressed = None  # Reset key pressed after handling
+                return "submit"
+
+            elif key_pressed == pygame.K_BACKSPACE:
                 self.text = self.text[:-1]
+
             else:
-                if len(self.text) < 20:
-                    self.text += event.unicode
-            self.txt_surface = self.font.render(self.text, True, (0, 0, 0))
+                # Solo permitir números y punto
+                key_name = pygame.key.name(key_pressed)
+                if len(self.text) < 20 and (key_name.isdigit() or key_name == "."):
+                    self.text += key_name
+            self.txt_surface = self.font.render(self.text, True, self.color)
+            self.parent.game.key_pressed = None  # Reset key pressed after handling
+
         return None
 
     def draw(self, screen):

@@ -6,7 +6,7 @@ from colors import Colors
 from components import InputBox
 
 if TYPE_CHECKING:
-    from game import Game
+    from game_class import Game
 
 
 class Menu:
@@ -23,6 +23,10 @@ class Menu:
         self.game.window.blit(self.game.screen, (0, 0))
         pygame.display.update()
         self.game.reset_keys()
+
+    def display_menu(self):
+        """Método que debe ser implementado en las subclases"""
+        pass
 
 
 class MainMenu(Menu):
@@ -115,6 +119,7 @@ class LobbyCreatorMenu(Menu):
             s.connect(("8.8.8.8", 80))
             ip = s.getsockname()[0]
             s.close()
+            self.game.server_ip = ip
             return ip
         except Exception:
             return "127.0.0.1"
@@ -204,7 +209,7 @@ class InputLobbyIPMenu(Menu):
             self.game.screen.blit(self.logo_small, self.logo_rect)
             # Texto de instrucción
             self.game.draw_text(
-                "Ingresa la IP del lobby al que deseas unirte:",
+                "Ingresa la IP de la sala a la que deseas unirte:",
                 24,
                 self.mid_w,
                 self.mid_h - 40,
@@ -232,27 +237,22 @@ class InputLobbyIPMenu(Menu):
 
     def check_input(self):
         """Maneja la entrada de texto para la IP y los botones"""
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.game.running = False
-                self.run_display = False
-            # InputBox component event handling
-            result = self.input_box_component.handle_event(event)
-            if result == "submit":
+        # InputBox component event handling
+        result = self.input_box_component.handle_event()
+        if result == "submit":
+            self.run_display = False
+            self.game.current_menu = self.game.lobby_joiner_menu
+
+        if self.game.click_pos is not None:
+            # Botón Unirse
+            if self.join_button.collidepoint(self.game.click_pos):
+                self.game.server_ip = self.input_box_component.text
                 self.run_display = False
                 self.game.current_menu = self.game.lobby_joiner_menu
-
-            elif (
-                event.type == pygame.MOUSEBUTTONDOWN and self.game.click_pos is not None
-            ):
-                # Botón Unirse
-                if self.join_button.collidepoint(self.game.click_pos):
-                    self.run_display = False
-                    self.game.current_menu = self.game.lobby_joiner_menu
-                # Botón Volver
-                if self.back_button.collidepoint(self.game.click_pos):
-                    self.run_display = False
-                    self.game.current_menu = self.game.main_menu
+            # Botón Volver
+            if self.back_button.collidepoint(self.game.click_pos):
+                self.run_display = False
+                self.game.current_menu = self.game.main_menu
 
 
 class LobbyJoinerMenu(Menu):
@@ -262,24 +262,12 @@ class LobbyJoinerMenu(Menu):
         super().__init__(game)
         self.quit_x, self.quit_y = self.mid_w, self.mid_h + 120
         self.quit_button = pygame.Rect(self.mid_w - 100, self.mid_h + 210, 200, 50)
-        # Obtener la IP local
-        self.local_ip = self.get_local_ip()
         # Lista de jugadores
         self.players = ["Player 1", "Player 2"]
         # Logo reducido en la esquina superior izquierda
         self.logo = pygame.image.load("assets/menu/game-logo.png")
         self.logo_small = pygame.transform.scale(self.logo, (80, 80))
         self.logo_rect = self.logo_small.get_rect(topleft=(20, 20))
-
-    def get_local_ip(self):
-        try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            s.connect(("8.8.8.8", 80))
-            ip = s.getsockname()[0]
-            s.close()
-            return ip
-        except Exception:
-            return "127.0.0.1"
 
     def display_menu(self):
         """Muestra el menú principal"""
@@ -292,7 +280,7 @@ class LobbyJoinerMenu(Menu):
             self.game.screen.blit(self.logo_small, self.logo_rect)
             # Mostrar la IP local
             self.game.draw_text(
-                f"Sala de espera - IP de la sala: {self.local_ip}",
+                f"Sala de espera - IP de la sala: {self.game.server_ip}",
                 28,
                 self.mid_w,
                 self.mid_h - 120,

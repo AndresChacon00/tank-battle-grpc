@@ -2,7 +2,7 @@ import pygame
 import math
 import grpc
 import uuid
-from game.game_pb2 import Empty
+from typing import Union
 from game.game_pb2_grpc import GameServiceStub
 from game.game_pb2 import PlayerState, BulletState
 from tank import Tank, TankCannon, Track
@@ -47,6 +47,8 @@ class Game:
         self.current_menu: Menu = self.main_menu
         # Game variables
         self.click_pos = None
+        self.key_pressed = None
+        self.server_ip: Union[str, None] = None
         self.tank = Tank()
         self.cannon = TankCannon(self.tank)
         self.tank_sprites = pygame.sprite.Group()
@@ -163,6 +165,8 @@ class Game:
             else:
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     self.click_pos = pygame.mouse.get_pos()
+                elif event.type == pygame.KEYDOWN:
+                    self.key_pressed = event.key
 
     def reset_keys(self):
         """Reinicia las teclas de movimiento."""
