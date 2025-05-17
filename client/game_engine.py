@@ -80,6 +80,23 @@ def send_player_state(tank):
     except grpc.RpcError as e:
         print(f"Error al enviar el estado del jugador: {e}")
 
+# Función para obtener el mapa actual del servidor
+def get_map_from_server():
+    try:
+        response = client.GetMap(Empty())
+        print(f"Mapa recibido del servidor: {response.map_number}")
+        return response.map_number
+    except grpc.RpcError as e:
+        print(f"Error al obtener el mapa del servidor: {e}")
+        return None
+
+# Obtener el mapa del servidor al inicio del juego
+map_number = get_map_from_server()
+if map_number is not None:
+    print(f"Usando el mapa {map_number} para el juego.")
+else:
+    print("No se pudo obtener el mapa del servidor. Usando el mapa predeterminado.")
+
 # Obtener el estado del juego desde el servidor
 def get_game_state():
     try:

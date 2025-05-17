@@ -10,11 +10,15 @@ import (
 	"google.golang.org/grpc"
 )
 
+// Añadir un contador global para los IDs de los jugadores
+var playerIDCounter int32 = 1
+
 type gameServer struct {
     game.UnimplementedGameServiceServer
     mu      sync.Mutex
     players map[string]*game.PlayerState
     bullets map[string]*game.BulletState // Mapa para almacenar las balas activas
+    mapID   int                          // ID del mapa seleccionado
 }
 
 // Eliminar la lógica de actualización de balas en UpdateState
@@ -90,6 +94,39 @@ func (s *gameServer) GetGameState(ctx context.Context, empty *game.Empty) (*game
 	
     defer s.mu.Unlock()
     return gameState, nil
+}
+
+// Implementar el método SetMap para recibir y almacenar el número del mapa
+func (s *gameServer) SetMap(ctx context.Context, req *game.MapRequest) (*game.Empty, error) {
+    s.mu.Lock()
+    defer s.mu.Unlock()
+
+    s.mapID = int(req.MapNumber)
+    log.Printf("Mapa seleccionado: %d", s.mapID)
+
+    return &game.Empty{}, nil
+}
+
+// Implementar el método GetMap para devolver el número del mapa actual
+func (s *gameServer) GetMap(ctx context.Context, empty *game.Empty) (*game.MapResponse, error) {
+    s.mu.Lock()
+    defer s.mu.Unlock()
+
+    log.Printf("Mapa actual solicitado: %d", s.mapID)
+    return &game.MapResponse{MapNumber: int32(s.mapID)}, nil
+}
+
+// Implementar el método AddPlayer para asignar un ID único a un nuevo jugador
+func (s *gameServer) AddPlayer(ctx context.Context, req *game.PlayerRequest) (*game.PlayerResponse, error) {
+    s.mu.Lock()
+    defer s.mu.Unlock()
+
+    assignedID := playerIDCounter
+    playerIDCounter++
+
+    log.Printf("Jugador agregado: Nombre=%s, ID=%d", req.PlayerName, assignedID)
+
+    return &game.PlayerResponse{PlayerId: assignedID}, nil
 }
 
 func main() {
