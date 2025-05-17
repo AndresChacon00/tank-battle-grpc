@@ -1,6 +1,5 @@
 import pygame
-import math
-import time
+
 
 class Bullet(pygame.sprite.Sprite):
     """Clase para las balas disparadas por el tanque"""

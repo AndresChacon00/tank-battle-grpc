@@ -69,6 +69,11 @@ class GameServiceStub(object):
                 request_serializer=game__pb2.PlayerRequest.SerializeToString,
                 response_deserializer=game__pb2.PlayerResponse.FromString,
                 _registered_method=True)
+        self.GetPlayerList = channel.unary_unary(
+                '/game.GameService/GetPlayerList',
+                request_serializer=game__pb2.Empty.SerializeToString,
+                response_deserializer=game__pb2.PlayerList.FromString,
+                _registered_method=True)
 
 
 class GameServiceServicer(object):
@@ -123,6 +128,13 @@ class GameServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetPlayerList(self, request, context):
+        """Obtener el listado de jugadores
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_GameServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -160,6 +172,11 @@ def add_GameServiceServicer_to_server(servicer, server):
                     servicer.AddPlayer,
                     request_deserializer=game__pb2.PlayerRequest.FromString,
                     response_serializer=game__pb2.PlayerResponse.SerializeToString,
+            ),
+            'GetPlayerList': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetPlayerList,
+                    request_deserializer=game__pb2.Empty.FromString,
+                    response_serializer=game__pb2.PlayerList.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -351,6 +368,33 @@ class GameService(object):
             '/game.GameService/AddPlayer',
             game__pb2.PlayerRequest.SerializeToString,
             game__pb2.PlayerResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetPlayerList(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/game.GameService/GetPlayerList',
+            game__pb2.Empty.SerializeToString,
+            game__pb2.PlayerList.FromString,
             options,
             channel_credentials,
             insecure,

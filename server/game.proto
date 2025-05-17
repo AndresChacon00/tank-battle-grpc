@@ -24,6 +24,9 @@ service GameService {
 
     // Añadir un método para agregar nuevos jugadores
     rpc AddPlayer (PlayerRequest) returns (PlayerResponse);
+
+    // Obtener el listado de jugadores
+    rpc GetPlayerList (Empty) returns (PlayerList);
 }
 // Estado de juego y jugador
 message PlayerState {
@@ -41,6 +44,16 @@ message BulletState {
     float dx = 4;         // Dirección X de la bala
     float dy = 5;         // Dirección Y de la bala
     string owner_id = 6;  // ID del jugador que disparó la bala
+}
+
+// Item de listado de jugadores
+message PlayerListItem {
+    string player_id = 1;
+}
+
+// Listado de jugadores
+message PlayerList {
+    repeated PlayerListItem players = 1;
 }
 
 // Estado del juego

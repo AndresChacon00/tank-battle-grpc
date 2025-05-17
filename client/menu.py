@@ -83,6 +83,7 @@ class MainMenu(Menu):
         if self.game.click_pos is not None:
             if self.start_lobby_button.collidepoint(self.game.click_pos):
                 self.game.playing = False
+                self.game.add_player_to_server("Host")
                 self.game.current_menu = self.game.start_lobby_menu
                 self.run_display = False
             elif self.join_lobby_button.collidepoint(self.game.click_pos):
@@ -132,6 +133,7 @@ class LobbyCreatorMenu(Menu):
             self.game.check_events()
             self.check_input()
             self.game.screen.fill(Colors.PALE_YELLOW)
+            player_list = self.game.get_player_list()
             # Logo en la esquina
             self.game.screen.blit(self.logo_small, self.logo_rect)
             # Mostrar la IP local
@@ -143,14 +145,17 @@ class LobbyCreatorMenu(Menu):
                 color=Colors.BLACK,
             )
             # Mostrar lista de jugadores
-            for idx, player in enumerate(self.players):
-                self.game.draw_text(
-                    f"{player}",
-                    24,
-                    self.mid_w,
-                    self.mid_h - 60 + idx * 30,
-                    color=Colors.BLACK,
-                )
+            if player_list is not None:
+                for player in player_list.players:
+                    print(str(player))
+                    self.game.draw_text(
+                        f"Jugador {player.player_id}",
+                        24,
+                        self.mid_w,
+                        self.mid_h - 60 + int(player.player_id) * 30,
+                        color=Colors.BLACK,
+                    )
+
             # Botones
             pygame.draw.rect(self.game.screen, Colors.BLACK, self.play_button, 2)
             self.game.draw_text(
@@ -248,6 +253,7 @@ class InputLobbyIPMenu(Menu):
             # Botón Unirse
             if self.join_button.collidepoint(self.game.click_pos):
                 self.game.server_ip = self.input_box_component.text
+                self.game.add_player_to_server("Otro")
                 self.run_display = False
                 self.game.current_menu = self.game.lobby_joiner_menu
             # Botón Volver
@@ -275,6 +281,7 @@ class LobbyJoinerMenu(Menu):
         self.run_display = True
         while self.run_display:
             self.game.check_events()
+            player_list = self.game.get_player_list()
             self.check_input()
             self.game.screen.fill(Colors.PALE_YELLOW)
             # Logo en la esquina
@@ -288,14 +295,16 @@ class LobbyJoinerMenu(Menu):
                 color=Colors.BLACK,
             )
             # Mostrar lista de jugadores
-            for idx, player in enumerate(self.players):
-                self.game.draw_text(
-                    f"{player}",
-                    24,
-                    self.mid_w,
-                    self.mid_h - 60 + idx * 30,
-                    color=Colors.BLACK,
-                )
+            if player_list is not None:
+                for player in player_list.players:
+                    self.game.draw_text(
+                        f"Jugador {player.player_id}",
+                        24,
+                        self.mid_w,
+                        self.mid_h - 60 + int(player.player_id) * 30,
+                        color=Colors.BLACK,
+                    )
+
             # Botones
             pygame.draw.rect(self.game.screen, Colors.BLACK, self.quit_button, 2)
             self.game.draw_text(

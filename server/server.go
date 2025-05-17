@@ -1,13 +1,14 @@
 package main
 
 import (
-	"context"
-	"log"
-	"net"
-	"sync"
-	"tank-battle-grpc/game"
+    "context"
+    "fmt"
+    "log"
+    "net"
+    "sync"
+    "tank-battle-grpc/game"
 
-	"google.golang.org/grpc"
+    "google.golang.org/grpc"
 )
 
 // Añadir un contador global para los IDs de los jugadores
@@ -28,9 +29,9 @@ func (s *gameServer) UpdateState(ctx context.Context, state *game.PlayerState) (
     // Actualizar el estado del jugador
     s.players[state.PlayerId] = state
 
-    // Eliminar balas que salgan de los límites del mapa (ejemplo: 800x600)
+    // Eliminar balas que salgan de los límites del mapa
     for id, bullet := range s.bullets {
-        if bullet.X < 0 || bullet.X > 800 || bullet.Y < 0 || bullet.Y > 600 {
+        if bullet.X < 0 || bullet.X > 720 || bullet.Y < 0 || bullet.Y > 1200 {
             log.Printf("Eliminando bala fuera de límites: ID=%s, Posición=(%f, %f)", id, bullet.X, bullet.Y)
             delete(s.bullets, id)
         }
@@ -123,10 +124,29 @@ func (s *gameServer) AddPlayer(ctx context.Context, req *game.PlayerRequest) (*g
 
     assignedID := playerIDCounter
     playerIDCounter++
+    player := &game.PlayerState{
+        PlayerId:   fmt.Sprintf("%d", assignedID),
+    }
+    s.players[req.PlayerName] = player
 
     log.Printf("Jugador agregado: Nombre=%s, ID=%d", req.PlayerName, assignedID)
 
     return &game.PlayerResponse{PlayerId: assignedID}, nil
+}
+
+func (s *gameServer) GetPlayerList(ctx context.Context, req *game.Empty) (*game.PlayerList, error) {
+    s.mu.Lock()
+    defer s.mu.Unlock()
+
+    playerList := &game.PlayerList{}
+    for _, player := range s.players {
+        playerList.Players = append(playerList.Players, &game.PlayerListItem{
+            PlayerId:   player.PlayerId,
+        })
+    }
+
+    log.Printf("Lista de jugadores solicitada: %d jugadores activos", len(playerList.Players))
+    return playerList, nil
 }
 
 func main() {

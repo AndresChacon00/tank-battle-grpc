@@ -11,7 +11,7 @@ from game.game_pb2 import (
     MapRequest,
     PlayerRequest,
 )
-from tank import Tank, TankCannon, Track
+from tank import Tank, TankCannon
 from colors import Colors
 from config import Config
 from menu import MainMenu, Menu, LobbyCreatorMenu, InputLobbyIPMenu, LobbyJoinerMenu
@@ -60,13 +60,11 @@ class Game:
         self.tank_sprites = pygame.sprite.Group()
         self.tank_sprites.add(self.tank)
         self.tank_sprites.add(self.cannon)
-        self.previous_tank_position = self.tank.rect.center
         self.player_id = None
         self.player_name = "Jugador 0"
 
         self.explosions_group = pygame.sprite.Group()
         self.bullets_group = pygame.sprite.Group()
-        self.tracks_group = pygame.sprite.Group()
 
         self.map = Map(1, MAP_1_LAYOUT)
         self.blocks = self.map.generate_map()
@@ -92,11 +90,6 @@ class Game:
             self.tank_sprites.draw(self.screen)
             self.bullets_group.draw(self.screen)
             self.explosions_group.draw(self.screen)
-            if self.tank.rect.center != self.previous_tank_position:
-                # Dejar rastro
-                track = Track(self.previous_tank_position)
-                self.tracks_group.add(track)
-                self.previous_tank_position = self.tank.rect.center
             # Dibujar mira
             mouse_pos = pygame.mouse.get_pos()
             pygame.draw.circle(self.screen, Colors.RED, mouse_pos, 5)
@@ -193,19 +186,19 @@ class Game:
         text_rect = text_surface.get_rect(center=(x, y))
         self.screen.blit(text_surface, text_rect)
 
-    def add_player_to_server(self, player_name):
+    def add_player_to_server(self, player_name: str):
         """Agregar jugador al servidor"""
         try:
             response = self.client.AddPlayer(PlayerRequest(player_name=player_name))
             print(f"Jugador añadido: Nombre={player_name}, ID={response.player_id}")
-            self.player_id = response.player_id
+            self.player_id = str(response.player_id)
             self.player_name = f"Jugador {self.player_id}"
-            return response.player_id
+            return str(response.player_id)
         except grpc.RpcError as e:
             print(f"Error al añadir el jugador al servidor: {e}")
             return None
 
-    def send_map_to_server(self, map_id):
+    def send_map_to_server(self, map_id: int):
         try:
             self.client.SetMap(
                 MapRequest(map_number=map_id)
@@ -252,3 +245,19 @@ class Game:
             self.client.UpdateState(player_state)
         except grpc.RpcError as e:
             print(f"Error al enviar el estado del jugador: {e}")
+
+    def get_game_state(self):
+        """Obtener el estado del juego desde el servidor"""
+        try:
+            return self.client.GetGameState(Empty())
+        except grpc.RpcError as e:
+            print(f"Error al obtener el estado del juego: {e}")
+            return None
+        
+    def get_player_list(self):
+        """Obtener la lista de jugadores desde el servidor"""
+        try:
+            return self.client.GetPlayerList(Empty())
+        except grpc.RpcError as e:
+            print(f"Error al obtener la lista de jugadores: {e}")
+            return None
