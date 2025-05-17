@@ -5,8 +5,10 @@ import time
 class Bullet(pygame.sprite.Sprite):
     """Clase para las balas disparadas por el tanque"""
 
-    def __init__(self, position, direction):
+    def __init__(self, position, direction, tank_id, damage = 10):
         super().__init__()
+        self.tank_id = tank_id
+        self.damage = damage
         self.image = pygame.image.load(
             "assets/Retina/bulletBlue1_outline.png"
         ).convert_alpha()  # Asegúrate de que el archivo esté en el mismo directorio

@@ -22,14 +22,11 @@ clock = pygame.time.Clock()
 pygame.mouse.set_visible(False)
 
 # Crear tanque y cañón
-tank = Tank()
-cannon = TankCannon(tank)
+
 
 tank_sprites = pygame.sprite.Group()
-tank_sprites.add(tank)
-tank_sprites.add(cannon)
 
-previous_tank_position = tank.rect.center
+
 
 # Crear un grupo para los rastros del tanque
 tracks_group = pygame.sprite.Group()
@@ -57,7 +54,7 @@ blocks = map.generate_map()
 bullets_group = pygame.sprite.Group()
 
 # Longitud fija del cañón (ajusta este valor según el diseño de tu tanque)
-cannon_length = cannon.rect.height
+
 
 # Cosas del servidor
 # Establecer conexion gRPC
@@ -125,7 +122,7 @@ while running:
     # Crear tanque y cañón basado en el estado del juego
     tank_sprites = pygame.sprite.Group()
     for player in game_state.players:
-        tank = Tank()
+        tank = Tank(player.player_id, player.health)
         tank.rect.center = (player.x, player.y)
         tank.angle = player.angle  # Suponiendo que el tanque tiene un atributo 'angle'
         # Rotar la imagen del tanque y mantener el centro
@@ -155,7 +152,7 @@ while running:
         print(len(game_state.bullets))
         if bullet_state.bullet_id not in existing_bullets and bullet_state.bullet_id not in processed_bullet_ids:
             # Crear una nueva bala si no existe y no ha sido procesada
-            bullet = Bullet((bullet_state.x, bullet_state.y), (bullet_state.dx, bullet_state.dy))
+            bullet = Bullet((bullet_state.x, bullet_state.y), (bullet_state.dx, bullet_state.dy),PLAYER_ID)
             bullet.bullet_id = bullet_state.bullet_id  # Asignar el bullet_id
             bullets_group.add(bullet)
             processed_bullet_ids.add(bullet_state.bullet_id)

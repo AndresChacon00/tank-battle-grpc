@@ -67,6 +67,7 @@ func (s *gameServer) AddBullet(ctx context.Context, bullet *game.BulletState) (*
             Dx:      bullet.Dx,
             Dy:      bullet.Dy,
             OwnerId: bullet.OwnerId,
+            Damage:  bullet.Damage, // Agregar el daño de la bala
         }
         log.Printf("Bala registrada correctamente: ID=%s, Total de balas activas: %d", bullet.BulletId, len(s.bullets))
     }

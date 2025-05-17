@@ -21,7 +21,7 @@ clock = pygame.time.Clock()
 pygame.mouse.set_visible(False)
 
 # Crear tanque y cañón
-tank = Tank()
+tank = Tank(tank_id="1")
 cannon = TankCannon(tank)
 
 tank_sprites = pygame.sprite.Group()
@@ -98,6 +98,7 @@ def send_bullet(bullet):
         dx=bullet.direction[0],
         dy=bullet.direction[1],
         owner_id=str(PLAYER_ID),  # ID del jugador que disparó la bala
+        damage=bullet.damage,  # Agregar el daño de la bala
     )
     try:
         client.AddBullet(bullet_state)  # Llamar al método AddBullet en el servidor
@@ -111,6 +112,7 @@ def send_player_state(tank):
         x=float(tank.rect.centerx),  # Asegurar que sea float
         y=float(tank.rect.centery),  # Asegurar que sea float
         angle=float(tank.angle),  # Asegurar que sea float
+        health=float(tank.health),  # Agregar la vida del jugador
     )
 
     # Enviar el estado del jugador al servidor
@@ -145,7 +147,7 @@ while running:
             bullet_start_pos = (bullet_start_x, bullet_start_y)
 
             # Crear una bala con la rotación del cañón
-            bullet = Bullet(bullet_start_pos, direction)
+            bullet = Bullet(bullet_start_pos, direction, PLAYER_ID)
             bullet.image = pygame.transform.rotate(bullet.image, cannon_angle - 90)  # Rotar la bala
             bullets_group.add(bullet)
 

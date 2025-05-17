@@ -7,8 +7,10 @@ from config import Config
 class Tank(pygame.sprite.Sprite):
     """Tank body class"""
 
-    def __init__(self):
+    def __init__(self, tank_id, health=100):
         super().__init__()
+        self.tank_id = tank_id
+        self.health = health
         self.original_image = pygame.image.load(
             "assets/Retina/tankBody_blue_outline.png"
         ).convert_alpha()  # Imagen original
