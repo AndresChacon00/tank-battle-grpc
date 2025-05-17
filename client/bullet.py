@@ -1,21 +1,23 @@
 import pygame
 import math
 from muzzleFlash import MuzzleFlash
+from tank import Tank
 
 class Bullet(pygame.sprite.Sprite):
     """Clase para las balas disparadas por el tanque"""
 
-    def __init__(self, position, direction, collision_group, muzzle_flash_group):
+    def __init__(self, position, direction, collision_group, muzzle_flash_group, tank_id, damage=10):
         super().__init__()
-        self.original_image = pygame.image.load(
-            "assets/Retina/bulletBlue1_outline.png"
-        ).convert_alpha()  # Imagen original sin rotar
+        self.tank_id = tank_id  # ID del tanque que disparó la bala
+        self.damage = damage  # Daño que inflige la bala
+        self.original_image = self.get_bullet_image()  # Imagen basada en el ID del tanque
         self.image = self.original_image
         self.rect = self.image.get_rect(center=position)
         self.speed = 5
         self.direction = list(direction)  # Convertir la dirección a una lista
         self.collision_group = collision_group  # Grupo de bloques con los que la bala puede colisionar
         self.bounces = 1  # Número de rebotes permitidos
+        self.spawn_time = pygame.time.get_ticks()  # Tiempo de creación de la bala
 
         # Ajustar la posición del MuzzleFlash
         muzzle_offset_x = direction[0] * 20  # Ajusta este valor según el diseño
@@ -49,6 +51,22 @@ class Bullet(pygame.sprite.Sprite):
                 # Si no quedan rebotes, eliminar la bala
                 self.kill()
 
+        # Detectar colisiones con tanques
+        current_time = pygame.time.get_ticks()
+        for tank in [sprite for sprite in self.collision_group if isinstance(sprite, Tank)]:
+            if self.rect.colliderect(tank.rect):
+                if tank.tank_id == self.tank_id:
+                    # Si es el tanque que disparó, esperar 1 segundo antes de destruirlo
+                    if current_time - self.spawn_time > 1000:  # 1000 ms = 1 segundo
+                        tank.is_destroyed = True  # Marcar el tanque como destruido
+                        tank.kill()  # Eliminar el tanque
+                        self.kill()  # Eliminar la bala
+                else:
+                    # Si es un tanque enemigo, destruirlo inmediatamente
+                    tank.is_destroyed = True
+                    tank.kill()
+                    self.kill()
+
         # Detectar colisiones con los límites de la pantalla
         screen_width = pygame.display.get_surface().get_width()
         screen_height = pygame.display.get_surface().get_height()
@@ -75,6 +93,15 @@ class Bullet(pygame.sprite.Sprite):
         angle = math.degrees(math.atan2(-self.direction[1], self.direction[0])) - 90
         self.image = pygame.transform.rotate(self.original_image, angle)
         self.rect = self.image.get_rect(center=self.rect.center)
+
+    def get_bullet_image(self):
+        """Devuelve la imagen de la bala según el ID del tanque"""
+        if self.tank_id == 1:
+            return pygame.image.load("assets/Retina/bulletBlue1_outline.png").convert_alpha()
+        elif self.tank_id == 2:
+            return pygame.image.load("assets/Retina/bulletRed1_outline.png").convert_alpha()
+        else:
+            return pygame.image.load("assets/Retina/bulletGreen1_outline.png").convert_alpha()
 
 
 class MuzzleFlash(pygame.sprite.Sprite):

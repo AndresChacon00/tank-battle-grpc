@@ -1,5 +1,5 @@
 import pygame, math
-from tank import Tank, TankCannon, Track, EnemyTank
+from tank import Tank, TankCannon, Track
 from colors import Colors
 from config import Config
 from blocks import BlockTypes
@@ -15,21 +15,26 @@ clock = pygame.time.Clock()
 # Ocultar el cursor del mouse
 pygame.mouse.set_visible(False)
 
-# Crear tanque y cañón
-tank = Tank()
-cannon = TankCannon(tank)
+# Crear tanque del jugador
+player_tank = Tank(tank_id=1, x=100, y=300, color="blue")
+player_cannon = TankCannon(player_tank)  # Ajustar el cañón para que el eje esté en la parte trasera
+player_tank.set_cannon(player_cannon)
 
-# Crear tanque enemigo
-enemy_tank = EnemyTank(Config.WIDTH // 2, Config.HEIGHT // 2)  # Posición inicial del tanque enemigo
-enemy_cannon = TankCannon(enemy_tank)
+# Crear tanques de otros jugadores
+other_tanks = []
+for i in range(2, 5):  # Simular 3 jugadores adicionales con IDs 2, 3 y 4
+    other_tank = Tank(tank_id=i, x=100 * i, y=200, color="red")
+    other_cannon = TankCannon(other_tank)  # Ajustar el cañón de los otros tanques
+    other_tank.set_cannon(other_cannon)
+    other_tanks.append((other_tank, other_cannon))
 
+# Grupos de sprites
 tank_sprites = pygame.sprite.Group()
-tank_sprites.add(tank)
-tank_sprites.add(cannon)
-tank_sprites.add(enemy_tank)  # Agregar el tanque enemigo al grupo
-tank_sprites.add(enemy_cannon)  # Agregar el cañón del tanque enemigo al grupo
-
-previous_tank_position = tank.rect.center
+tank_sprites.add(player_tank)
+tank_sprites.add(player_cannon)
+for tank, cannon in other_tanks:
+    tank_sprites.add(tank)
+    tank_sprites.add(cannon)
 
 # Crear un grupo para los rastros del tanque
 tracks_group = pygame.sprite.Group()
@@ -57,7 +62,7 @@ blocks = map.generate_map()
 bullets_group = pygame.sprite.Group()
 
 # Longitud fija del cañón (ajusta este valor según el diseño de tu tanque)
-cannon_length = cannon.rect.height + 1
+cannon_length = player_cannon.rect.height
 
 running = True
 while running:
@@ -67,41 +72,63 @@ while running:
             running = False
         # Detectar clic izquierdo para disparar
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Clic izquierdo
-            mouse_pos = pygame.mouse.get_pos()
-            tank_pos = tank.rect.center  # Centro del tanque
+            if not player_tank.is_destroyed:  # Solo permitir disparar si el tanque no está destruido
+                mouse_pos = pygame.mouse.get_pos()
+                tank_pos = player_tank.rect.center  # Centro del tanque
 
-            # Calcular el ángulo del cañón en relación al mouse
-            dx, dy = mouse_pos[0] - tank_pos[0], mouse_pos[1] - tank_pos[1]
-            cannon_angle = math.degrees(math.atan2(-dy, dx))  # Invertir dy para corregir el eje Y
+                # Calcular el ángulo del cañón en relación al mouse
+                dx, dy = mouse_pos[0] - tank_pos[0], mouse_pos[1] - tank_pos[1]
+                cannon_angle = math.degrees(math.atan2(-dy, dx))  # Invertir dy para corregir el eje Y
 
-            # Calcular la dirección normalizada
-            distance = math.hypot(dx, dy)
-            direction = (dx / distance, dy / distance)  # Vector unitario
+                # Calcular la dirección normalizada
+                distance = math.hypot(dx, dy)
+                direction = (dx / distance, dy / distance)  # Vector unitario
 
-            # Calcular la posición inicial de la bala (alrededor de un círculo)
-            circle_radius = cannon_length   #Radio del círculo alrededor del tanque
-            rad_angle = math.radians(cannon_angle)  # Convertir el ángulo del cañón a radianes
-            bullet_start_x = tank.rect.centerx + circle_radius * math.cos(rad_angle)
-            bullet_start_y = tank.rect.centery - circle_radius * math.sin(rad_angle)
-            bullet_start_pos = (bullet_start_x, bullet_start_y)
+                # Calcular la posición inicial de la bala (alrededor de un círculo)
+                circle_radius = cannon_length  # Radio del círculo alrededor del tanque
+                rad_angle = math.radians(cannon_angle)  # Convertir el ángulo del cañón a radianes
+                bullet_start_x = player_tank.rect.centerx + circle_radius * math.cos(rad_angle)
+                bullet_start_y = player_tank.rect.centery - circle_radius * math.sin(rad_angle)
+                bullet_start_pos = (bullet_start_x, bullet_start_y)
 
-            # Crear una bala con la rotación del cañón            
-            bullet = Bullet(bullet_start_pos, direction, blocks, explosions_group)  # Pasar el grupo de explosiones
-            bullet.image = pygame.transform.rotate(bullet.image, cannon_angle)  # Rotar la bala
-            bullets_group.add(bullet)
+                # Crear una bala con la rotación del cañón
+                # Crear una bala con la rotación del cañón
+                bullet = Bullet(
+                    bullet_start_pos,
+                    direction,
+                    blocks,
+                    explosions_group,
+                    tank_id=player_tank.tank_id,
+                    damage=15  # Daño personalizado para esta bala
+                )
+                bullet.image = pygame.transform.rotate(bullet.image, cannon_angle)  # Rotar la bala
+                bullets_group.add(bullet)
 
-    # Detectar si el tanque se ha movido
-    if tank.rect.center != previous_tank_position:
-        # Crear un rastro en la posición anterior del tanque
-        track = Track(previous_tank_position)
-        tracks_group.add(track)
-        # Actualizar la posición anterior del tanque
-        previous_tank_position = tank.rect.center
+    # Controlar el tanque del jugador local
+    keystate = pygame.key.get_pressed()
+    player_tank.handle_movement(keystate)
+    player_tank.update(blocks, bullets_group)
+    player_cannon.handle_rotation()  # Rotar hacia el mouse
+    player_cannon.update()
 
-    # Actualizar los tanques y cañones
-    tank.update(blocks, bullets_group)
-    cannon.update()
-    enemy_tank.update(blocks, bullets_group)  # Pasar el grupo de balas al tanque enemigo
+    # Controlar otros tanques
+    for i, (tank, cannon) in enumerate(other_tanks):
+        if i == 0:  # Ejemplo: mover el primer tanque con las flechas
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_LEFT]:
+                tank.speed_x = -tank.max_speed
+            if keys[pygame.K_RIGHT]:
+                tank.speed_x = tank.max_speed
+            if keys[pygame.K_UP]:
+                tank.speed_y = -tank.max_speed
+            if keys[pygame.K_DOWN]:
+                tank.speed_y = tank.max_speed
+        else:
+            # Rotar el cañón automáticamente
+            cannon.handle_rotation(target_angle=(pygame.time.get_ticks() % 360))
+
+        tank.update(blocks, bullets_group)
+        cannon.update()
 
     # Actualizar las balas
     bullets_group.update()
@@ -139,6 +166,10 @@ while running:
         (mouse_pos[0], mouse_pos[1] + 15),
         2,
     )  # Línea vertical
+
+    # Dibujar la vida de los tanques
+    for tank in [player_tank] + [t[0] for t in other_tanks]:
+        tank.draw_health(screen)
 
     # Actualizar la pantalla
     pygame.display.flip()
