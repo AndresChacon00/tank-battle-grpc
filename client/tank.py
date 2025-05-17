@@ -47,6 +47,40 @@ class Tank(pygame.sprite.Sprite):
         """Asociar un cañón al tanque"""
         self.cannon = cannon
 
+    def handle_joystick(self, joystick):
+        """Manejar el movimiento del tanque y la rotación del cañón con un joystick"""
+        if joystick:
+            # Movimiento del tanque (joystick izquierdo)
+            move_x = joystick.get_axis(0)  # Eje X del joystick izquierdo
+            move_y = joystick.get_axis(1)  # Eje Y del joystick izquierdo
+            self.speed_x = move_x * self.max_speed
+            self.speed_y = move_y * self.max_speed
+
+            # Calcular el ángulo objetivo basado en el joystick
+            if abs(move_x) > 0.1 or abs(move_y) > 0.1:  # Evitar ruido en el joystick
+                self.target_angle = math.degrees(math.atan2(-move_y, move_x)) + 90  # Invertir Y para corregir el eje
+                self.target_angle %= 360  # Asegurarse de que el ángulo esté en el rango [0, 360]
+
+            # Rotación gradual hacia el ángulo objetivo
+            rotation_speed = 5  # Velocidad de rotación (grados por frame)
+            angle_difference = (self.target_angle - self.angle + 360) % 360
+
+            # Determinar la dirección de rotación más corta
+            if angle_difference > 180:
+                # Rotar en sentido antihorario
+                self.angle -= rotation_speed
+                if self.angle < 0:
+                    self.angle += 360  # Mantener el ángulo en el rango [0, 360]
+            else:
+                # Rotar en sentido horario
+                self.angle += rotation_speed
+                if self.angle >= 360:
+                    self.angle -= 360  # Mantener el ángulo en el rango [0, 360]
+
+            # Asegurarse de no sobrepasar el ángulo objetivo
+            if abs(angle_difference) < rotation_speed:
+                self.angle = self.target_angle
+
     def handle_movement(self, keys):
         """Manejar el movimiento del tanque basado en las teclas presionadas"""
         self.speed_x = 0
@@ -106,7 +140,7 @@ class Tank(pygame.sprite.Sprite):
         if abs(angle_difference) < rotation_speed:
             self.angle = self.target_angle
 
-    def update(self, blocks: pygame.sprite.Group, bullets_group: pygame.sprite.Group):
+    def update(self, blocks: pygame.sprite.Group, bullets_group: pygame.sprite.Group, other_tanks: list):
         """Actualizar el estado del tanque"""
         if self.is_destroyed:
             return
@@ -120,6 +154,9 @@ class Tank(pygame.sprite.Sprite):
         if any(block.solid for block in colliding_blocks):
             self.rect.x -= self.speed_x
             self.rect.y -= self.speed_y
+
+        # Detectar colisiones con otros tanques
+        self.handle_tank_collision(other_tanks)
 
         # Rotar la imagen del tanque
         self.image = pygame.transform.rotate(self.original_image, self.angle)
@@ -145,7 +182,7 @@ class Tank(pygame.sprite.Sprite):
 
         for bullet in colliding_bullets:
             # Ignorar colisión si la bala fue disparada por este tanque y tiene menos de 1 segundo
-            if bullet.tank_id == self.tank_id and current_time - bullet.spawn_time < 75:
+            if bullet.tank_id == self.tank_id and current_time - bullet.spawn_time < 250:
                 continue
 
             # Aplicar daño
@@ -155,7 +192,16 @@ class Tank(pygame.sprite.Sprite):
                 self.is_destroyed = True
                 if self.cannon:
                     self.cannon.kill()
-                self.kill()                  
+                self.kill()
+    
+    def handle_tank_collision(self, other_tanks):
+        """Manejar colisiones con otros tanques"""
+        for other_tank in other_tanks:
+            if other_tank != self and not other_tank.is_destroyed and self.rect.colliderect(other_tank.rect):
+                # Revertir el movimiento si hay colisión
+                self.rect.x -= self.speed_x
+                self.rect.y -= self.speed_y
+                break  # Salir del bucle después de manejar la colisión
 
     def draw_health(self, screen):
         """Dibujar la vida del tanque encima de él"""
@@ -195,6 +241,16 @@ class TankCannon(pygame.sprite.Sprite):
             mouse_x, mouse_y = pygame.mouse.get_pos()
             rel_x, rel_y = mouse_x - self.tank.rect.centerx, mouse_y - self.tank.rect.centery
             self.angle = math.degrees(math.atan2(-rel_y, rel_x)) + 90
+
+    def handle_rotation_joystick(self, joystick):
+        """Manejar la rotación del cañón usando el joystick derecho"""
+        aim_x = joystick.get_axis(2)  # Eje X del joystick derecho
+        aim_y = joystick.get_axis(3)  # Eje Y del joystick derecho
+
+        # Evitar ruido en el joystick
+        if abs(aim_x) > 0.1 or abs(aim_y) > 0.1:
+            self.angle = math.degrees(math.atan2(-aim_y, aim_x)) + 90 # Calcular el ángulo del cañón
+
 
     def update(self):
         """Actualizar la posición y rotación del cañón"""

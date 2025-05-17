@@ -64,13 +64,24 @@ bullets_group = pygame.sprite.Group()
 # Longitud fija del cañón (ajusta este valor según el diseño de tu tanque)
 cannon_length = player_cannon.rect.height
 
+# Detectar y conectar el joystick
+joystick = None
+if pygame.joystick.get_count() > 0:
+    joystick = pygame.joystick.Joystick(0)
+    joystick.init()
+    print(f"Joystick conectado: {joystick.get_name()}")
+
+# Variable para rastrear el estado del botón R2
+r2_pressed = False
+
+# Bucle principal del juego
 running = True
 while running:
     clock.tick(60)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        # Detectar clic izquierdo para disparar
+# Detectar clic izquierdo para disparar
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Clic izquierdo
             if not player_tank.is_destroyed:  # Solo permitir disparar si el tanque no está destruido
                 mouse_pos = pygame.mouse.get_pos()
@@ -104,11 +115,46 @@ while running:
                 bullet.image = pygame.transform.rotate(bullet.image, cannon_angle)  # Rotar la bala
                 bullets_group.add(bullet)
 
+    # Detectar disparo con el botón R2 del joystick
+    if joystick:
+        current_r2_state = joystick.get_button(10)  # Cambia el índice si es necesario
+        if current_r2_state and not r2_pressed:  # Detectar el cambio de estado (de no presionado a presionado)
+            print("Botón R2 presionado")
+            if not player_tank.is_destroyed:  # Solo permitir disparar si el tanque no está destruido
+                # Calcular la dirección del cañón
+                cannon_angle = player_cannon.angle - 90
+                rad_angle = math.radians(cannon_angle)
+                direction = (math.cos(rad_angle), -math.sin(rad_angle))  # Vector unitario
+
+                # Calcular la posición inicial de la bala
+                bullet_start_x = player_tank.rect.centerx + cannon_length * direction[0]
+                bullet_start_y = player_tank.rect.centery + cannon_length * direction[1]
+                bullet_start_pos = (bullet_start_x, bullet_start_y)
+
+                # Crear una bala con la rotación del cañón
+                bullet = Bullet(
+                    bullet_start_pos,
+                    direction,
+                    blocks,
+                    explosions_group,
+                    tank_id=player_tank.tank_id,
+                    damage=15  # Daño personalizado para esta bala
+                )
+                bullet.image = pygame.transform.rotate(bullet.image, cannon_angle)  # Rotar la bala
+                bullets_group.add(bullet)
+
+        # Actualizar el estado del botón R2
+        r2_pressed = current_r2_state
+
     # Controlar el tanque del jugador local
     keystate = pygame.key.get_pressed()
     player_tank.handle_movement(keystate)
-    player_tank.update(blocks, bullets_group)
+    player_tank.handle_joystick(joystick)
+    # Actualizar el tanque del jugador local
+    player_tank.update(blocks, bullets_group, [tank for tank, _ in other_tanks])
+       
     player_cannon.handle_rotation()  # Rotar hacia el mouse
+    player_cannon.handle_rotation_joystick(joystick)  # Controlar el cañón con el joystick
     player_cannon.update()
 
     # Controlar otros tanques
@@ -127,7 +173,7 @@ while running:
             # Rotar el cañón automáticamente
             cannon.handle_rotation(target_angle=(pygame.time.get_ticks() % 360))
 
-        tank.update(blocks, bullets_group)
+        tank.update(blocks, bullets_group, [player_tank] + [t for t, _ in other_tanks if t != tank])
         cannon.update()
 
     # Actualizar las balas
