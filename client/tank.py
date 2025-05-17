@@ -23,6 +23,8 @@ class Tank(pygame.sprite.Sprite):
         self.angle = 0
         self.target_angle = 0  # Nuevo: Ángulo objetivo
 
+        self.font = pygame.font.Font(None, 24)
+
     def update(self, blocks: pygame.sprite.Group):
         self.speed_x = 0
         self.speed_y = 0
@@ -113,6 +115,33 @@ class Tank(pygame.sprite.Sprite):
             self.rect.top = 0
 
 
+
+    def handle_bullet_collision(self, bullets_group):
+        """Manejar colisiones con balas"""
+        colliding_bullets = pygame.sprite.spritecollide(self, bullets_group, False)
+
+        for bullet in colliding_bullets:
+            # Ignorar colisión si la bala fue disparada por este tanque y tiene menos de 1 segundo
+            print("BAla impacto")
+            if bullet.tank_id == self.tank_id:
+                print("mismoid")
+                continue
+
+            # Aplicar daño
+            self.health -= bullet.damage
+            
+           # bullet.kill()
+            if self.health <= 0:
+                print("murio")
+            #    self.kill()  
+
+    def draw_health(self, screen):
+            """Dibujar la vida del tanque encima de él"""
+            
+            life_text = self.font.render(f"{self.health}", True, (255, 0, 0))
+            text_rect = life_text.get_rect(center=(self.rect.centerx, self.rect.top - 10))
+            screen.blit(life_text, text_rect)
+
 class TankCannon(pygame.sprite.Sprite):
     """Cannon attached to a tank body"""
 
@@ -170,3 +199,4 @@ class Track(pygame.sprite.Sprite):
         # Eliminar el rastro después de 2 segundos
         if time.time() - self.spawn_time > 2:
             self.kill()
+

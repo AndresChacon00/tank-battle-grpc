@@ -21,7 +21,7 @@ clock = pygame.time.Clock()
 pygame.mouse.set_visible(False)
 
 # Crear tanque y cañón
-tank = Tank(tank_id="1")
+tank = Tank(tank_id="2")
 cannon = TankCannon(tank)
 
 tank_sprites = pygame.sprite.Group()

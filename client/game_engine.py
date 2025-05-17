@@ -4,6 +4,7 @@ from game.game_pb2 import Empty
 from game.game_pb2_grpc import GameServiceStub
 from game.game_pb2 import PlayerState
 from game.game_pb2_grpc import GameServiceStub
+from game.game_pb2 import BulletRemoveRequest
 from tank import Tank, TankCannon, Track
 from colors import Colors
 from config import Config
@@ -67,10 +68,11 @@ PLAYER_ID = "player2"
 # Función para enviar el estado del jugador al servidor
 def send_player_state(tank):
     player_state = PlayerState(
-        player_id=PLAYER_ID,
-        x=tank.rect.centerx,
-        y=tank.rect.centery,
-        angle=tank.angle,  # Suponiendo que el tanque tiene un atributo 'angle'
+        player_id=str(tank.tank_id),  # Convertir a string
+        x=float(tank.rect.centerx),  # Asegurar que sea float
+        y=float(tank.rect.centery),  # Asegurar que sea float
+        angle=float(tank.angle),  # Asegurar que sea float
+        health=float(tank.health),  # Agregar la vida del jugador
     )
     try:
         client.UpdateState(player_state)
@@ -102,6 +104,25 @@ def get_game_state():
         print(f"Error al obtener el estado del juego: {e}")
         return None
 
+# Manejar colisiones de balas con tanques
+def handle_bullet_collision(tank, bullets_group):
+    """Manejar colisiones con balas"""
+    colliding_bullets = pygame.sprite.spritecollide(tank, bullets_group, False)
+
+    for bullet in colliding_bullets:
+        # Ignorar colisión si la bala fue disparada por este tanque y tiene menos de 1 segundo
+        print("BAla impacto")
+        if bullet.tank_id == tank.tank_id:
+            print("mismoid")
+            continue
+        #eliminar bala del servidor
+        client.RemoveBullet(BulletRemoveRequest(bullet_id=bullet.bullet_id))
+        # Aplicar daño
+        tank.health -= bullet.damage
+
+        if tank.health <= 0:
+            print("murio")
+
 # Obtener el estado del juego desde el servidor y reconstruir la pantalla
 running = True
 while running:
@@ -130,7 +151,7 @@ while running:
         tank.image = pygame.transform.rotate(tank.original_image, player.angle)
         tank.rect = tank.image.get_rect(center=original_center)
         tank_sprites.add(tank)
-
+        tank.draw_health(screen)
     # Dibujar los tanques
     tank_sprites.draw(screen)
 
@@ -149,7 +170,7 @@ while running:
 
     # Procesar el evento de disparo recibido del servidor
     for bullet_state in game_state.bullets:
-        print(len(game_state.bullets))
+       
         if bullet_state.bullet_id not in existing_bullets and bullet_state.bullet_id not in processed_bullet_ids:
             # Crear una nueva bala si no existe y no ha sido procesada
             bullet = Bullet((bullet_state.x, bullet_state.y), (bullet_state.dx, bullet_state.dy),PLAYER_ID)
@@ -173,6 +194,10 @@ while running:
             except grpc.RpcError as e:
                 print(f"Error al eliminar la bala del servidor: {e}")
             bullet.kill()
+    # Manejar colisiones de balas con tanques
+    for tank in tank_sprites:
+        handle_bullet_collision(tank, bullets_group)
+        send_player_state(tank)
 
     # Actualizar las balas existentes usando su método update
     bullets_group.update()
@@ -180,6 +205,6 @@ while running:
     # Dibujar las balas
     bullets_group.draw(screen)
 
-    pygame.display.flip()
+    pygame.display.update()
 
 pygame.quit()
