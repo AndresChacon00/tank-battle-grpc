@@ -168,6 +168,7 @@ class LobbyCreatorMenu(Menu):
         """Actúa según la entrada del usuario"""
         if self.game.click_pos is not None:
             if self.play_button.collidepoint(self.game.click_pos):
+                self.game.join_server()
                 self.game.playing = True
                 self.run_display = False
 
