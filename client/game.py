@@ -1,5 +1,12 @@
 import pygame
 import math
+import grpc 
+import uuid
+from game.game_pb2 import Empty
+from game.game_pb2_grpc import GameServiceStub
+from game.game_pb2 import PlayerState, BulletState
+from game.game_pb2_grpc import GameServiceStub
+from tank import Tank, TankCannon, Track
 from colors import Colors
 from config import Config
 from menu import MainMenu, Menu, LobbyCreatorMenu, InputLobbyIPMenu, LobbyJoinerMenu
@@ -73,6 +80,87 @@ class Game:
             self.bullets_group.draw(self.screen)
             self.explosions_group.draw(self.screen)
             # Dibujar mira
+            tank_sprites = pygame.sprite.Group()
+            tank_sprites.add(tank)
+            tank_sprites.add(cannon)
+
+            previous_tank_position = tank.rect.center
+
+            # Crear un grupo para los rastros del tanque
+            tracks_group = pygame.sprite.Group()
+
+            # Crear el grupo de explosiones
+            explosions_group = pygame.sprite.Group()
+
+# Crear mapa
+MAP_LAYOUT = [
+    [BlockTypes.GRASS_BACKGROUND] * 12,
+    [BlockTypes.GRASS_BACKGROUND, BlockTypes.GREEN_TREE] + [BlockTypes.SAND_BACKGROUND] * 9 + [BlockTypes.GRASS_BACKGROUND],
+    [BlockTypes.SAND_BACKGROUND] * 2 + [BlockTypes.BROWN_TREE] + [BlockTypes.GRASS_BACKGROUND] * 9,
+    [BlockTypes.GRASS_BACKGROUND] * 12,
+    [BlockTypes.GRASS_BACKGROUND] * 12,
+    [BlockTypes.GRASS_BACKGROUND] * 12,
+    [BlockTypes.GRASS_BACKGROUND] * 12,
+    [BlockTypes.GRASS_BACKGROUND] * 12,
+    [BlockTypes.GRASS_BACKGROUND] * 12,
+    [BlockTypes.GRASS_BACKGROUND] * 12,
+]
+map = Map("test_map", MAP_LAYOUT)
+blocks = map.generate_map()
+
+# Grupo para las balas
+bullets_group = pygame.sprite.Group()
+
+# Longitud fija del cañón (ajusta este valor según el diseño de tu tanque)
+cannon_length = cannon.rect.height
+
+# Cosas del servidor
+# Establecer conexion gRPC
+channel = grpc.insecure_channel("localhost:9000")
+client = GameServiceStub(channel)
+
+# Identificador único para el jugador
+PLAYER_ID = "player1"
+
+# Función para enviar una bala al servidor
+def send_bullet(bullet):
+    bullet_state = BulletState(
+        bullet_id=str(uuid.uuid4()),  # Usar el ID único del objeto como identificador
+        x=bullet.rect.centerx,
+        y=bullet.rect.centery,
+        dx=bullet.direction[0],
+        dy=bullet.direction[1],
+        owner_id=PLAYER_ID,  # ID del jugador que disparó la bala
+    )
+    try:
+        client.AddBullet(bullet_state)  # Llamar al método AddBullet en el servidor
+    except grpc.RpcError as e:
+        print(f"Error al enviar la bala al servidor: {e}")
+
+# Función para enviar el estado del jugador al servidor
+def send_player_state(tank):
+    player_state = PlayerState(
+        player_id=PLAYER_ID,
+        x=tank.rect.centerx,
+        y=tank.rect.centery,
+        angle=tank.angle,  # Suponiendo que el tanque tiene un atributo 'angle'
+    )
+
+    # Enviar el estado del jugador al servidor
+    try:
+        client.UpdateState(player_state)
+    except grpc.RpcError as e:
+        print(f"Error al enviar el estado del jugador: {e}")
+
+# Bucle principal del juego
+running = True
+while running:
+    clock.tick(60)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        # Detectar clic izquierdo para disparar
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Clic izquierdo
             mouse_pos = pygame.mouse.get_pos()
             pygame.draw.circle(self.screen, Colors.RED, mouse_pos, 5)
             pygame.draw.line(
@@ -119,6 +207,13 @@ class Game:
                     # Calcular la dirección normalizada
                     distance = math.hypot(dx, dy)
                     direction = (dx / distance, dy / distance)  # Vector unitario
+            # Enviar la bala al servidor una sola vez
+            send_bullet(bullet)
+
+            # Crear un muzzle flash en la posición inicial de la bala
+            muzzle_flash = MuzzleFlash(bullet_start_pos)
+            muzzle_flash.image = pygame.transform.rotate(muzzle_flash.image, cannon_angle + 90)  # Rotar el muzzle flash
+            explosions_group.add(muzzle_flash)  # Agregar el muzzle flash al grupo de explosiones
 
                     # Calcular la posición inicial de la bala (parte superior del cañón)
                     cannon_length = self.cannon.rect.height
@@ -132,6 +227,11 @@ class Game:
                         bullet.image, cannon_angle - 90
                     )  # Rotar la bala
                     self.bullets_group.add(bullet)
+    # Enviar el estado del jugador al servidor
+    send_player_state(tank)
+
+    tank.update(blocks)
+    cannon.update()
 
                     # Crear un muzzle flash en la posición inicial de la bala
                     muzzle_flash = MuzzleFlash(bullet_start_pos)
@@ -162,3 +262,24 @@ class Game:
             False,
             False,
         )
+    # Dibujar la mira personalizada
+    mouse_pos = pygame.mouse.get_pos()
+    pygame.draw.circle(screen, Colors.RED, mouse_pos, 10, 2)  # Círculo exterior
+    pygame.draw.line(
+        screen,
+        Colors.RED,
+        (mouse_pos[0] - 15, mouse_pos[1]),
+        (mouse_pos[0] + 15, mouse_pos[1]),
+        2,
+    )  # Línea horizontal
+    pygame.draw.line(
+        screen,
+        Colors.RED,
+        (mouse_pos[0], mouse_pos[1] - 15),
+        (mouse_pos[0], mouse_pos[1] + 15),
+        2,
+    )  # Línea vertical
+    bullets_group.draw(screen)
+    explosions_group.draw(screen)  # Dibujar el grupo de explosiones
+    pygame.display.flip()
+pygame.quit()

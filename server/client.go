@@ -28,6 +28,7 @@ func main() {
 			PlayerId: "player1",
 			X: 10.0,
 			Y: 20.0,
+			Angle: 45.0,
 		}
 
 		gameState, err := client.UpdateState(context.Background(), playerState)

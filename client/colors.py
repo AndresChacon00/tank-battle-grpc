@@ -6,3 +6,4 @@ class Colors:
     RED = (255, 0, 0)
     ORANGE = (221, 85, 47)
     PALE_YELLOW = (241, 219, 133)
+    GREEN = (0, 255, 0)
