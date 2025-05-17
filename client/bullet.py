@@ -20,10 +20,10 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.y += self.direction[1] * self.speed
 
         # Eliminar la bala se sale de la pantalla
-        if (
-            self.rect.right < 0
-            or self.rect.left > pygame.display.get_surface().get_width()
-            or self.rect.bottom < 0
-            or self.rect.top > pygame.display.get_surface().get_height()
-        ):
-            self.kill()
+        #if (
+         #   self.rect.right < 0
+          #  or self.rect.left > pygame.display.get_surface().get_width()
+           # or self.rect.bottom < 0
+           # or self.rect.top > pygame.display.get_surface().get_height()
+        #):
+         #   self.kill()

@@ -161,6 +161,22 @@ while running:
             processed_bullet_ids.add(bullet_state.bullet_id)
             print("Se ha disparado una bala " + bullet_state.bullet_id)
 
+    # Eliminar balas que ya no están activas en el servidor
+    for bullet in bullets_group:
+        if (
+            bullet.rect.right < 0
+            or bullet.rect.left > pygame.display.get_surface().get_width()
+            or bullet.rect.bottom < 0
+            or bullet.rect.top > pygame.display.get_surface().get_height()
+        ):
+            try:
+                from game.game_pb2 import BulletRemoveRequest
+                client.RemoveBullet(BulletRemoveRequest(bullet_id=bullet.bullet_id))
+                print(f"Bala eliminada del servidor: {bullet.bullet_id}")
+            except grpc.RpcError as e:
+                print(f"Error al eliminar la bala del servidor: {e}")
+            bullet.kill()
+
     # Actualizar las balas existentes usando su método update
     bullets_group.update()
 
