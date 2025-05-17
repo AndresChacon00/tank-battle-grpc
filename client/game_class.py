@@ -55,8 +55,9 @@ class Game:
         self.click_pos = None
         self.key_pressed = None
         self.server_ip: Union[str, None] = None
-        self.tank = Tank()
+        self.tank = Tank(tank_id=1, x=100, y=300, color="blue")
         self.cannon = TankCannon(self.tank)
+        self.tank.set_cannon(self.cannon)
         self.tank_sprites = pygame.sprite.Group()
         self.tank_sprites.add(self.tank)
         self.tank_sprites.add(self.cannon)
@@ -78,7 +79,7 @@ class Game:
             self.check_events()
             # Actualizar entidades
             self.send_player_state(self.tank)
-            self.tank.update(self.blocks)
+            self.tank.update(self.blocks, self.bullets_group)
             self.cannon.update()
             self.bullets_group.update()
             self.explosions_group.update()
@@ -123,7 +124,11 @@ class Game:
                 self.current_menu.run_display = False
 
             if self.playing:
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if (
+                    event.type == pygame.MOUSEBUTTONDOWN
+                    and event.button == 1
+                    and not self.tank.is_destroyed
+                ):
                     # Disparar
                     mouse_pos = pygame.mouse.get_pos()
                     tank_pos = self.tank.rect.center
@@ -145,20 +150,18 @@ class Game:
                     bullet_start_pos = (bullet_start_x, bullet_start_y)
 
                     # Crear una bala con la rotación del cañón
-                    bullet = Bullet(bullet_start_pos, direction)
+                    bullet = Bullet(
+                        bullet_start_pos,
+                        direction,
+                        self.blocks,
+                        self.explosions_group,
+                        tank_id=self.tank.tank_id,
+                        damage=15,
+                    )
                     bullet.image = pygame.transform.rotate(
                         bullet.image, cannon_angle - 90
                     )  # Rotar la bala
                     self.bullets_group.add(bullet)
-
-                    # Crear un muzzle flash en la posición inicial de la bala
-                    muzzle_flash = MuzzleFlash(bullet_start_pos)
-                    muzzle_flash.image = pygame.transform.rotate(
-                        muzzle_flash.image, cannon_angle + 90
-                    )  # Rotar el muzzle flash
-                    self.explosions_group.add(
-                        muzzle_flash
-                    )  # Agregar el muzzle flash al grupo de explosiones
 
                     # Enviar la bala al servidor una sola vez
                     self.send_bullet(bullet)
@@ -253,7 +256,7 @@ class Game:
         except grpc.RpcError as e:
             print(f"Error al obtener el estado del juego: {e}")
             return None
-        
+
     def get_player_list(self):
         """Obtener la lista de jugadores desde el servidor"""
         try:

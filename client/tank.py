@@ -2,6 +2,7 @@ import pygame
 import math
 import time
 from config import Config
+from colors import Colors  # Importar Colors
 
 
 class Tank(pygame.sprite.Sprite):
@@ -9,61 +10,104 @@ class Tank(pygame.sprite.Sprite):
 
     TANK_SIZE = 56  # Size of the tank in pixels
 
-    def __init__(self):
+    def __init__(self, tank_id, x=None, y=None, color="blue", health=100, score=0):
         super().__init__()
-        self.original_image = pygame.image.load(
-            "assets/Retina/tankBody_blue_outline.png"
-        ).convert_alpha()  # Imagen original
+        # Imagen del tanque
+        self.original_image = self.get_tank_image()
         self.original_image = pygame.transform.scale(
             self.original_image, (self.TANK_SIZE, self.TANK_SIZE)
         )
         self.image = self.original_image
-        self.rect = self.image.get_rect()
+        self.image = self.original_image
+        # Velocidad y posición
+        self.speed_x = 0
+        self.speed_y = 0
+        self.max_speed = 3
+        self.x = x if x is not None else Config.WIDTH // 2
+        self.y = y if y is not None else Config.HEIGHT - 10
+        # Hitbox
+        self.rect = self.image.get_rect(center=(self.x, self.y))
         self.rect.centerx = Config.WIDTH // 2
         self.rect.bottom = Config.HEIGHT - 10
-        self.speed_x = 0
-        self.speed_y = 0
+        # ID
+        self.tank_id = tank_id
+        # Ángulo
         self.angle = 0
-        self.target_angle = 0  # Nuevo: Ángulo objetivo
+        self.target_angle = 0
+        # Vida y puntuación
+        self.health = health
+        self.score = score
+        # Estado
+        self.is_destroyed = False
+        # Color
+        self.color = color
+        # Cañón
+        self.cannon = None
+        # Fuente para mostrar la vida
+        self.font = pygame.font.Font(None, 24)
 
-    def update(self, blocks: pygame.sprite.Group):
+    def get_tank_image(self):
+        """Devuelve la imagen del tanque según el color"""
+        if self.color == "blue":
+            return pygame.image.load(
+                "assets/Retina/tankBody_blue_outline.png"
+            ).convert_alpha()
+        elif self.color == "red":
+            return pygame.image.load(
+                "assets/Retina/tankBody_red_outline.png"
+            ).convert_alpha()
+        elif self.color == "green":
+            return pygame.image.load(
+                "assets/Retina/tankBody_green_outline.png"
+            ).convert_alpha()
+        else:
+            return pygame.image.load(
+                "assets/Retina/tankBody_gray_outline.png"
+            ).convert_alpha()
+
+    def set_cannon(self, cannon):
+        """Asociar un cañón al tanque"""
+        self.cannon = cannon
+
+    def handle_movement(self, keys):
+        """Manejar el movimiento del tanque basado en las teclas presionadas"""
         self.speed_x = 0
         self.speed_y = 0
-        keystate = pygame.key.get_pressed()
-        # Movimiento en el eje X
-        if keystate[pygame.K_a]:
-            self.speed_x = -5
-        if keystate[pygame.K_d]:
-            self.speed_x = 5
 
-        # Movimiento en el eje Y
-        if keystate[pygame.K_w]:
-            self.speed_y = -5
-        if keystate[pygame.K_s]:
-            self.speed_y = 5
+        # Movimiento básico
+        if keys[pygame.K_a]:
+            self.speed_x = -self.max_speed
+        if keys[pygame.K_d]:
+            self.speed_x = self.max_speed
+        if keys[pygame.K_w]:
+            self.speed_y = -self.max_speed
+        if keys[pygame.K_s]:
+            self.speed_y = self.max_speed
 
         # Normalizar la velocidad en caso de movimiento diagonal
         if self.speed_x != 0 and self.speed_y != 0:
-            diagonal_speed = 5 / (2**0.5)  # Velocidad ajustada para movimiento diagonal
+            diagonal_speed = self.max_speed / (
+                2**0.5
+            )  # Velocidad ajustada para movimiento diagonal
             self.speed_x = self.speed_x / abs(self.speed_x) * diagonal_speed
             self.speed_y = self.speed_y / abs(self.speed_y) * diagonal_speed
 
         # Ajustar el ángulo objetivo para movimientos diagonales
-        if keystate[pygame.K_w] and keystate[pygame.K_a]:
+        if keys[pygame.K_w] and keys[pygame.K_a]:
             self.target_angle = 225  # Arriba-izquierda
-        elif keystate[pygame.K_w] and keystate[pygame.K_d]:
+        elif keys[pygame.K_w] and keys[pygame.K_d]:
             self.target_angle = 135  # Arriba-derecha
-        elif keystate[pygame.K_s] and keystate[pygame.K_a]:
+        elif keys[pygame.K_s] and keys[pygame.K_a]:
             self.target_angle = -45  # Abajo-izquierda
-        elif keystate[pygame.K_s] and keystate[pygame.K_d]:
+        elif keys[pygame.K_s] and keys[pygame.K_d]:
             self.target_angle = 45  # Abajo-derecha
-        elif keystate[pygame.K_w]:
+        elif keys[pygame.K_w]:
             self.target_angle = 180  # Arriba
-        elif keystate[pygame.K_s]:
+        elif keys[pygame.K_s]:
             self.target_angle = 0  # Abajo
-        elif keystate[pygame.K_a]:
+        elif keys[pygame.K_a]:
             self.target_angle = -90  # Izquierda
-        elif keystate[pygame.K_d]:
+        elif keys[pygame.K_d]:
             self.target_angle = 90  # Derecha
 
         # Rotación gradual hacia el ángulo objetivo
@@ -86,22 +130,22 @@ class Tank(pygame.sprite.Sprite):
         if abs(angle_difference) < rotation_speed:
             self.angle = self.target_angle
 
-        # Guardar la posición anterior
-        previous_x = self.rect.x
-        previous_y = self.rect.y
+    def update(self, blocks: pygame.sprite.Group, bullets_group: pygame.sprite.Group):
+        """Actualizar el estado del tanque"""
+        if self.is_destroyed:
+            return
 
         # Actualizar posición
         self.rect.x += self.speed_x
         self.rect.y += self.speed_y
 
-        # Detectar colisiones con bloques sólidos
+        # Detectar colisiones con bloques
         colliding_blocks = pygame.sprite.spritecollide(self, blocks, False)
-        if any([block.solid for block in colliding_blocks]):
-            # Revertir posición si hay colisión
-            self.rect.x = previous_x
-            self.rect.y = previous_y
+        if any(block.solid for block in colliding_blocks):
+            self.rect.x -= self.speed_x
+            self.rect.y -= self.speed_y
 
-        # Rotar la imagen usando la original
+        # Rotar la imagen del tanque
         self.image = pygame.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
 
@@ -115,48 +159,92 @@ class Tank(pygame.sprite.Sprite):
         if self.rect.top < 0:
             self.rect.top = 0
 
+        # Manejar colisiones con balas
+        self.handle_bullet_collision(bullets_group)
+
+    def handle_bullet_collision(self, bullets_group):
+        """Manejar colisiones con balas"""
+        current_time = pygame.time.get_ticks()  # Tiempo actual en milisegundos
+        colliding_bullets = pygame.sprite.spritecollide(self, bullets_group, False)
+
+        for bullet in colliding_bullets:
+            # Ignorar colisión si la bala fue disparada por este tanque y tiene menos de 1 segundo
+            if bullet.tank_id == self.tank_id and current_time - bullet.spawn_time < 75:
+                continue
+
+            # Aplicar daño
+            self.health -= bullet.damage
+            bullet.kill()
+            if self.health <= 0:
+                self.is_destroyed = True
+                if self.cannon:
+                    self.cannon.kill()
+                self.kill()
+
+    def draw_health(self, screen):
+        """Dibujar la vida del tanque encima de él"""
+        if not self.is_destroyed:
+            life_text = self.font.render(f"{self.health}", True, Colors.RED)
+            text_rect = life_text.get_rect(
+                center=(self.rect.centerx, self.rect.top - 10)
+            )
+            screen.blit(life_text, text_rect)
+
 
 class TankCannon(pygame.sprite.Sprite):
-    """Cannon attached to a tank body"""
+    """Cañón del tanque"""
 
     CANNON_HEIGHT = 46
     CANNON_WIDTH = 25
 
     def __init__(self, tank):
         super().__init__()
-        self.tank = tank  # Referencia al tanque base
-        self.original_image = pygame.image.load(
-            "assets/Retina/tankBlue_barrel1_outline.png"
-        ).convert_alpha()
+        self.tank = tank
+        self.angle = 0
+        self.original_image = self.get_cannon_image()
         self.original_image = pygame.transform.scale(
             self.original_image, (self.CANNON_WIDTH, self.CANNON_HEIGHT)
         )
         self.image = self.original_image
         self.rect = self.image.get_rect(center=self.tank.rect.center)
-        self.angle = 0
+        self.offset = int(self.rect.height * 0.4)
 
-        # Calcular el desplazamiento desde el centro del cañón hasta su base
-        self.offset = int(
-            self.rect.height * 0.4
-        )  # Asume que la base está en el centro inferior del sprite
+    def get_cannon_image(self):
+        """Devuelve la imagen del cañón según el color del tanque"""
+        if self.tank.color == "blue":
+            return pygame.image.load(
+                "assets/Retina/tankBlue_barrel1_outline.png"
+            ).convert_alpha()
+        elif self.tank.color == "red":
+            return pygame.image.load(
+                "assets/Retina/tankRed_barrel1_outline.png"
+            ).convert_alpha()
+        elif self.tank.color == "green":
+            return pygame.image.load(
+                "assets/Retina/tankGreen_barrel1_outline.png"
+            ).convert_alpha()
+        else:
+            return pygame.image.load(
+                "assets/Retina/tankGray_barrel1_outline.png"
+            ).convert_alpha()
+
+    def handle_rotation(self, target_angle=None):
+        """Manejar la rotación del cañón"""
+        if target_angle is not None:
+            self.angle = target_angle
+        else:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            rel_x, rel_y = (
+                mouse_x - self.tank.rect.centerx,
+                mouse_y - self.tank.rect.centery,
+            )
+            self.angle = math.degrees(math.atan2(-rel_y, rel_x)) + 90
 
     def update(self):
-        # Rotar hacia el cursor
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-        rel_x, rel_y = (
-            mouse_x - self.tank.rect.centerx,
-            mouse_y - self.tank.rect.centery,
-        )
-        self.angle = (
-            math.degrees(math.atan2(-rel_y, rel_x)) + 90
-        )  # Calcular ángulo hacia el cursor
-
-        # Rotar la imagen del cañón
+        """Actualizar la posición y rotación del cañón"""
         self.image = pygame.transform.rotate(self.original_image, self.angle)
-
-        # Ajustar el rectángulo del cañón para que el eje de rotación esté en la base
+        rad_angle = math.radians(self.angle - 90)
         self.rect = self.image.get_rect()
-        rad_angle = math.radians(self.angle - 90)  # Convertir el ángulo a radianes
         self.rect.centerx = self.tank.rect.centerx + self.offset * math.cos(rad_angle)
         self.rect.centery = self.tank.rect.centery - self.offset * math.sin(rad_angle)
 
