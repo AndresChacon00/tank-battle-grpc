@@ -16,6 +16,9 @@ service GameService {
     // Agregar una bala al servidor
     rpc AddBullet (BulletState) returns (Empty);
 
+    // Eliminar una bala del servidor
+    rpc RemoveBullet (BulletRemoveRequest) returns (Empty);
+
     // Establecer el mapa que se va a usar
     rpc SetMap (MapRequest) returns (Empty);
 
@@ -54,6 +57,11 @@ message PlayerListItem {
 // Listado de jugadores
 message PlayerList {
     repeated PlayerListItem players = 1;
+}
+
+// Mensaje para eliminar una bala
+message BulletRemoveRequest {
+    string bullet_id = 1; // ID de la bala a eliminar
 }
 
 // Estado del juego

@@ -23,6 +23,7 @@ const (
 	GameService_GetGameState_FullMethodName    = "/game.GameService/GetGameState"
 	GameService_StreamGameState_FullMethodName = "/game.GameService/StreamGameState"
 	GameService_AddBullet_FullMethodName       = "/game.GameService/AddBullet"
+	GameService_RemoveBullet_FullMethodName    = "/game.GameService/RemoveBullet"
 	GameService_SetMap_FullMethodName          = "/game.GameService/SetMap"
 	GameService_GetMap_FullMethodName          = "/game.GameService/GetMap"
 	GameService_AddPlayer_FullMethodName       = "/game.GameService/AddPlayer"
@@ -41,6 +42,8 @@ type GameServiceClient interface {
 	StreamGameState(ctx context.Context, in *Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GameState], error)
 	// Agregar una bala al servidor
 	AddBullet(ctx context.Context, in *BulletState, opts ...grpc.CallOption) (*Empty, error)
+	// Eliminar una bala del servidor
+	RemoveBullet(ctx context.Context, in *BulletRemoveRequest, opts ...grpc.CallOption) (*Empty, error)
 	// Establecer el mapa que se va a usar
 	SetMap(ctx context.Context, in *MapRequest, opts ...grpc.CallOption) (*Empty, error)
 	// Obtener el mapa actual
@@ -108,6 +111,16 @@ func (c *gameServiceClient) AddBullet(ctx context.Context, in *BulletState, opts
 	return out, nil
 }
 
+func (c *gameServiceClient) RemoveBullet(ctx context.Context, in *BulletRemoveRequest, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, GameService_RemoveBullet_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *gameServiceClient) SetMap(ctx context.Context, in *MapRequest, opts ...grpc.CallOption) (*Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Empty)
@@ -160,6 +173,8 @@ type GameServiceServer interface {
 	StreamGameState(*Empty, grpc.ServerStreamingServer[GameState]) error
 	// Agregar una bala al servidor
 	AddBullet(context.Context, *BulletState) (*Empty, error)
+	// Eliminar una bala del servidor
+	RemoveBullet(context.Context, *BulletRemoveRequest) (*Empty, error)
 	// Establecer el mapa que se va a usar
 	SetMap(context.Context, *MapRequest) (*Empty, error)
 	// Obtener el mapa actual
@@ -189,6 +204,9 @@ func (UnimplementedGameServiceServer) StreamGameState(*Empty, grpc.ServerStreami
 }
 func (UnimplementedGameServiceServer) AddBullet(context.Context, *BulletState) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddBullet not implemented")
+}
+func (UnimplementedGameServiceServer) RemoveBullet(context.Context, *BulletRemoveRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveBullet not implemented")
 }
 func (UnimplementedGameServiceServer) SetMap(context.Context, *MapRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetMap not implemented")
@@ -288,6 +306,24 @@ func _GameService_AddBullet_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GameService_RemoveBullet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BulletRemoveRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServiceServer).RemoveBullet(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameService_RemoveBullet_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServiceServer).RemoveBullet(ctx, req.(*BulletRemoveRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _GameService_SetMap_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(MapRequest)
 	if err := dec(in); err != nil {
@@ -378,6 +414,10 @@ var GameService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AddBullet",
 			Handler:    _GameService_AddBullet_Handler,
+		},
+		{
+			MethodName: "RemoveBullet",
+			Handler:    _GameService_RemoveBullet_Handler,
 		},
 		{
 			MethodName: "SetMap",

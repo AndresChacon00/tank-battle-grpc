@@ -54,6 +54,11 @@ class GameServiceStub(object):
                 request_serializer=game__pb2.BulletState.SerializeToString,
                 response_deserializer=game__pb2.Empty.FromString,
                 _registered_method=True)
+        self.RemoveBullet = channel.unary_unary(
+                '/game.GameService/RemoveBullet',
+                request_serializer=game__pb2.BulletRemoveRequest.SerializeToString,
+                response_deserializer=game__pb2.Empty.FromString,
+                _registered_method=True)
         self.SetMap = channel.unary_unary(
                 '/game.GameService/SetMap',
                 request_serializer=game__pb2.MapRequest.SerializeToString,
@@ -102,6 +107,13 @@ class GameServiceServicer(object):
 
     def AddBullet(self, request, context):
         """Agregar una bala al servidor
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RemoveBullet(self, request, context):
+        """Eliminar una bala del servidor
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -156,6 +168,11 @@ def add_GameServiceServicer_to_server(servicer, server):
             'AddBullet': grpc.unary_unary_rpc_method_handler(
                     servicer.AddBullet,
                     request_deserializer=game__pb2.BulletState.FromString,
+                    response_serializer=game__pb2.Empty.SerializeToString,
+            ),
+            'RemoveBullet': grpc.unary_unary_rpc_method_handler(
+                    servicer.RemoveBullet,
+                    request_deserializer=game__pb2.BulletRemoveRequest.FromString,
                     response_serializer=game__pb2.Empty.SerializeToString,
             ),
             'SetMap': grpc.unary_unary_rpc_method_handler(
@@ -286,6 +303,33 @@ class GameService(object):
             target,
             '/game.GameService/AddBullet',
             game__pb2.BulletState.SerializeToString,
+            game__pb2.Empty.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def RemoveBullet(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/game.GameService/RemoveBullet',
+            game__pb2.BulletRemoveRequest.SerializeToString,
             game__pb2.Empty.FromString,
             options,
             channel_credentials,

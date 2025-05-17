@@ -175,28 +175,28 @@ func (x *BulletState) GetOwnerId() string {
 	return ""
 }
 
-// Item de listado de jugadores
-type PlayerListItem struct {
+// Mensaje para eliminar una bala
+type BulletRemoveRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PlayerId      string                 `protobuf:"bytes,1,opt,name=player_id,json=playerId,proto3" json:"player_id,omitempty"`
+	BulletId      string                 `protobuf:"bytes,1,opt,name=bullet_id,json=bulletId,proto3" json:"bullet_id,omitempty"` // ID de la bala a eliminar
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *PlayerListItem) Reset() {
-	*x = PlayerListItem{}
+func (x *BulletRemoveRequest) Reset() {
+	*x = BulletRemoveRequest{}
 	mi := &file_game_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *PlayerListItem) String() string {
+func (x *BulletRemoveRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*PlayerListItem) ProtoMessage() {}
+func (*BulletRemoveRequest) ProtoMessage() {}
 
-func (x *PlayerListItem) ProtoReflect() protoreflect.Message {
+func (x *BulletRemoveRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_game_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -208,61 +208,16 @@ func (x *PlayerListItem) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use PlayerListItem.ProtoReflect.Descriptor instead.
-func (*PlayerListItem) Descriptor() ([]byte, []int) {
+// Deprecated: Use BulletRemoveRequest.ProtoReflect.Descriptor instead.
+func (*BulletRemoveRequest) Descriptor() ([]byte, []int) {
 	return file_game_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *PlayerListItem) GetPlayerId() string {
+func (x *BulletRemoveRequest) GetBulletId() string {
 	if x != nil {
-		return x.PlayerId
+		return x.BulletId
 	}
 	return ""
-}
-
-// Listado de jugadores
-type PlayerList struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Players       []*PlayerListItem      `protobuf:"bytes,1,rep,name=players,proto3" json:"players,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *PlayerList) Reset() {
-	*x = PlayerList{}
-	mi := &file_game_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *PlayerList) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PlayerList) ProtoMessage() {}
-
-func (x *PlayerList) ProtoReflect() protoreflect.Message {
-	mi := &file_game_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PlayerList.ProtoReflect.Descriptor instead.
-func (*PlayerList) Descriptor() ([]byte, []int) {
-	return file_game_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *PlayerList) GetPlayers() []*PlayerListItem {
-	if x != nil {
-		return x.Players
-	}
-	return nil
 }
 
 // Estado del juego
@@ -276,7 +231,7 @@ type GameState struct {
 
 func (x *GameState) Reset() {
 	*x = GameState{}
-	mi := &file_game_proto_msgTypes[4]
+	mi := &file_game_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -288,7 +243,7 @@ func (x *GameState) String() string {
 func (*GameState) ProtoMessage() {}
 
 func (x *GameState) ProtoReflect() protoreflect.Message {
-	mi := &file_game_proto_msgTypes[4]
+	mi := &file_game_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -301,7 +256,7 @@ func (x *GameState) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GameState.ProtoReflect.Descriptor instead.
 func (*GameState) Descriptor() ([]byte, []int) {
-	return file_game_proto_rawDescGZIP(), []int{4}
+	return file_game_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GameState) GetPlayers() []*PlayerState {
@@ -327,7 +282,7 @@ type Empty struct {
 
 func (x *Empty) Reset() {
 	*x = Empty{}
-	mi := &file_game_proto_msgTypes[5]
+	mi := &file_game_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -339,7 +294,7 @@ func (x *Empty) String() string {
 func (*Empty) ProtoMessage() {}
 
 func (x *Empty) ProtoReflect() protoreflect.Message {
-	mi := &file_game_proto_msgTypes[5]
+	mi := &file_game_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -352,7 +307,7 @@ func (x *Empty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Empty.ProtoReflect.Descriptor instead.
 func (*Empty) Descriptor() ([]byte, []int) {
-	return file_game_proto_rawDescGZIP(), []int{5}
+	return file_game_proto_rawDescGZIP(), []int{4}
 }
 
 // Mensaje para establecer el mapa
@@ -365,7 +320,7 @@ type MapRequest struct {
 
 func (x *MapRequest) Reset() {
 	*x = MapRequest{}
-	mi := &file_game_proto_msgTypes[6]
+	mi := &file_game_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -377,7 +332,7 @@ func (x *MapRequest) String() string {
 func (*MapRequest) ProtoMessage() {}
 
 func (x *MapRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_game_proto_msgTypes[6]
+	mi := &file_game_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -390,7 +345,7 @@ func (x *MapRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MapRequest.ProtoReflect.Descriptor instead.
 func (*MapRequest) Descriptor() ([]byte, []int) {
-	return file_game_proto_rawDescGZIP(), []int{6}
+	return file_game_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *MapRequest) GetMapNumber() int32 {
@@ -410,7 +365,7 @@ type MapResponse struct {
 
 func (x *MapResponse) Reset() {
 	*x = MapResponse{}
-	mi := &file_game_proto_msgTypes[7]
+	mi := &file_game_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -422,7 +377,7 @@ func (x *MapResponse) String() string {
 func (*MapResponse) ProtoMessage() {}
 
 func (x *MapResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_game_proto_msgTypes[7]
+	mi := &file_game_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -435,7 +390,7 @@ func (x *MapResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MapResponse.ProtoReflect.Descriptor instead.
 func (*MapResponse) Descriptor() ([]byte, []int) {
-	return file_game_proto_rawDescGZIP(), []int{7}
+	return file_game_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *MapResponse) GetMapNumber() int32 {
@@ -455,7 +410,7 @@ type PlayerRequest struct {
 
 func (x *PlayerRequest) Reset() {
 	*x = PlayerRequest{}
-	mi := &file_game_proto_msgTypes[8]
+	mi := &file_game_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -467,7 +422,7 @@ func (x *PlayerRequest) String() string {
 func (*PlayerRequest) ProtoMessage() {}
 
 func (x *PlayerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_game_proto_msgTypes[8]
+	mi := &file_game_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -480,7 +435,7 @@ func (x *PlayerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlayerRequest.ProtoReflect.Descriptor instead.
 func (*PlayerRequest) Descriptor() ([]byte, []int) {
-	return file_game_proto_rawDescGZIP(), []int{8}
+	return file_game_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *PlayerRequest) GetPlayerName() string {
@@ -500,7 +455,7 @@ type PlayerResponse struct {
 
 func (x *PlayerResponse) Reset() {
 	*x = PlayerResponse{}
-	mi := &file_game_proto_msgTypes[9]
+	mi := &file_game_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -512,7 +467,7 @@ func (x *PlayerResponse) String() string {
 func (*PlayerResponse) ProtoMessage() {}
 
 func (x *PlayerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_game_proto_msgTypes[9]
+	mi := &file_game_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -525,7 +480,7 @@ func (x *PlayerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlayerResponse.ProtoReflect.Descriptor instead.
 func (*PlayerResponse) Descriptor() ([]byte, []int) {
-	return file_game_proto_rawDescGZIP(), []int{9}
+	return file_game_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *PlayerResponse) GetPlayerId() int32 {
@@ -552,12 +507,9 @@ const file_game_proto_rawDesc = "" +
 	"\x01y\x18\x03 \x01(\x02R\x01y\x12\x0e\n" +
 	"\x02dx\x18\x04 \x01(\x02R\x02dx\x12\x0e\n" +
 	"\x02dy\x18\x05 \x01(\x02R\x02dy\x12\x19\n" +
-	"\bowner_id\x18\x06 \x01(\tR\aownerId\"-\n" +
-	"\x0ePlayerListItem\x12\x1b\n" +
-	"\tplayer_id\x18\x01 \x01(\tR\bplayerId\"<\n" +
-	"\n" +
-	"PlayerList\x12.\n" +
-	"\aplayers\x18\x01 \x03(\v2\x14.game.PlayerListItemR\aplayers\"e\n" +
+	"\bowner_id\x18\x06 \x01(\tR\aownerId\"2\n" +
+	"\x13BulletRemoveRequest\x12\x1b\n" +
+	"\tbullet_id\x18\x01 \x01(\tR\bbulletId\"e\n" +
 	"\tGameState\x12+\n" +
 	"\aplayers\x18\x01 \x03(\v2\x11.game.PlayerStateR\aplayers\x12+\n" +
 	"\abullets\x18\x02 \x03(\v2\x11.game.BulletStateR\abullets\"\a\n" +
@@ -573,12 +525,13 @@ const file_game_proto_rawDesc = "" +
 	"\vplayer_name\x18\x01 \x01(\tR\n" +
 	"playerName\"-\n" +
 	"\x0ePlayerResponse\x12\x1b\n" +
-	"\tplayer_id\x18\x01 \x01(\x05R\bplayerId2\x89\x03\n" +
+	"\tplayer_id\x18\x01 \x01(\x05R\bplayerId2\x91\x03\n" +
 	"\vGameService\x121\n" +
 	"\vUpdateState\x12\x11.game.PlayerState\x1a\x0f.game.GameState\x12,\n" +
 	"\fGetGameState\x12\v.game.Empty\x1a\x0f.game.GameState\x121\n" +
 	"\x0fStreamGameState\x12\v.game.Empty\x1a\x0f.game.GameState0\x01\x12+\n" +
-	"\tAddBullet\x12\x11.game.BulletState\x1a\v.game.Empty\x12'\n" +
+	"\tAddBullet\x12\x11.game.BulletState\x1a\v.game.Empty\x126\n" +
+	"\fRemoveBullet\x12\x19.game.BulletRemoveRequest\x1a\v.game.Empty\x12'\n" +
 	"\x06SetMap\x12\x10.game.MapRequest\x1a\v.game.Empty\x12(\n" +
 	"\x06GetMap\x12\v.game.Empty\x1a\x11.game.MapResponse\x126\n" +
 	"\tAddPlayer\x12\x13.game.PlayerRequest\x1a\x14.game.PlayerResponse\x12.\n" +
@@ -596,44 +549,42 @@ func file_game_proto_rawDescGZIP() []byte {
 	return file_game_proto_rawDescData
 }
 
-var file_game_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_game_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_game_proto_goTypes = []any{
-	(*PlayerState)(nil),    // 0: game.PlayerState
-	(*BulletState)(nil),    // 1: game.BulletState
-	(*PlayerListItem)(nil), // 2: game.PlayerListItem
-	(*PlayerList)(nil),     // 3: game.PlayerList
-	(*GameState)(nil),      // 4: game.GameState
-	(*Empty)(nil),          // 5: game.Empty
-	(*MapRequest)(nil),     // 6: game.MapRequest
-	(*MapResponse)(nil),    // 7: game.MapResponse
-	(*PlayerRequest)(nil),  // 8: game.PlayerRequest
-	(*PlayerResponse)(nil), // 9: game.PlayerResponse
+	(*PlayerState)(nil),         // 0: game.PlayerState
+	(*BulletState)(nil),         // 1: game.BulletState
+	(*BulletRemoveRequest)(nil), // 2: game.BulletRemoveRequest
+	(*GameState)(nil),           // 3: game.GameState
+	(*Empty)(nil),               // 4: game.Empty
+	(*MapRequest)(nil),          // 5: game.MapRequest
+	(*MapResponse)(nil),         // 6: game.MapResponse
+	(*PlayerRequest)(nil),       // 7: game.PlayerRequest
+	(*PlayerResponse)(nil),      // 8: game.PlayerResponse
 }
 var file_game_proto_depIdxs = []int32{
-	2,  // 0: game.PlayerList.players:type_name -> game.PlayerListItem
-	0,  // 1: game.GameState.players:type_name -> game.PlayerState
-	1,  // 2: game.GameState.bullets:type_name -> game.BulletState
-	0,  // 3: game.GameService.UpdateState:input_type -> game.PlayerState
-	5,  // 4: game.GameService.GetGameState:input_type -> game.Empty
-	5,  // 5: game.GameService.StreamGameState:input_type -> game.Empty
-	1,  // 6: game.GameService.AddBullet:input_type -> game.BulletState
-	6,  // 7: game.GameService.SetMap:input_type -> game.MapRequest
-	5,  // 8: game.GameService.GetMap:input_type -> game.Empty
-	8,  // 9: game.GameService.AddPlayer:input_type -> game.PlayerRequest
-	5,  // 10: game.GameService.GetPlayerList:input_type -> game.Empty
-	4,  // 11: game.GameService.UpdateState:output_type -> game.GameState
-	4,  // 12: game.GameService.GetGameState:output_type -> game.GameState
-	4,  // 13: game.GameService.StreamGameState:output_type -> game.GameState
-	5,  // 14: game.GameService.AddBullet:output_type -> game.Empty
-	5,  // 15: game.GameService.SetMap:output_type -> game.Empty
-	7,  // 16: game.GameService.GetMap:output_type -> game.MapResponse
-	9,  // 17: game.GameService.AddPlayer:output_type -> game.PlayerResponse
-	3,  // 18: game.GameService.GetPlayerList:output_type -> game.PlayerList
-	11, // [11:19] is the sub-list for method output_type
-	3,  // [3:11] is the sub-list for method input_type
-	3,  // [3:3] is the sub-list for extension type_name
-	3,  // [3:3] is the sub-list for extension extendee
-	0,  // [0:3] is the sub-list for field type_name
+	0,  // 0: game.GameState.players:type_name -> game.PlayerState
+	1,  // 1: game.GameState.bullets:type_name -> game.BulletState
+	0,  // 2: game.GameService.UpdateState:input_type -> game.PlayerState
+	4,  // 3: game.GameService.GetGameState:input_type -> game.Empty
+	4,  // 4: game.GameService.StreamGameState:input_type -> game.Empty
+	1,  // 5: game.GameService.AddBullet:input_type -> game.BulletState
+	2,  // 6: game.GameService.RemoveBullet:input_type -> game.BulletRemoveRequest
+	5,  // 7: game.GameService.SetMap:input_type -> game.MapRequest
+	4,  // 8: game.GameService.GetMap:input_type -> game.Empty
+	7,  // 9: game.GameService.AddPlayer:input_type -> game.PlayerRequest
+	3,  // 10: game.GameService.UpdateState:output_type -> game.GameState
+	3,  // 11: game.GameService.GetGameState:output_type -> game.GameState
+	3,  // 12: game.GameService.StreamGameState:output_type -> game.GameState
+	4,  // 13: game.GameService.AddBullet:output_type -> game.Empty
+	4,  // 14: game.GameService.RemoveBullet:output_type -> game.Empty
+	4,  // 15: game.GameService.SetMap:output_type -> game.Empty
+	6,  // 16: game.GameService.GetMap:output_type -> game.MapResponse
+	8,  // 17: game.GameService.AddPlayer:output_type -> game.PlayerResponse
+	10, // [10:18] is the sub-list for method output_type
+	2,  // [2:10] is the sub-list for method input_type
+	2,  // [2:2] is the sub-list for extension type_name
+	2,  // [2:2] is the sub-list for extension extendee
+	0,  // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_game_proto_init() }
@@ -647,7 +598,7 @@ func file_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_proto_rawDesc), len(file_game_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

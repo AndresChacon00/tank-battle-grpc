@@ -80,6 +80,21 @@ func (s *gameServer) AddBullet(ctx context.Context, bullet *game.BulletState) (*
     return &game.Empty{}, nil
 }
 
+func (s *gameServer) RemoveBullet(ctx context.Context, req *game.BulletRemoveRequest) (*game.Empty, error) {
+    s.mu.Lock()
+    defer s.mu.Unlock()
+
+    // Verificar si la bala existe en el mapa de balas
+    if _, exists := s.bullets[req.BulletId]; exists {
+        delete(s.bullets, req.BulletId)
+        log.Printf("Bala eliminada: ID=%s", req.BulletId)
+    } else {
+        log.Printf("Advertencia: Se intentó eliminar una bala inexistente: ID=%s", req.BulletId)
+    }
+
+    return &game.Empty{}, nil
+}
+
 func (s *gameServer) GetGameState(ctx context.Context, empty *game.Empty) (*game.GameState, error) {
     s.mu.Lock()
 
