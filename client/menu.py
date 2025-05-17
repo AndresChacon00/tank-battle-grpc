@@ -147,7 +147,6 @@ class LobbyCreatorMenu(Menu):
             # Mostrar lista de jugadores
             if player_list is not None:
                 for player in player_list.players:
-                    print(str(player))
                     self.game.draw_text(
                         f"Jugador {player.player_id}",
                         24,
