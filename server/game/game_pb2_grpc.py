@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import game_pb2 as game__pb2
+from . import game_pb2 as game__pb2
 
 GRPC_GENERATED_VERSION = '1.71.0'
 GRPC_VERSION = grpc.__version__
@@ -54,6 +54,16 @@ class GameServiceStub(object):
                 request_serializer=game__pb2.BulletState.SerializeToString,
                 response_deserializer=game__pb2.Empty.FromString,
                 _registered_method=True)
+        self.SetMap = channel.unary_unary(
+                '/game.GameService/SetMap',
+                request_serializer=game__pb2.MapRequest.SerializeToString,
+                response_deserializer=game__pb2.Empty.FromString,
+                _registered_method=True)
+        self.GetMap = channel.unary_unary(
+                '/game.GameService/GetMap',
+                request_serializer=game__pb2.Empty.SerializeToString,
+                response_deserializer=game__pb2.MapResponse.FromString,
+                _registered_method=True)
 
 
 class GameServiceServicer(object):
@@ -87,6 +97,20 @@ class GameServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def SetMap(self, request, context):
+        """Establecer el mapa que se va a usar
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetMap(self, request, context):
+        """Obtener el mapa actual
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_GameServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -109,6 +133,16 @@ def add_GameServiceServicer_to_server(servicer, server):
                     servicer.AddBullet,
                     request_deserializer=game__pb2.BulletState.FromString,
                     response_serializer=game__pb2.Empty.SerializeToString,
+            ),
+            'SetMap': grpc.unary_unary_rpc_method_handler(
+                    servicer.SetMap,
+                    request_deserializer=game__pb2.MapRequest.FromString,
+                    response_serializer=game__pb2.Empty.SerializeToString,
+            ),
+            'GetMap': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetMap,
+                    request_deserializer=game__pb2.Empty.FromString,
+                    response_serializer=game__pb2.MapResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -219,6 +253,60 @@ class GameService(object):
             '/game.GameService/AddBullet',
             game__pb2.BulletState.SerializeToString,
             game__pb2.Empty.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SetMap(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/game.GameService/SetMap',
+            game__pb2.MapRequest.SerializeToString,
+            game__pb2.Empty.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetMap(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/game.GameService/GetMap',
+            game__pb2.Empty.SerializeToString,
+            game__pb2.MapResponse.FromString,
             options,
             channel_credentials,
             insecure,

@@ -1,9 +1,7 @@
 import pygame, math
 import grpc 
 import uuid
-from game.game_pb2 import Empty
-from game.game_pb2_grpc import GameServiceStub
-from game.game_pb2 import PlayerState, BulletState
+from game.game_pb2 import Empty, PlayerState, BulletState, MapRequest  # Importar MapRequest para enviar el mapa
 from game.game_pb2_grpc import GameServiceStub
 from tank import Tank, TankCannon, Track
 from colors import Colors
@@ -67,6 +65,18 @@ client = GameServiceStub(channel)
 
 # Identificador único para el jugador
 PLAYER_ID = "player1"
+
+# Función para enviar el mapa al servidor
+def send_map_to_server(map_id):
+    try:
+        client.SetMap(MapRequest(map_number=map_id))  # Usar el nombre correcto del campo
+        print(f"Mapa {map_id} enviado al servidor correctamente.")
+    except grpc.RpcError as e:
+        print(f"Error al enviar el mapa al servidor: {e}")
+
+# Enviar el mapa al servidor al inicio del juego
+MAP_ID = 1  # Cambiar este valor según el mapa deseado
+send_map_to_server(MAP_ID)
 
 # Función para enviar una bala al servidor
 def send_bullet(bullet):

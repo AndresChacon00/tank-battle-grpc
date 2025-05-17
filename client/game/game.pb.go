@@ -265,6 +265,96 @@ func (*Empty) Descriptor() ([]byte, []int) {
 	return file_game_proto_rawDescGZIP(), []int{3}
 }
 
+// Mensaje para establecer el mapa
+type MapRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MapNumber     int32                  `protobuf:"varint,1,opt,name=map_number,json=mapNumber,proto3" json:"map_number,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MapRequest) Reset() {
+	*x = MapRequest{}
+	mi := &file_game_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MapRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MapRequest) ProtoMessage() {}
+
+func (x *MapRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MapRequest.ProtoReflect.Descriptor instead.
+func (*MapRequest) Descriptor() ([]byte, []int) {
+	return file_game_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *MapRequest) GetMapNumber() int32 {
+	if x != nil {
+		return x.MapNumber
+	}
+	return 0
+}
+
+// Mensaje para responder con el mapa actual
+type MapResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MapNumber     int32                  `protobuf:"varint,1,opt,name=map_number,json=mapNumber,proto3" json:"map_number,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MapResponse) Reset() {
+	*x = MapResponse{}
+	mi := &file_game_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MapResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MapResponse) ProtoMessage() {}
+
+func (x *MapResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_game_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MapResponse.ProtoReflect.Descriptor instead.
+func (*MapResponse) Descriptor() ([]byte, []int) {
+	return file_game_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *MapResponse) GetMapNumber() int32 {
+	if x != nil {
+		return x.MapNumber
+	}
+	return 0
+}
+
 var File_game_proto protoreflect.FileDescriptor
 
 const file_game_proto_rawDesc = "" +
@@ -286,12 +376,21 @@ const file_game_proto_rawDesc = "" +
 	"\tGameState\x12+\n" +
 	"\aplayers\x18\x01 \x03(\v2\x11.game.PlayerStateR\aplayers\x12+\n" +
 	"\abullets\x18\x02 \x03(\v2\x11.game.BulletStateR\abullets\"\a\n" +
-	"\x05Empty2\xce\x01\n" +
+	"\x05Empty\"+\n" +
+	"\n" +
+	"MapRequest\x12\x1d\n" +
+	"\n" +
+	"map_number\x18\x01 \x01(\x05R\tmapNumber\",\n" +
+	"\vMapResponse\x12\x1d\n" +
+	"\n" +
+	"map_number\x18\x01 \x01(\x05R\tmapNumber2\xa1\x02\n" +
 	"\vGameService\x121\n" +
 	"\vUpdateState\x12\x11.game.PlayerState\x1a\x0f.game.GameState\x12,\n" +
 	"\fGetGameState\x12\v.game.Empty\x1a\x0f.game.GameState\x121\n" +
 	"\x0fStreamGameState\x12\v.game.Empty\x1a\x0f.game.GameState0\x01\x12+\n" +
-	"\tAddBullet\x12\x11.game.BulletState\x1a\v.game.EmptyB\aZ\x05/gameb\x06proto3"
+	"\tAddBullet\x12\x11.game.BulletState\x1a\v.game.Empty\x12'\n" +
+	"\x06SetMap\x12\x10.game.MapRequest\x1a\v.game.Empty\x12(\n" +
+	"\x06GetMap\x12\v.game.Empty\x1a\x11.game.MapResponseB\aZ\x05/gameb\x06proto3"
 
 var (
 	file_game_proto_rawDescOnce sync.Once
@@ -305,12 +404,14 @@ func file_game_proto_rawDescGZIP() []byte {
 	return file_game_proto_rawDescData
 }
 
-var file_game_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_game_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_game_proto_goTypes = []any{
 	(*PlayerState)(nil), // 0: game.PlayerState
 	(*BulletState)(nil), // 1: game.BulletState
 	(*GameState)(nil),   // 2: game.GameState
 	(*Empty)(nil),       // 3: game.Empty
+	(*MapRequest)(nil),  // 4: game.MapRequest
+	(*MapResponse)(nil), // 5: game.MapResponse
 }
 var file_game_proto_depIdxs = []int32{
 	0, // 0: game.GameState.players:type_name -> game.PlayerState
@@ -319,12 +420,16 @@ var file_game_proto_depIdxs = []int32{
 	3, // 3: game.GameService.GetGameState:input_type -> game.Empty
 	3, // 4: game.GameService.StreamGameState:input_type -> game.Empty
 	1, // 5: game.GameService.AddBullet:input_type -> game.BulletState
-	2, // 6: game.GameService.UpdateState:output_type -> game.GameState
-	2, // 7: game.GameService.GetGameState:output_type -> game.GameState
-	2, // 8: game.GameService.StreamGameState:output_type -> game.GameState
-	3, // 9: game.GameService.AddBullet:output_type -> game.Empty
-	6, // [6:10] is the sub-list for method output_type
-	2, // [2:6] is the sub-list for method input_type
+	4, // 6: game.GameService.SetMap:input_type -> game.MapRequest
+	3, // 7: game.GameService.GetMap:input_type -> game.Empty
+	2, // 8: game.GameService.UpdateState:output_type -> game.GameState
+	2, // 9: game.GameService.GetGameState:output_type -> game.GameState
+	2, // 10: game.GameService.StreamGameState:output_type -> game.GameState
+	3, // 11: game.GameService.AddBullet:output_type -> game.Empty
+	3, // 12: game.GameService.SetMap:output_type -> game.Empty
+	5, // 13: game.GameService.GetMap:output_type -> game.MapResponse
+	8, // [8:14] is the sub-list for method output_type
+	2, // [2:8] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
 	2, // [2:2] is the sub-list for extension extendee
 	0, // [0:2] is the sub-list for field type_name
@@ -341,7 +446,7 @@ func file_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_proto_rawDesc), len(file_game_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

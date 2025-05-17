@@ -15,6 +15,12 @@ service GameService {
 
     // Agregar una bala al servidor
     rpc AddBullet (BulletState) returns (Empty);
+
+    // Establecer el mapa que se va a usar
+    rpc SetMap (MapRequest) returns (Empty);
+
+    // Obtener el mapa actual
+    rpc GetMap (Empty) returns (MapResponse);
 }
 // Estado de juego y jugador
 message PlayerState {
@@ -40,7 +46,15 @@ message GameState {
     repeated BulletState bullets = 2; // Lista de balas activas
 }
 
-
-
 // Obtener estado
 message Empty {}
+
+// Mensaje para establecer el mapa
+message MapRequest {
+    int32 map_number = 1;
+}
+
+// Mensaje para responder con el mapa actual
+message MapResponse {
+    int32 map_number = 1;
+}
