@@ -1,7 +1,7 @@
 import pygame, math
 import grpc 
 import uuid
-from game.game_pb2 import Empty, PlayerState, BulletState, MapRequest  # Importar MapRequest para enviar el mapa
+from game.game_pb2 import Empty, PlayerState, BulletState, MapRequest, PlayerRequest  # Importar PlayerRequest para añadir jugadores
 from game.game_pb2_grpc import GameServiceStub
 from tank import Tank, TankCannon, Track
 from colors import Colors
@@ -63,8 +63,19 @@ cannon_length = cannon.rect.height
 channel = grpc.insecure_channel("localhost:9000")
 client = GameServiceStub(channel)
 
-# Identificador único para el jugador
-PLAYER_ID = "player1"
+# Función para añadir un jugador al servidor
+def add_player_to_server(player_name):
+    try:
+        response = client.AddPlayer(PlayerRequest(player_name=player_name))
+        print(f"Jugador añadido: Nombre={player_name}, ID={response.player_id}")
+        return response.player_id
+    except grpc.RpcError as e:
+        print(f"Error al añadir el jugador al servidor: {e}")
+        return None
+
+# Añadir un jugador al inicio del juego
+PLAYER_NAME = "player1"  # Cambiar este valor según el nombre del jugador
+PLAYER_ID = add_player_to_server(PLAYER_NAME)
 
 # Función para enviar el mapa al servidor
 def send_map_to_server(map_id):
@@ -86,7 +97,7 @@ def send_bullet(bullet):
         y=bullet.rect.centery,
         dx=bullet.direction[0],
         dy=bullet.direction[1],
-        owner_id=PLAYER_ID,  # ID del jugador que disparó la bala
+        owner_id=str(PLAYER_ID),  # ID del jugador que disparó la bala
     )
     try:
         client.AddBullet(bullet_state)  # Llamar al método AddBullet en el servidor
@@ -96,10 +107,10 @@ def send_bullet(bullet):
 # Función para enviar el estado del jugador al servidor
 def send_player_state(tank):
     player_state = PlayerState(
-        player_id=PLAYER_ID,
-        x=tank.rect.centerx,
-        y=tank.rect.centery,
-        angle=tank.angle,  # Suponiendo que el tanque tiene un atributo 'angle'
+        player_id=str(PLAYER_ID),  # Convertir a string
+        x=float(tank.rect.centerx),  # Asegurar que sea float
+        y=float(tank.rect.centery),  # Asegurar que sea float
+        angle=float(tank.angle),  # Asegurar que sea float
     )
 
     # Enviar el estado del jugador al servidor

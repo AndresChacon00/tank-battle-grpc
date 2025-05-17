@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from . import game_pb2 as game__pb2
+import game_pb2 as game__pb2
 
 GRPC_GENERATED_VERSION = '1.71.0'
 GRPC_VERSION = grpc.__version__
@@ -64,6 +64,11 @@ class GameServiceStub(object):
                 request_serializer=game__pb2.Empty.SerializeToString,
                 response_deserializer=game__pb2.MapResponse.FromString,
                 _registered_method=True)
+        self.AddPlayer = channel.unary_unary(
+                '/game.GameService/AddPlayer',
+                request_serializer=game__pb2.PlayerRequest.SerializeToString,
+                response_deserializer=game__pb2.PlayerResponse.FromString,
+                _registered_method=True)
 
 
 class GameServiceServicer(object):
@@ -111,6 +116,13 @@ class GameServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def AddPlayer(self, request, context):
+        """Añadir un método para agregar nuevos jugadores
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_GameServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -143,6 +155,11 @@ def add_GameServiceServicer_to_server(servicer, server):
                     servicer.GetMap,
                     request_deserializer=game__pb2.Empty.FromString,
                     response_serializer=game__pb2.MapResponse.SerializeToString,
+            ),
+            'AddPlayer': grpc.unary_unary_rpc_method_handler(
+                    servicer.AddPlayer,
+                    request_deserializer=game__pb2.PlayerRequest.FromString,
+                    response_serializer=game__pb2.PlayerResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -307,6 +324,33 @@ class GameService(object):
             '/game.GameService/GetMap',
             game__pb2.Empty.SerializeToString,
             game__pb2.MapResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def AddPlayer(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/game.GameService/AddPlayer',
+            game__pb2.PlayerRequest.SerializeToString,
+            game__pb2.PlayerResponse.FromString,
             options,
             channel_credentials,
             insecure,
