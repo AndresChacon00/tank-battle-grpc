@@ -72,7 +72,8 @@ class Game:
 
     def init_tank(self, tank_id: str):
         """Inicializa el tanque del jugador."""
-        self.tank = Tank(tank_id=tank_id)
+        x, y = Tank.get_initial_position(tank_id)
+        self.tank = Tank(tank_id=tank_id, x=x, y=y)
         self.cannon = TankCannon(self.tank)
         self.tank_sprites = pygame.sprite.Group()
         self.tank_sprites.add(self.tank)
@@ -114,6 +115,9 @@ class Game:
             self.blocks.draw(self.screen)
             # Draw all tanks
             self.tank_sprites.draw(self.screen)
+            for tank in self.tank_sprites:
+                if isinstance(tank, Tank):
+                    tank.draw_health(self.screen)
             self.bullets_group.draw(self.screen)
             self.explosions_group.draw(self.screen)
             # Dibujar mira
@@ -150,7 +154,10 @@ class Game:
                 # Find existing tank sprite or create a new one
                 tank = None
                 for sprite in self.tank_sprites:
-                    if isinstance(sprite, Tank) and getattr(sprite, "tank_id", None) == pid:
+                    if (
+                        isinstance(sprite, Tank)
+                        and getattr(sprite, "tank_id", None) == pid
+                    ):
                         tank = sprite
                         break
                 if not tank:
@@ -163,7 +170,8 @@ class Game:
         # Ensure your own tank is always present in tank_sprites
         if self.player_id:
             found = any(
-                isinstance(sprite, Tank) and getattr(sprite, "tank_id", None) == self.player_id
+                isinstance(sprite, Tank)
+                and getattr(sprite, "tank_id", None) == self.player_id
                 for sprite in self.tank_sprites
             )
             if not found and hasattr(self, "tank") and self.tank.health > 0:
@@ -269,10 +277,10 @@ class Game:
 
     def send_bullet(self, bullet: Bullet):
         """Enviar la bala al servidor"""
+        bullet_id = str(uuid.uuid4())
+        bullet.bullet_id = bullet_id  # Asignar un ID único a la bala
         bullet_state = BulletState(
-            bullet_id=str(
-                uuid.uuid4()
-            ),  # Usar el ID único del objeto como identificador
+            bullet_id=bullet_id,
             x=bullet.rect.centerx,
             y=bullet.rect.centery,
             dx=bullet.direction[0],

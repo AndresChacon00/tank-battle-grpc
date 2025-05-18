@@ -6,9 +6,10 @@ import math
 class Bullet(pygame.sprite.Sprite):
     """Clase para las balas disparadas por el tanque"""
 
-    def __init__(self, position, direction, tank_id, damage = 10):
+    def __init__(self, position, direction, tank_id, bullet_id = "1", damage = 10):
         super().__init__()
         self.tank_id = tank_id
+        self.bullet_id = bullet_id
         self.damage = damage
         self.image = self.get_bullet_image()
         self.rect = self.image.get_rect(center=position)
@@ -106,17 +107,21 @@ class Bullet(pygame.sprite.Sprite):
 
     def get_bullet_image(self):
         """Devuelve la imagen de la bala según el ID del tanque"""
-        if self.tank_id == 1:
+        if self.tank_id == "1":
             return pygame.image.load(
                 "assets/Retina/bulletBlue1_outline.png"
             ).convert_alpha()
-        elif self.tank_id == 2:
+        elif self.tank_id == "2":
             return pygame.image.load(
                 "assets/Retina/bulletRed1_outline.png"
             ).convert_alpha()
-        else:
+        elif self.tank_id == "3":
             return pygame.image.load(
                 "assets/Retina/bulletGreen1_outline.png"
+            ).convert_alpha()
+        else:
+            return pygame.image.load(
+                "assets/Retina/bulletDark1_outline.png"
             ).convert_alpha()
 
 

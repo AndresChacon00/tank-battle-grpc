@@ -4,6 +4,8 @@ import socket
 from config import Config
 from colors import Colors
 from components import InputBox
+from game.game_pb2 import Empty
+
 
 if TYPE_CHECKING:
     from game_class import Game
@@ -188,8 +190,6 @@ class LobbyCreatorMenu(Menu):
                 # --- NEW: Call StartGame RPC on the server ---
                 if hasattr(self.game, "client"):
                     try:
-                        from game.game_pb2 import Empty
-
                         self.game.client.StartGame(Empty())
                     except Exception as e:
                         print(f"Error al iniciar el juego en el servidor: {e}")
