@@ -76,8 +76,9 @@ class Game:
         self.tank = Tank(tank_id=tank_id, x=x, y=y)
         self.cannon = TankCannon(self.tank)
         self.tank_sprites = pygame.sprite.Group()
+        self.cannon_sprites = pygame.sprite.Group()
         self.tank_sprites.add(self.tank)
-        self.tank_sprites.add(self.cannon)
+        self.cannon_sprites.add(self.cannon)
 
     def _start_game_state_stream(self):
         def stream():
@@ -98,20 +99,20 @@ class Game:
             pygame.mouse.set_visible(False)
             self.clock.tick(Config.FPS)
             self.check_events()
-            # Update from game state
-            self.update_tanks_from_game_state()
-            self.update_bullets_from_game_state()
-            # Actualizar entidades
-            self.send_player_state(self.tank)
-            self.tank.update(self.blocks)
-
+            # Posición del mouse
             mouse_x, mouse_y = pygame.mouse.get_pos()
             tank_x, tank_y = self.tank.rect.center
             dx = mouse_x - tank_x
             dy = mouse_y - tank_y
             mouse_angle = math.degrees(math.atan2(-dy, dx)) + 90
+            self.cannon.angle = mouse_angle
+            # Update from game state
+            self.update_tanks_from_game_state()
+            self.update_bullets_from_game_state()
+            # Actualizar entidades
+            self.send_player_state(self.tank, self.cannon)
+            self.tank.update(self.blocks)
             self.cannon.update(mouse_angle)
-
             self.bullets_group.update()
             self.explosions_group.update()
             # Clear the screen before drawing
@@ -123,6 +124,7 @@ class Game:
             self.blocks.draw(self.screen)
             # Draw all tanks
             self.tank_sprites.draw(self.screen)
+            self.cannon_sprites.draw(self.screen)
             for tank in self.tank_sprites:
                 if isinstance(tank, Tank):
                     tank.draw_health(self.screen)
@@ -197,16 +199,40 @@ class Game:
         """Update all tanks from the latest game state."""
         if self.game_state and hasattr(self.game_state, "players"):
             self.tank_sprites = pygame.sprite.Group()
+            self.cannon_sprites = pygame.sprite.Group()
             for player in self.game_state.players:
                 if player.health <= 0:
                     continue
 
                 tank = Tank(player.player_id, player.health, x=player.x, y=player.y)
+                if player.player_id != self.player_id:
+                    cannon = TankCannon(tank)
+                    cannon.angle = player.cannon_angle
+                    # Rotar la imagen del cañón
+                    cannon.image = pygame.transform.rotate(
+                        cannon.original_image, cannon.angle
+                    )
+
+                    # Ajustar el rectángulo del cañón para que el eje de rotación esté en la base
+                    cannon.rect = cannon.image.get_rect()
+                    rad_angle = math.radians(
+                        cannon.angle - 90
+                    )  # Convertir el ángulo a radianes
+                    cannon.rect.centerx = int(
+                        cannon.tank.rect.centerx + cannon.offset * math.cos(rad_angle)
+                    )
+                    cannon.rect.centery = int(
+                        cannon.tank.rect.centery - cannon.offset * math.sin(rad_angle)
+                    )
+                    self.cannon_sprites.add(cannon)
+
                 tank.angle = player.angle
                 original_center = tank.rect.center
                 tank.image = pygame.transform.rotate(tank.original_image, player.angle)
                 tank.rect = tank.image.get_rect(center=original_center)
                 self.tank_sprites.add(tank)
+
+            self.cannon_sprites.add(self.cannon)
 
         # Ensure your own tank is always present in tank_sprites
         if self.player_id:
@@ -336,7 +362,7 @@ class Game:
         except grpc.RpcError as e:
             print(f"Error al enviar la bala al servidor: {e}")
 
-    def send_player_state(self, tank: Tank):
+    def send_player_state(self, tank: Tank, cannon: TankCannon):
         """Enviar el estado del jugador al servidor"""
         player_state = PlayerState(
             player_id=self.player_id,
@@ -344,6 +370,7 @@ class Game:
             y=tank.rect.centery,
             angle=tank.angle,  # Suponiendo que el tanque tiene un atributo 'angle'
             health=float(tank.health),
+            cannon_angle=cannon.angle,
         )
 
         # Enviar el estado del jugador al servidor

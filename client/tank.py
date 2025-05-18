@@ -100,8 +100,8 @@ class Tank(pygame.sprite.Sprite):
         previous_y = self.rect.y
 
         # Actualizar posición
-        self.rect.x += self.speed_x
-        self.rect.y += self.speed_y
+        self.rect.x += int(self.speed_x)
+        self.rect.y += int(self.speed_y)
 
         # Detectar colisiones con bloques sólidos
         colliding_blocks = pygame.sprite.spritecollide(self, blocks, False)
@@ -195,8 +195,12 @@ class TankCannon(pygame.sprite.Sprite):
         # Ajustar el rectángulo del cañón para que el eje de rotación esté en la base
         self.rect = self.image.get_rect()
         rad_angle = math.radians(self.angle - 90)  # Convertir el ángulo a radianes
-        self.rect.centerx = self.tank.rect.centerx + self.offset * math.cos(rad_angle)
-        self.rect.centery = self.tank.rect.centery - self.offset * math.sin(rad_angle)
+        self.rect.centerx = int(
+            self.tank.rect.centerx + self.offset * math.cos(rad_angle)
+        )
+        self.rect.centery = int(
+            self.tank.rect.centery - self.offset * math.sin(rad_angle)
+        )
 
     def get_cannon_image(self):
         """Devuelve la imagen del cañón según el color del tanque"""
