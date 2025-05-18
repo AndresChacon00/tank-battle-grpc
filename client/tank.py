@@ -27,13 +27,13 @@ class Tank(pygame.sprite.Sprite):
     def get_initial_position(tank_id):
         """Devuelve la posición inicial del tanque según su ID"""
         if tank_id == "1":
-            return 50, Config.HEIGHT - 50  # Esquina inferior izquierda
+            return 100, Config.HEIGHT - 100  # Esquina inferior izquierda
         elif tank_id == "2":
-            return Config.WIDTH - 50, Config.HEIGHT - 50  # Esquina inferior derecha
+            return Config.WIDTH - 100, Config.HEIGHT - 100  # Esquina inferior derecha
         elif tank_id == "3":
-            return 50, 50  # Esquina superior izquierda
+            return 100, 100  # Esquina superior izquierda
         else:
-            return Config.WIDTH - 50, 50  # Esquina superior derecha (por defecto)
+            return Config.WIDTH - 100, 100  # Esquina superior derecha (por defecto)
 
     def update(self, blocks: pygame.sprite.Group):
         self.speed_x = 0

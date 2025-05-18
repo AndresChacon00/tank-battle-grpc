@@ -647,9 +647,10 @@ const file_game_proto_rawDesc = "" +
 	"\vplayer_name\x18\x01 \x01(\tR\n" +
 	"playerName\"-\n" +
 	"\x0ePlayerResponse\x12\x1b\n" +
-	"\tplayer_id\x18\x01 \x01(\x05R\bplayerId2\xe8\x03\n" +
+	"\tplayer_id\x18\x01 \x01(\x05R\bplayerId2\xa5\x04\n" +
 	"\vGameService\x121\n" +
-	"\vUpdateState\x12\x11.game.PlayerState\x1a\x0f.game.GameState\x12,\n" +
+	"\vUpdateState\x12\x11.game.PlayerState\x1a\x0f.game.GameState\x12;\n" +
+	"\x15UpdateStateFromEngine\x12\x11.game.PlayerState\x1a\x0f.game.GameState\x12,\n" +
 	"\fGetGameState\x12\v.game.Empty\x1a\x0f.game.GameState\x121\n" +
 	"\x0fStreamGameState\x12\v.game.Empty\x1a\x0f.game.GameState0\x01\x12+\n" +
 	"\tAddBullet\x12\x11.game.BulletState\x1a\v.game.Empty\x126\n" +
@@ -691,27 +692,29 @@ var file_game_proto_depIdxs = []int32{
 	0,  // 1: game.GameState.players:type_name -> game.PlayerState
 	1,  // 2: game.GameState.bullets:type_name -> game.BulletState
 	0,  // 3: game.GameService.UpdateState:input_type -> game.PlayerState
-	6,  // 4: game.GameService.GetGameState:input_type -> game.Empty
-	6,  // 5: game.GameService.StreamGameState:input_type -> game.Empty
-	1,  // 6: game.GameService.AddBullet:input_type -> game.BulletState
-	4,  // 7: game.GameService.RemoveBullet:input_type -> game.BulletRemoveRequest
-	7,  // 8: game.GameService.SetMap:input_type -> game.MapRequest
-	6,  // 9: game.GameService.GetMap:input_type -> game.Empty
-	9,  // 10: game.GameService.AddPlayer:input_type -> game.PlayerRequest
-	6,  // 11: game.GameService.GetPlayerList:input_type -> game.Empty
-	6,  // 12: game.GameService.StartGame:input_type -> game.Empty
-	5,  // 13: game.GameService.UpdateState:output_type -> game.GameState
-	5,  // 14: game.GameService.GetGameState:output_type -> game.GameState
-	5,  // 15: game.GameService.StreamGameState:output_type -> game.GameState
-	6,  // 16: game.GameService.AddBullet:output_type -> game.Empty
-	6,  // 17: game.GameService.RemoveBullet:output_type -> game.Empty
-	6,  // 18: game.GameService.SetMap:output_type -> game.Empty
-	8,  // 19: game.GameService.GetMap:output_type -> game.MapResponse
-	10, // 20: game.GameService.AddPlayer:output_type -> game.PlayerResponse
-	3,  // 21: game.GameService.GetPlayerList:output_type -> game.PlayerList
-	6,  // 22: game.GameService.StartGame:output_type -> game.Empty
-	13, // [13:23] is the sub-list for method output_type
-	3,  // [3:13] is the sub-list for method input_type
+	0,  // 4: game.GameService.UpdateStateFromEngine:input_type -> game.PlayerState
+	6,  // 5: game.GameService.GetGameState:input_type -> game.Empty
+	6,  // 6: game.GameService.StreamGameState:input_type -> game.Empty
+	1,  // 7: game.GameService.AddBullet:input_type -> game.BulletState
+	4,  // 8: game.GameService.RemoveBullet:input_type -> game.BulletRemoveRequest
+	7,  // 9: game.GameService.SetMap:input_type -> game.MapRequest
+	6,  // 10: game.GameService.GetMap:input_type -> game.Empty
+	9,  // 11: game.GameService.AddPlayer:input_type -> game.PlayerRequest
+	6,  // 12: game.GameService.GetPlayerList:input_type -> game.Empty
+	6,  // 13: game.GameService.StartGame:input_type -> game.Empty
+	5,  // 14: game.GameService.UpdateState:output_type -> game.GameState
+	5,  // 15: game.GameService.UpdateStateFromEngine:output_type -> game.GameState
+	5,  // 16: game.GameService.GetGameState:output_type -> game.GameState
+	5,  // 17: game.GameService.StreamGameState:output_type -> game.GameState
+	6,  // 18: game.GameService.AddBullet:output_type -> game.Empty
+	6,  // 19: game.GameService.RemoveBullet:output_type -> game.Empty
+	6,  // 20: game.GameService.SetMap:output_type -> game.Empty
+	8,  // 21: game.GameService.GetMap:output_type -> game.MapResponse
+	10, // 22: game.GameService.AddPlayer:output_type -> game.PlayerResponse
+	3,  // 23: game.GameService.GetPlayerList:output_type -> game.PlayerList
+	6,  // 24: game.GameService.StartGame:output_type -> game.Empty
+	14, // [14:25] is the sub-list for method output_type
+	3,  // [3:14] is the sub-list for method input_type
 	3,  // [3:3] is the sub-list for extension type_name
 	3,  // [3:3] is the sub-list for extension extendee
 	0,  // [0:3] is the sub-list for field type_name

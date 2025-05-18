@@ -12,7 +12,7 @@ SIDE_BORDER_ROW = (
 
 MAP_1_LAYOUT = [
     TOP_BORDER_ROW,
-    SIDE_BORDER_ROW,
+    *[SIDE_BORDER_ROW for _ in range(Config.HEIGHT_IN_BLOCKS - 2)],
     TOP_BORDER_ROW,
 ]
 

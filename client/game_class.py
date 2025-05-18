@@ -98,14 +98,15 @@ class Game:
             pygame.mouse.set_visible(False)
             self.clock.tick(Config.FPS)
             self.check_events()
+            # Update from game state
+            self.update_tanks_from_game_state()
+            self.update_bullets_from_game_state()
             # Actualizar entidades
             self.send_player_state(self.tank)
             self.tank.update(self.blocks)
             self.cannon.update()
             self.bullets_group.update()
             self.explosions_group.update()
-            # Update all tanks from game state
-            self.update_tanks_from_game_state()
             # Clear the screen before drawing
             self.screen.fill((0, 0, 0))  # Fill with black, or change color as needed
             # Dibujar entidades
@@ -115,9 +116,9 @@ class Game:
             self.blocks.draw(self.screen)
             # Draw all tanks
             self.tank_sprites.draw(self.screen)
-            for tank in self.tank_sprites:
-                if isinstance(tank, Tank):
-                    tank.draw_health(self.screen)
+            # for tank in self.tank_sprites:
+            #     if isinstance(tank, Tank):
+            #         tank.draw_health(self.screen)
             self.bullets_group.draw(self.screen)
             self.explosions_group.draw(self.screen)
             # Dibujar mira
@@ -143,6 +144,48 @@ class Game:
             pygame.display.flip()
             self.reset_keys()
 
+    def update_bullets_from_game_state(self):
+        """Update all bullets from the latest game state."""
+        if self.game_state and hasattr(self.game_state, "bullets"):
+            # Crear un diccionario para rastrear las balas existentes por su bullet_id
+            existing_bullets = {
+                bullet.bullet_id: bullet for bullet in self.bullets_group
+            }
+
+            # Crear un conjunto de IDs de balas activas desde el estado del servidor
+            active_bullet_ids = {
+                bullet_state.bullet_id for bullet_state in self.game_state.bullets
+            }
+
+            # Eliminar balas que ya no están activas en el servidor
+            self.bullets_group = pygame.sprite.Group(
+                [
+                    bullet
+                    for bullet in self.bullets_group
+                    if bullet.bullet_id in active_bullet_ids
+                ]
+            )
+
+            # Mantener un conjunto de IDs de balas ya procesadas
+            processed_bullet_ids = set()
+
+            # Procesar el evento de disparo recibido del servidor
+            for bullet_state in self.game_state.bullets:
+                if (
+                    bullet_state.bullet_id not in existing_bullets
+                    and bullet_state.bullet_id not in processed_bullet_ids
+                ):
+                    bullet = Bullet(
+                        (bullet_state.x, bullet_state.y),
+                        (bullet_state.dx, bullet_state.dy),
+                        bullet_state.owner_id,
+                    )
+                    bullet.bullet_id = bullet_state.bullet_id
+                    angle = math.degrees(math.atan2(-bullet_state.dy, bullet_state.dx))
+                    bullet.image = pygame.transform.rotate(bullet.image, angle - 90)
+                    self.bullets_group.add(bullet)
+                    processed_bullet_ids.add(bullet_state.bullet_id)
+
     def update_tanks_from_game_state(self):
         """Update all tanks from the latest game state."""
         if self.game_state and hasattr(self.game_state, "players"):
@@ -167,6 +210,7 @@ class Game:
                 tank.rect.centery = int(player.y)
                 tank.angle = getattr(player, "angle", 0)
                 tank.health = getattr(player, "health", 100)
+                tank.draw_health(self.screen)
         # Ensure your own tank is always present in tank_sprites
         if self.player_id:
             found = any(
@@ -217,9 +261,11 @@ class Game:
                         direction,
                         self.player_id,
                     )
+                    # Calcular el ángulo de rotación basado en la dirección de la bala
+                    angle = math.degrees(math.atan2(-direction[1], direction[0]))
                     bullet.image = pygame.transform.rotate(
-                        bullet.image, cannon_angle - 90
-                    )  # Rotar la bala
+                        bullet.image, angle - 90
+                    )
                     self.bullets_group.add(bullet)
 
                     # Enviar la bala al servidor una sola vez

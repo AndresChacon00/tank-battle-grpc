@@ -19,16 +19,17 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	GameService_UpdateState_FullMethodName     = "/game.GameService/UpdateState"
-	GameService_GetGameState_FullMethodName    = "/game.GameService/GetGameState"
-	GameService_StreamGameState_FullMethodName = "/game.GameService/StreamGameState"
-	GameService_AddBullet_FullMethodName       = "/game.GameService/AddBullet"
-	GameService_RemoveBullet_FullMethodName    = "/game.GameService/RemoveBullet"
-	GameService_SetMap_FullMethodName          = "/game.GameService/SetMap"
-	GameService_GetMap_FullMethodName          = "/game.GameService/GetMap"
-	GameService_AddPlayer_FullMethodName       = "/game.GameService/AddPlayer"
-	GameService_GetPlayerList_FullMethodName   = "/game.GameService/GetPlayerList"
-	GameService_StartGame_FullMethodName       = "/game.GameService/StartGame"
+	GameService_UpdateState_FullMethodName           = "/game.GameService/UpdateState"
+	GameService_UpdateStateFromEngine_FullMethodName = "/game.GameService/UpdateStateFromEngine"
+	GameService_GetGameState_FullMethodName          = "/game.GameService/GetGameState"
+	GameService_StreamGameState_FullMethodName       = "/game.GameService/StreamGameState"
+	GameService_AddBullet_FullMethodName             = "/game.GameService/AddBullet"
+	GameService_RemoveBullet_FullMethodName          = "/game.GameService/RemoveBullet"
+	GameService_SetMap_FullMethodName                = "/game.GameService/SetMap"
+	GameService_GetMap_FullMethodName                = "/game.GameService/GetMap"
+	GameService_AddPlayer_FullMethodName             = "/game.GameService/AddPlayer"
+	GameService_GetPlayerList_FullMethodName         = "/game.GameService/GetPlayerList"
+	GameService_StartGame_FullMethodName             = "/game.GameService/StartGame"
 )
 
 // GameServiceClient is the client API for GameService service.
@@ -37,6 +38,8 @@ const (
 type GameServiceClient interface {
 	// Actualiza el estado del jugador y envia una actualizacion
 	UpdateState(ctx context.Context, in *PlayerState, opts ...grpc.CallOption) (*GameState, error)
+	// Actualiza el estado del jugador desde el engine
+	UpdateStateFromEngine(ctx context.Context, in *PlayerState, opts ...grpc.CallOption) (*GameState, error)
 	// Obtener estado del juego
 	GetGameState(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GameState, error)
 	// Devuelve actualizaciones en tiempo real
@@ -69,6 +72,16 @@ func (c *gameServiceClient) UpdateState(ctx context.Context, in *PlayerState, op
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GameState)
 	err := c.cc.Invoke(ctx, GameService_UpdateState_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameServiceClient) UpdateStateFromEngine(ctx context.Context, in *PlayerState, opts ...grpc.CallOption) (*GameState, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GameState)
+	err := c.cc.Invoke(ctx, GameService_UpdateStateFromEngine_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -180,6 +193,8 @@ func (c *gameServiceClient) StartGame(ctx context.Context, in *Empty, opts ...gr
 type GameServiceServer interface {
 	// Actualiza el estado del jugador y envia una actualizacion
 	UpdateState(context.Context, *PlayerState) (*GameState, error)
+	// Actualiza el estado del jugador desde el engine
+	UpdateStateFromEngine(context.Context, *PlayerState) (*GameState, error)
 	// Obtener estado del juego
 	GetGameState(context.Context, *Empty) (*GameState, error)
 	// Devuelve actualizaciones en tiempo real
@@ -210,6 +225,9 @@ type UnimplementedGameServiceServer struct{}
 
 func (UnimplementedGameServiceServer) UpdateState(context.Context, *PlayerState) (*GameState, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateState not implemented")
+}
+func (UnimplementedGameServiceServer) UpdateStateFromEngine(context.Context, *PlayerState) (*GameState, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateStateFromEngine not implemented")
 }
 func (UnimplementedGameServiceServer) GetGameState(context.Context, *Empty) (*GameState, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetGameState not implemented")
@@ -273,6 +291,24 @@ func _GameService_UpdateState_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GameServiceServer).UpdateState(ctx, req.(*PlayerState))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GameService_UpdateStateFromEngine_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlayerState)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServiceServer).UpdateStateFromEngine(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameService_UpdateStateFromEngine_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServiceServer).UpdateStateFromEngine(ctx, req.(*PlayerState))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -442,6 +478,10 @@ var GameService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateState",
 			Handler:    _GameService_UpdateState_Handler,
+		},
+		{
+			MethodName: "UpdateStateFromEngine",
+			Handler:    _GameService_UpdateStateFromEngine_Handler,
 		},
 		{
 			MethodName: "GetGameState",

@@ -7,6 +7,9 @@ service GameService {
     // Actualiza el estado del jugador y envia una actualizacion
     rpc UpdateState (PlayerState) returns (GameState);
 
+    // Actualiza el estado del jugador desde el engine
+    rpc UpdateStateFromEngine (PlayerState) returns (GameState);
+
     // Obtener estado del juego
     rpc GetGameState (Empty) returns (GameState);
 

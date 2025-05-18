@@ -28,6 +28,31 @@ func (s *gameServer) UpdateState(ctx context.Context, state *game.PlayerState) (
     s.mu.Lock()
 
     // Actualizar el estado del jugador
+    // Conservar el valor actual de Health y actualizar el resto del estado
+    if existing, ok := s.players[state.PlayerId]; ok {
+        state.Health = existing.Health
+    }
+    s.players[state.PlayerId] = state
+
+
+    // Construir el estado del juego
+    gameState := &game.GameState{}
+    for _, player := range s.players {
+        gameState.Players = append(gameState.Players, player)
+    }
+    for _, bullet := range s.bullets {
+        gameState.Bullets = append(gameState.Bullets, bullet)
+    }
+    gameState.GameStarted = s.gameStarted // Nuevo: incluir estado de inicio de juego
+
+    defer s.mu.Unlock()
+    return gameState, nil
+}
+
+func (s *gameServer) UpdateStateFromEngine(ctx context.Context, state *game.PlayerState) (*game.GameState, error) {
+    s.mu.Lock()
+
+    // Actualizar el estado del jugador
     s.players[state.PlayerId] = state
 
 

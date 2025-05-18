@@ -94,7 +94,7 @@ def send_player_state(tank):
         health=float(tank.health),  # Agregar la vida del jugador
     )
     try:
-        client.UpdateState(player_state)
+        client.UpdateStateFromEngine(player_state)
     except grpc.RpcError as e:
         print(f"Error al enviar el estado del jugador: {e}")
 

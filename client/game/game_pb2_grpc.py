@@ -39,6 +39,11 @@ class GameServiceStub(object):
                 request_serializer=game__pb2.PlayerState.SerializeToString,
                 response_deserializer=game__pb2.GameState.FromString,
                 _registered_method=True)
+        self.UpdateStateFromEngine = channel.unary_unary(
+                '/game.GameService/UpdateStateFromEngine',
+                request_serializer=game__pb2.PlayerState.SerializeToString,
+                response_deserializer=game__pb2.GameState.FromString,
+                _registered_method=True)
         self.GetGameState = channel.unary_unary(
                 '/game.GameService/GetGameState',
                 request_serializer=game__pb2.Empty.SerializeToString,
@@ -91,6 +96,13 @@ class GameServiceServicer(object):
 
     def UpdateState(self, request, context):
         """Actualiza el estado del jugador y envia una actualizacion
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def UpdateStateFromEngine(self, request, context):
+        """Actualiza el estado del jugador desde el engine
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -167,6 +179,11 @@ def add_GameServiceServicer_to_server(servicer, server):
                     request_deserializer=game__pb2.PlayerState.FromString,
                     response_serializer=game__pb2.GameState.SerializeToString,
             ),
+            'UpdateStateFromEngine': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateStateFromEngine,
+                    request_deserializer=game__pb2.PlayerState.FromString,
+                    response_serializer=game__pb2.GameState.SerializeToString,
+            ),
             'GetGameState': grpc.unary_unary_rpc_method_handler(
                     servicer.GetGameState,
                     request_deserializer=game__pb2.Empty.FromString,
@@ -238,6 +255,33 @@ class GameService(object):
             request,
             target,
             '/game.GameService/UpdateState',
+            game__pb2.PlayerState.SerializeToString,
+            game__pb2.GameState.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def UpdateStateFromEngine(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/game.GameService/UpdateStateFromEngine',
             game__pb2.PlayerState.SerializeToString,
             game__pb2.GameState.FromString,
             options,
