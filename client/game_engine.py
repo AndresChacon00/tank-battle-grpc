@@ -84,7 +84,7 @@ bullets_group = pygame.sprite.Group()
 
 
 # Identificador único para el jugador
-PLAYER_ID = "player2"
+# PLAYER_ID = "player2"
 
 
 # Función para enviar el estado del jugador al servidor
@@ -210,7 +210,7 @@ while running:
             bullet = Bullet(
                 (bullet_state.x, bullet_state.y),
                 (bullet_state.dx, bullet_state.dy),
-                PLAYER_ID,
+                bullet_state.owner_id,
             )
             bullet.bullet_id = bullet_state.bullet_id
             bullets_group.add(bullet)
