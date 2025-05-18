@@ -21,7 +21,8 @@ type gameServer struct {
     players map[string]*game.PlayerState
     bullets map[string]*game.BulletState // Mapa para almacenar las balas activas
     mapID   int                          // ID del mapa seleccionado
-    gameStarted bool                     // Nuevo: indica si el juego ha comenzado
+    gamePhase   string                   // "lobby", "playing", "finish"
+    winnerID    string                   // ID del jugador ganador
 }
 
 func (s *gameServer) UpdateState(ctx context.Context, state *game.PlayerState) (*game.GameState, error) {
@@ -43,7 +44,8 @@ func (s *gameServer) UpdateState(ctx context.Context, state *game.PlayerState) (
     for _, bullet := range s.bullets {
         gameState.Bullets = append(gameState.Bullets, bullet)
     }
-    gameState.GameStarted = s.gameStarted // Nuevo: incluir estado de inicio de juego
+    gameState.GamePhase = s.gamePhase
+    gameState.WinnerId = s.winnerID
 
     defer s.mu.Unlock()
     return gameState, nil
@@ -55,6 +57,20 @@ func (s *gameServer) UpdateStateFromEngine(ctx context.Context, state *game.Play
     // Actualizar el estado del jugador
     s.players[state.PlayerId] = state
 
+    // Detectar si solo queda un jugador vivo
+    vivos := 0
+    var ultimoID string
+    for _, p := range s.players {
+        if p.Health > 0 {
+            vivos++
+            ultimoID = p.PlayerId
+        }
+    }
+    if vivos == 1 && s.gamePhase != "finish" {
+        s.gamePhase = "finish"
+        s.winnerID = ultimoID
+        log.Printf("Juego terminado. Ganador: %s", ultimoID)
+    }
 
     // Construir el estado del juego
     gameState := &game.GameState{}
@@ -64,7 +80,8 @@ func (s *gameServer) UpdateStateFromEngine(ctx context.Context, state *game.Play
     for _, bullet := range s.bullets {
         gameState.Bullets = append(gameState.Bullets, bullet)
     }
-    gameState.GameStarted = s.gameStarted // Nuevo: incluir estado de inicio de juego
+    gameState.GamePhase = s.gamePhase
+    gameState.WinnerId = s.winnerID
 
     defer s.mu.Unlock()
     return gameState, nil
@@ -112,7 +129,8 @@ func (s *gameServer) GetGameState(ctx context.Context, empty *game.Empty) (*game
     for _, bullet := range s.bullets {
         gameState.Bullets = append(gameState.Bullets, bullet)
     }
-    gameState.GameStarted = s.gameStarted // Nuevo: incluir estado de inicio de juego
+    gameState.GamePhase = s.gamePhase
+    gameState.WinnerId = s.winnerID
 
     defer s.mu.Unlock()
     return gameState, nil
@@ -145,10 +163,24 @@ func (s *gameServer) AddPlayer(ctx context.Context, req *game.PlayerRequest) (*g
 
     assignedID := playerIDCounter
     playerIDCounter++
+    x := 120;
+    y := 120;
+    switch assignedID {
+    case 1:
+        y = 600;
+    case 2:
+        x = 1080;
+        y = 600;
+    case 4:
+        x = 1080;
+    }
     player := &game.PlayerState{
         PlayerId:   fmt.Sprintf("%d", assignedID),
+        X: float32(x),
+        Y: float32(y),
+        Health: 100,
     }
-    s.players[req.PlayerName] = player
+    s.players[fmt.Sprintf("%d", assignedID)] = player
 
     log.Printf("Jugador agregado: Nombre=%s, ID=%d", req.PlayerName, assignedID)
 
@@ -182,7 +214,8 @@ func (s *gameServer) StreamGameState(empty *game.Empty, stream game.GameService_
         for _, bullet := range s.bullets {
             gameState.Bullets = append(gameState.Bullets, bullet)
         }
-        gameState.GameStarted = s.gameStarted // Nuevo: incluir estado de inicio de juego
+        gameState.GamePhase = s.gamePhase
+        gameState.WinnerId = s.winnerID
 
         s.mu.Unlock()
 
@@ -200,8 +233,9 @@ func (s *gameServer) StreamGameState(empty *game.Empty, stream game.GameService_
 // Implementar el método StartGame para cambiar el estado y notificar a los clientes
 func (s *gameServer) StartGame(ctx context.Context, empty *game.Empty) (*game.Empty, error) {
     s.mu.Lock()
-    s.gameStarted = true
-    log.Printf("El juego ha comenzado (gameStarted=true)")
+    s.gamePhase = "playing"
+    s.winnerID = ""
+    log.Printf("El juego ha comenzado (gamePhase: playing)")
     s.mu.Unlock()
     return &game.Empty{}, nil
 }
@@ -218,6 +252,8 @@ func main() {
         bullets: make(map[string]*game.BulletState), // Inicializar el mapa de balas
         players: make(map[string]*game.PlayerState), // Inicializar el mapa de jugadores
         mapID:   0, // Inicializar el ID del mapa
+        gamePhase: "lobby",
+        winnerID:  "",
     }
     game.RegisterGameServiceServer(grpcServer, server)
 

@@ -337,9 +337,10 @@ func (x *BulletRemoveRequest) GetBulletId() string {
 // Estado del juego
 type GameState struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Players       []*PlayerState         `protobuf:"bytes,1,rep,name=players,proto3" json:"players,omitempty"`                             // Lista de jugadores
-	Bullets       []*BulletState         `protobuf:"bytes,2,rep,name=bullets,proto3" json:"bullets,omitempty"`                             // Lista de balas activas
-	GameStarted   bool                   `protobuf:"varint,3,opt,name=game_started,json=gameStarted,proto3" json:"game_started,omitempty"` // Indica si el juego ha comenzado
+	Players       []*PlayerState         `protobuf:"bytes,1,rep,name=players,proto3" json:"players,omitempty"`                      // Lista de jugadores
+	Bullets       []*BulletState         `protobuf:"bytes,2,rep,name=bullets,proto3" json:"bullets,omitempty"`                      // Lista de balas activas
+	GamePhase     string                 `protobuf:"bytes,3,opt,name=game_phase,json=gamePhase,proto3" json:"game_phase,omitempty"` // "lobby", "playing", "finish"
+	WinnerId      string                 `protobuf:"bytes,4,opt,name=winner_id,json=winnerId,proto3" json:"winner_id,omitempty"`    // Nuevo: ID del jugador ganador
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -388,11 +389,18 @@ func (x *GameState) GetBullets() []*BulletState {
 	return nil
 }
 
-func (x *GameState) GetGameStarted() bool {
+func (x *GameState) GetGamePhase() string {
 	if x != nil {
-		return x.GameStarted
+		return x.GamePhase
 	}
-	return false
+	return ""
+}
+
+func (x *GameState) GetWinnerId() string {
+	if x != nil {
+		return x.WinnerId
+	}
+	return ""
 }
 
 // Obtener estado
@@ -639,11 +647,13 @@ const file_game_proto_rawDesc = "" +
 	"PlayerList\x12.\n" +
 	"\aplayers\x18\x01 \x03(\v2\x14.game.PlayerListItemR\aplayers\"2\n" +
 	"\x13BulletRemoveRequest\x12\x1b\n" +
-	"\tbullet_id\x18\x01 \x01(\tR\bbulletId\"\x88\x01\n" +
+	"\tbullet_id\x18\x01 \x01(\tR\bbulletId\"\xa1\x01\n" +
 	"\tGameState\x12+\n" +
 	"\aplayers\x18\x01 \x03(\v2\x11.game.PlayerStateR\aplayers\x12+\n" +
-	"\abullets\x18\x02 \x03(\v2\x11.game.BulletStateR\abullets\x12!\n" +
-	"\fgame_started\x18\x03 \x01(\bR\vgameStarted\"\a\n" +
+	"\abullets\x18\x02 \x03(\v2\x11.game.BulletStateR\abullets\x12\x1d\n" +
+	"\n" +
+	"game_phase\x18\x03 \x01(\tR\tgamePhase\x12\x1b\n" +
+	"\twinner_id\x18\x04 \x01(\tR\bwinnerId\"\a\n" +
 	"\x05Empty\"+\n" +
 	"\n" +
 	"MapRequest\x12\x1d\n" +

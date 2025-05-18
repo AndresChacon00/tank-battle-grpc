@@ -372,9 +372,67 @@ class LobbyJoinerMenu(Menu):
             
             # Si el juego ya inició, salir del menú
             if hasattr(self.game, "game_state") and self.game.game_state is not None:
-                if getattr(self.game.game_state, "game_started", False):
+                if self.game.game_state.game_phase == "playing":
                     self.game.playing = True
                     self.run_display = False
+
+    def check_input(self):
+        """Actúa según la entrada del usuario"""
+        if self.game.click_pos is not None:
+            if self.quit_button.collidepoint(self.game.click_pos):
+                self.game.playing = False
+                self.run_display = False
+                self.game.current_menu = self.game.main_menu
+
+
+class GameFinishMenu(Menu):
+    """Clase que representa el menú de fin de juego"""
+
+    def __init__(self, game: "Game"):
+        super().__init__(game)
+        self.quit_x, self.quit_y = self.mid_w, self.mid_h + 120
+        self.quit_button = pygame.Rect(self.mid_w - 200, self.mid_h + 210, 300, 50)
+        # Logo reducido en la esquina superior izquierda
+        self.logo = pygame.image.load("assets/menu/game-logo.png")
+        self.logo_small = pygame.transform.scale(self.logo, (80, 80))
+        self.logo_rect = self.logo_small.get_rect(topleft=(20, 20))
+
+    def display_menu(self):
+        """Muestra el menú de fin de juego"""
+        self.run_display = True
+        while self.run_display:
+            pygame.mouse.set_visible(True)
+            self.game.check_events()
+            self.check_input()
+            self.game.screen.fill(Colors.PALE_YELLOW)
+            # Logo en la esquina
+            self.game.screen.blit(self.logo_small, self.logo_rect)
+            # Mostrar mensaje de fin de juego
+            self.game.draw_text(
+                "Juego terminado",
+                28,
+                self.mid_w,
+                self.mid_h - 120,
+                color=Colors.BLACK,
+            )
+            if hasattr(self.game, "game_state") and self.game.game_state is not None:
+                self.game.draw_text(
+                    f"Ganador: Jugador {self.game.game_state.winner_id}",
+                    24,
+                    self.mid_w,
+                    self.mid_h - 60,
+                    color=Colors.BLACK,
+                )
+            # Botones
+            pygame.draw.rect(self.game.screen, Colors.BLACK, self.quit_button, 2)
+            self.game.draw_text(
+                "Volver al menú principal",
+                20,
+                self.quit_button.centerx,
+                self.quit_button.centery,
+                color=Colors.BLACK,
+            )
+            self.blit_screen()
 
     def check_input(self):
         """Actúa según la entrada del usuario"""

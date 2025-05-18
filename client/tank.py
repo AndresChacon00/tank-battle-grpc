@@ -27,13 +27,13 @@ class Tank(pygame.sprite.Sprite):
     def get_initial_position(tank_id):
         """Devuelve la posición inicial del tanque según su ID"""
         if tank_id == "1":
-            return 100, Config.HEIGHT - 100  # Esquina inferior izquierda
+            return 120, Config.HEIGHT - 120  # Esquina inferior izquierda
         elif tank_id == "2":
-            return Config.WIDTH - 100, Config.HEIGHT - 100  # Esquina inferior derecha
+            return Config.WIDTH - 120, Config.HEIGHT - 120  # Esquina inferior derecha
         elif tank_id == "3":
-            return 100, 100  # Esquina superior izquierda
+            return 120, 120  # Esquina superior izquierda
         else:
-            return Config.WIDTH - 100, 100  # Esquina superior derecha (por defecto)
+            return Config.WIDTH - 120, 120  # Esquina superior derecha (por defecto)
 
     def update(self, blocks: pygame.sprite.Group):
         self.speed_x = 0
@@ -123,25 +123,6 @@ class Tank(pygame.sprite.Sprite):
             self.rect.bottom = Config.HEIGHT
         if self.rect.top < 0:
             self.rect.top = 0
-
-    def handle_bullet_collision(self, bullets_group):
-        """Manejar colisiones con balas"""
-        colliding_bullets = pygame.sprite.spritecollide(self, bullets_group, False)
-
-        for bullet in colliding_bullets:
-            # Ignorar colisión si la bala fue disparada por este tanque y tiene menos de 1 segundo
-            print("BAla impacto")
-            if bullet.tank_id == self.tank_id:
-                print("mismoid")
-                continue
-
-            # Aplicar daño
-            self.health -= bullet.damage
-
-            # bullet.kill()
-            if self.health <= 0:
-                print("murio")
-            #    self.kill()
 
     def get_tank_image(self):
         """Devuelve la imagen del tanque según el color"""

@@ -15,7 +15,14 @@ from game.game_pb2 import (
 from tank import Tank, TankCannon
 from colors import Colors
 from config import Config
-from menu import MainMenu, Menu, LobbyCreatorMenu, InputLobbyIPMenu, LobbyJoinerMenu
+from menu import (
+    MainMenu,
+    Menu,
+    LobbyCreatorMenu,
+    InputLobbyIPMenu,
+    LobbyJoinerMenu,
+    GameFinishMenu,
+)
 from bullet import Bullet
 from maps import Map, MAP_1_LAYOUT
 from blocks import Block
@@ -51,6 +58,7 @@ class Game:
         self.start_lobby_menu = LobbyCreatorMenu(self)
         self.input_lobby_ip_menu = InputLobbyIPMenu(self)
         self.lobby_joiner_menu = LobbyJoinerMenu(self)
+        self.game_finish_menu = GameFinishMenu(self)
         self.current_menu: Menu = self.main_menu
         # Game variables
         self.click_pos = None
@@ -77,8 +85,9 @@ class Game:
         self.cannon = TankCannon(self.tank)
         self.tank_sprites = pygame.sprite.Group()
         self.cannon_sprites = pygame.sprite.Group()
-        self.tank_sprites.add(self.tank)
-        self.cannon_sprites.add(self.cannon)
+        # self.tank_sprites.add(self.tank)
+        # self.cannon_sprites.add(self.cannon)
+        self.send_player_state(self.tank, self.cannon)
 
     def _start_game_state_stream(self):
         def stream():
@@ -99,6 +108,13 @@ class Game:
             pygame.mouse.set_visible(False)
             self.clock.tick(Config.FPS)
             self.check_events()
+            # Revisar si terminó el juego
+            if self.game_state and hasattr(self.game_state, "game_phase"):
+                if self.game_state.game_phase == "finish":
+                    self.playing = False
+                    self.current_menu = self.game_finish_menu
+                    self.game_finish_menu.run_display = True
+                    continue
             # Posición del mouse
             mouse_x, mouse_y = pygame.mouse.get_pos()
             tank_x, tank_y = self.tank.rect.center
@@ -201,30 +217,29 @@ class Game:
             self.tank_sprites = pygame.sprite.Group()
             self.cannon_sprites = pygame.sprite.Group()
             for player in self.game_state.players:
+                if player.player_id == self.player_id:
+                    # Always update your own tank, even if health is 0
+                    self.tank.health = player.health
+                    continue
+
                 if player.health <= 0:
                     continue
 
                 tank = Tank(player.player_id, player.health, x=player.x, y=player.y)
-                if player.player_id != self.player_id:
-                    cannon = TankCannon(tank)
-                    cannon.angle = player.cannon_angle
-                    # Rotar la imagen del cañón
-                    cannon.image = pygame.transform.rotate(
-                        cannon.original_image, cannon.angle
-                    )
-
-                    # Ajustar el rectángulo del cañón para que el eje de rotación esté en la base
-                    cannon.rect = cannon.image.get_rect()
-                    rad_angle = math.radians(
-                        cannon.angle - 90
-                    )  # Convertir el ángulo a radianes
-                    cannon.rect.centerx = int(
-                        cannon.tank.rect.centerx + cannon.offset * math.cos(rad_angle)
-                    )
-                    cannon.rect.centery = int(
-                        cannon.tank.rect.centery - cannon.offset * math.sin(rad_angle)
-                    )
-                    self.cannon_sprites.add(cannon)
+                cannon = TankCannon(tank)
+                cannon.angle = player.cannon_angle
+                cannon.image = pygame.transform.rotate(
+                    cannon.original_image, cannon.angle
+                )
+                cannon.rect = cannon.image.get_rect()
+                rad_angle = math.radians(cannon.angle - 90)
+                cannon.rect.centerx = int(
+                    cannon.tank.rect.centerx + cannon.offset * math.cos(rad_angle)
+                )
+                cannon.rect.centery = int(
+                    cannon.tank.rect.centery - cannon.offset * math.sin(rad_angle)
+                )
+                self.cannon_sprites.add(cannon)
 
                 tank.angle = player.angle
                 original_center = tank.rect.center
@@ -232,7 +247,10 @@ class Game:
                 tank.rect = tank.image.get_rect(center=original_center)
                 self.tank_sprites.add(tank)
 
-            self.cannon_sprites.add(self.cannon)
+            # Only add your own tank if health > 0
+            if hasattr(self, "tank") and self.tank.health > 0:
+                self.tank_sprites.add(self.tank)
+                self.cannon_sprites.add(self.cannon)
 
         # Ensure your own tank is always present in tank_sprites
         if self.player_id:
@@ -255,8 +273,10 @@ class Game:
 
             if self.playing:
                 if (
-                    event.type == pygame.MOUSEBUTTONDOWN and event.button == 1
+                    event.type == pygame.MOUSEBUTTONDOWN
+                    and event.button == 1
                     # and not self.tank.is_destroyed
+                    and self.tank.health > 0
                 ):
                     # Disparar
                     mouse_pos = pygame.mouse.get_pos()
@@ -264,9 +284,6 @@ class Game:
 
                     # Calcular el ángulo del cañón en relación al mouse
                     dx, dy = mouse_pos[0] - tank_pos[0], mouse_pos[1] - tank_pos[1]
-                    cannon_angle = math.degrees(
-                        math.atan2(-dy, dx)
-                    )  # Invertir dy para corregir el eje Y
 
                     # Calcular la dirección normalizada
                     distance = math.hypot(dx, dy)
