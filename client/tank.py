@@ -160,16 +160,8 @@ class TankCannon(pygame.sprite.Sprite):
             self.rect.height * 0.4
         )  # Asume que la base está en el centro inferior del sprite
 
-    def update(self):
-        # Rotar hacia el cursor
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-        rel_x, rel_y = (
-            mouse_x - self.tank.rect.centerx,
-            mouse_y - self.tank.rect.centery,
-        )
-        self.angle = (
-            math.degrees(math.atan2(-rel_y, rel_x)) + 90
-        )  # Calcular ángulo hacia el cursor
+    def update(self, cursor_angle):
+        self.angle = cursor_angle
 
         # Rotar la imagen del cañón
         self.image = pygame.transform.rotate(self.original_image, self.angle)

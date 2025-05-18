@@ -171,7 +171,20 @@ while running:
     send_player_state(tank)
 
     tank.update(blocks)
-    cannon.update()
+
+    # Obtener la posición del mouse
+    mouse_x, mouse_y = pygame.mouse.get_pos()
+
+    # Obtener la posición del tanque
+    tank_x, tank_y = tank.rect.center
+
+    # Calcular la diferencia en las coordenadas
+    dx = mouse_x - tank_x
+    dy = mouse_y - tank_y
+
+    # Calcular el ángulo en grados
+    mouse_angle = math.degrees(math.atan2(-dy, dx)) + 90 # Invertir dy para corregir el eje Y
+    cannon.update(mouse_angle)
 
     # Actualizar las balas
     bullets_group.update()
