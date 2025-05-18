@@ -35,6 +35,7 @@ message PlayerState {
     float y = 3;
     float angle = 4;
     float health = 5; // Vida del jugador
+    float cannon_angle = 6; // Ángulo del cañón del tanque
 }
 
 // Estado de una bala
