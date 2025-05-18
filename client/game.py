@@ -149,12 +149,13 @@ while running:
     # Controlar el tanque del jugador local
     keystate = pygame.key.get_pressed()
     player_tank.handle_movement(keystate)
-    player_tank.handle_joystick(joystick)
+    if joystick:
+        player_tank.handle_joystick(joystick)
     # Actualizar el tanque del jugador local
-    player_tank.update(blocks, bullets_group, [tank for tank, _ in other_tanks])
-       
+    player_tank.update(blocks, bullets_group, [tank for tank, _ in other_tanks])      
     player_cannon.handle_rotation()  # Rotar hacia el mouse
-    player_cannon.handle_rotation_joystick(joystick)  # Controlar el cañón con el joystick
+    if joystick:
+        player_cannon.handle_rotation_joystick(joystick)  # Controlar el cañón con el joystick
     player_cannon.update()
 
     # Controlar otros tanques

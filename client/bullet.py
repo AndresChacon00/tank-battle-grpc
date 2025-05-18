@@ -1,6 +1,5 @@
 import pygame
 import math
-from muzzleFlash import MuzzleFlash
 from tank import Tank
 
 class Bullet(pygame.sprite.Sprite):

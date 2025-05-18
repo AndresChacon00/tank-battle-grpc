@@ -140,10 +140,18 @@ class Tank(pygame.sprite.Sprite):
         if abs(angle_difference) < rotation_speed:
             self.angle = self.target_angle
 
-    def update(self, blocks: pygame.sprite.Group, bullets_group: pygame.sprite.Group, other_tanks: list):
+    def update(self, blocks: pygame.sprite.Group, bullets_group: pygame.sprite.Group, other_tanks: list, joystick=None, keys=None):
         """Actualizar el estado del tanque"""
         if self.is_destroyed:
             return
+
+        # Manejar movimiento con teclado
+        if keys:
+            self.handle_movement(keys)
+
+        # Manejar movimiento con joystick
+        if joystick is not None:
+            self.handle_joystick(joystick)
 
         # Actualizar posición
         self.rect.x += self.speed_x
