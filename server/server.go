@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net"
 	"sync"
 	"tank-battle-grpc/game"
 	"time" // Importar el paquete de tiempo
 
-    "google.golang.org/grpc"
+	"google.golang.org/grpc"
 )
 
 // Añadir un contador global para los IDs de los jugadores
@@ -135,6 +136,7 @@ func (s *gameServer) GetPlayerList(ctx context.Context, req *game.Empty) (*game.
         playerList.Players = append(playerList.Players, &game.PlayerListItem{
             PlayerId:   player.PlayerId,
         })
+    }
 
     log.Printf("Lista de jugadores solicitada: %d jugadores activos", len(playerList.Players))
     return playerList, nil
@@ -149,6 +151,7 @@ func (s *gameServer) StreamGameState(empty *game.Empty, stream game.GameService_
         for _, player := range s.players {
             gameState.Players = append(gameState.Players, player)
         }
+        for _, bullet := range s.bullets {
             gameState.Bullets = append(gameState.Bullets, bullet)
         }
 
@@ -176,6 +179,8 @@ func main() {
 
     server := &gameServer{
         bullets: make(map[string]*game.BulletState), // Inicializar el mapa de balas
+        players: make(map[string]*game.PlayerState), // Inicializar el mapa de jugadores
+        mapID:   0, // Inicializar el ID del mapa
     }
     game.RegisterGameServiceServer(grpcServer, server)
 
