@@ -191,6 +191,96 @@ func (x *BulletState) GetDamage() float32 {
 	return 0
 }
 
+// Item de listado de jugadores
+type PlayerListItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PlayerId      string                 `protobuf:"bytes,1,opt,name=player_id,json=playerId,proto3" json:"player_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PlayerListItem) Reset() {
+	*x = PlayerListItem{}
+	mi := &file_game_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PlayerListItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PlayerListItem) ProtoMessage() {}
+
+func (x *PlayerListItem) ProtoReflect() protoreflect.Message {
+	mi := &file_game_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PlayerListItem.ProtoReflect.Descriptor instead.
+func (*PlayerListItem) Descriptor() ([]byte, []int) {
+	return file_game_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *PlayerListItem) GetPlayerId() string {
+	if x != nil {
+		return x.PlayerId
+	}
+	return ""
+}
+
+// Listado de jugadores
+type PlayerList struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Players       []*PlayerListItem      `protobuf:"bytes,1,rep,name=players,proto3" json:"players,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PlayerList) Reset() {
+	*x = PlayerList{}
+	mi := &file_game_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PlayerList) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PlayerList) ProtoMessage() {}
+
+func (x *PlayerList) ProtoReflect() protoreflect.Message {
+	mi := &file_game_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PlayerList.ProtoReflect.Descriptor instead.
+func (*PlayerList) Descriptor() ([]byte, []int) {
+	return file_game_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *PlayerList) GetPlayers() []*PlayerListItem {
+	if x != nil {
+		return x.Players
+	}
+	return nil
+}
+
 // Mensaje para eliminar una bala
 type BulletRemoveRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -525,7 +615,12 @@ const file_game_proto_rawDesc = "" +
 	"\x02dx\x18\x04 \x01(\x02R\x02dx\x12\x0e\n" +
 	"\x02dy\x18\x05 \x01(\x02R\x02dy\x12\x19\n" +
 	"\bowner_id\x18\x06 \x01(\tR\aownerId\x12\x16\n" +
-	"\x06damage\x18\a \x01(\x02R\x06damage\"2\n" +
+	"\x06damage\x18\a \x01(\x02R\x06damage\"-\n" +
+	"\x0ePlayerListItem\x12\x1b\n" +
+	"\tplayer_id\x18\x01 \x01(\tR\bplayerId\"<\n" +
+	"\n" +
+	"PlayerList\x12.\n" +
+	"\aplayers\x18\x01 \x03(\v2\x14.game.PlayerListItemR\aplayers\"2\n" +
 	"\x13BulletRemoveRequest\x12\x1b\n" +
 	"\tbullet_id\x18\x01 \x01(\tR\bbulletId\"e\n" +
 	"\tGameState\x12+\n" +

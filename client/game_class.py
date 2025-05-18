@@ -18,7 +18,7 @@ from menu import MainMenu, Menu, LobbyCreatorMenu, InputLobbyIPMenu, LobbyJoiner
 from bullet import Bullet
 from maps import Map, MAP_1_LAYOUT
 from blocks import Block
-from muzzleFlash import MuzzleFlash
+# from muzzleFlash import MuzzleFlash
 
 
 class Game:
@@ -55,9 +55,9 @@ class Game:
         self.click_pos = None
         self.key_pressed = None
         self.server_ip: Union[str, None] = None
-        self.tank = Tank(tank_id=1, x=100, y=300, color="blue")
+        self.tank = Tank(tank_id="2")
         self.cannon = TankCannon(self.tank)
-        self.tank.set_cannon(self.cannon)
+        # self.tank.set_cannon(self.cannon)
         self.tank_sprites = pygame.sprite.Group()
         self.tank_sprites.add(self.tank)
         self.tank_sprites.add(self.cannon)
@@ -79,7 +79,8 @@ class Game:
             self.check_events()
             # Actualizar entidades
             self.send_player_state(self.tank)
-            self.tank.update(self.blocks, self.bullets_group)
+            # self.tank.update(self.blocks, self.bullets_group)
+            self.tank.update(self.blocks)
             self.cannon.update()
             self.bullets_group.update()
             self.explosions_group.update()
@@ -127,7 +128,7 @@ class Game:
                 if (
                     event.type == pygame.MOUSEBUTTONDOWN
                     and event.button == 1
-                    and not self.tank.is_destroyed
+                    # and not self.tank.is_destroyed
                 ):
                     # Disparar
                     mouse_pos = pygame.mouse.get_pos()
@@ -153,10 +154,7 @@ class Game:
                     bullet = Bullet(
                         bullet_start_pos,
                         direction,
-                        self.blocks,
-                        self.explosions_group,
-                        tank_id=self.tank.tank_id,
-                        damage=15,
+                        self.player_id,
                     )
                     bullet.image = pygame.transform.rotate(
                         bullet.image, cannon_angle - 90
@@ -226,6 +224,7 @@ class Game:
             dx=bullet.direction[0],
             dy=bullet.direction[1],
             owner_id=self.player_id,  # ID del jugador que disparó la bala
+            damage=bullet.damage,
         )
         try:
             self.client.AddBullet(
@@ -241,6 +240,7 @@ class Game:
             x=tank.rect.centerx,
             y=tank.rect.centery,
             angle=tank.angle,  # Suponiendo que el tanque tiene un atributo 'angle'
+            health=float(tank.health),
         )
 
         # Enviar el estado del jugador al servidor
