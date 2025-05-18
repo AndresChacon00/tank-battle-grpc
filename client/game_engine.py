@@ -53,9 +53,6 @@ screen = pygame.display.set_mode((Config.WIDTH, Config.HEIGHT))
 pygame.display.set_caption("Tank Game")
 clock = pygame.time.Clock()
 
-# Ocultar el cursor del mouse
-pygame.mouse.set_visible(False)
-
 # Crear tanque y cañón
 
 

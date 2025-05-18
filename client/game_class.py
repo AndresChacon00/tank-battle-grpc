@@ -56,12 +56,6 @@ class Game:
         self.click_pos = None
         self.key_pressed = None
         self.server_ip: Union[str, None] = None
-        self.tank = Tank(tank_id="2")
-        self.cannon = TankCannon(self.tank)
-        # self.tank.set_cannon(self.cannon)
-        self.tank_sprites = pygame.sprite.Group()
-        self.tank_sprites.add(self.tank)
-        self.tank_sprites.add(self.cannon)
         self.player_id = None
         self.player_name = "Jugador 0"
 
@@ -73,6 +67,16 @@ class Game:
 
         self.game_state = None  # Holds the latest GameState from the server
         self._start_game_state_stream()
+
+        self.tanks = {}  # Store all tanks by player_id
+
+    def init_tank(self, tank_id: str):
+        """Inicializa el tanque del jugador."""
+        self.tank = Tank(tank_id=tank_id)
+        self.cannon = TankCannon(self.tank)
+        self.tank_sprites = pygame.sprite.Group()
+        self.tank_sprites.add(self.tank)
+        self.tank_sprites.add(self.cannon)
 
     def _start_game_state_stream(self):
         def stream():
@@ -95,16 +99,20 @@ class Game:
             self.check_events()
             # Actualizar entidades
             self.send_player_state(self.tank)
-            # self.tank.update(self.blocks, self.bullets_group)
             self.tank.update(self.blocks)
             self.cannon.update()
             self.bullets_group.update()
             self.explosions_group.update()
+            # Update all tanks from game state
+            self.update_tanks_from_game_state()
+            # Clear the screen before drawing
+            self.screen.fill((0, 0, 0))  # Fill with black, or change color as needed
             # Dibujar entidades
             for x in range(0, Config.WIDTH, Block.BLOCK_SIZE):
                 for y in range(0, Config.HEIGHT, Block.BLOCK_SIZE):
                     self.screen.blit(self.background_image, (x, y))
             self.blocks.draw(self.screen)
+            # Draw all tanks
             self.tank_sprites.draw(self.screen)
             self.bullets_group.draw(self.screen)
             self.explosions_group.draw(self.screen)
@@ -126,10 +134,40 @@ class Game:
                 2,
             )  # Línea vertical
 
-            pygame.display.flip()
+            # Blit the game surface to the window and update display only once
             self.window.blit(self.screen, (0, 0))
-            pygame.display.update()
+            pygame.display.flip()
             self.reset_keys()
+
+    def update_tanks_from_game_state(self):
+        """Update all tanks from the latest game state."""
+        if self.game_state and hasattr(self.game_state, "players"):
+            for player in self.game_state.players:
+                pid = str(player.player_id)
+                # If this is the local player's tank, skip (already managed)
+                if pid == self.player_id:
+                    continue
+                # Find existing tank sprite or create a new one
+                tank = None
+                for sprite in self.tank_sprites:
+                    if isinstance(sprite, Tank) and getattr(sprite, "tank_id", None) == pid:
+                        tank = sprite
+                        break
+                if not tank:
+                    tank = Tank(tank_id=pid)
+                    self.tank_sprites.add(tank)
+                tank.rect.centerx = int(player.x)
+                tank.rect.centery = int(player.y)
+                tank.angle = getattr(player, "angle", 0)
+                tank.health = getattr(player, "health", 100)
+        # Ensure your own tank is always present in tank_sprites
+        if self.player_id:
+            found = any(
+                isinstance(sprite, Tank) and getattr(sprite, "tank_id", None) == self.player_id
+                for sprite in self.tank_sprites
+            )
+            if not found and hasattr(self, "tank") and self.tank.health > 0:
+                self.tank_sprites.add(self.tank)
 
     def check_events(self):
         """Gestión de eventos de entrada del usuario."""
@@ -209,6 +247,7 @@ class Game:
             print(f"Jugador añadido: Nombre={player_name}, ID={response.player_id}")
             self.player_id = str(response.player_id)
             self.player_name = f"Jugador {self.player_id}"
+            self.init_tank(self.player_id)  # Inicializar el tanque del jugador
             return str(response.player_id)
         except grpc.RpcError as e:
             print(f"Error al añadir el jugador al servidor: {e}")

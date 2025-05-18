@@ -11,9 +11,7 @@ class Tank(pygame.sprite.Sprite):
         super().__init__()
         self.tank_id = tank_id
         self.health = health
-        self.original_image = pygame.image.load(
-            "assets/Retina/tankBody_blue_outline.png"
-        ).convert_alpha()  # Imagen original
+        self.original_image = self.get_tank_image()
         self.image = self.original_image
         self.rect = self.image.get_rect()
         self.rect.centerx = Config.WIDTH // 2
@@ -132,6 +130,25 @@ class Tank(pygame.sprite.Sprite):
             if self.health <= 0:
                 print("murio")
             #    self.kill()
+
+    def get_tank_image(self):
+        """Devuelve la imagen del tanque según el color"""
+        if self.tank_id == "1":
+            return pygame.image.load(
+                "assets/Retina/tankBody_blue_outline.png"
+            ).convert_alpha()
+        elif self.tank_id == "2":
+            return pygame.image.load(
+                "assets/Retina/tankBody_red_outline.png"
+            ).convert_alpha()
+        elif self.tank_id == "3":
+            return pygame.image.load(
+                "assets/Retina/tankBody_green_outline.png"
+            ).convert_alpha()
+        else:
+            return pygame.image.load(
+                "assets/Retina/tankBody_gray_outline.png"
+            ).convert_alpha()
 
     def draw_health(self, screen):
         """Dibujar la vida del tanque encima de él"""
