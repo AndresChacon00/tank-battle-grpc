@@ -15,7 +15,14 @@ from game.game_pb2 import (
 from tank import Tank, TankCannon
 from colors import Colors
 from config import Config
-from menu import MainMenu, Menu, LobbyCreatorMenu, InputLobbyIPMenu, LobbyJoinerMenu
+from menu import (
+    MainMenu,
+    Menu,
+    LobbyCreatorMenu,
+    InputLobbyIPMenu,
+    LobbyJoinerMenu,
+    GameFinishMenu,
+)
 from bullet import Bullet
 from maps import Map, MAP_1_LAYOUT
 from blocks import Block
@@ -51,6 +58,7 @@ class Game:
         self.start_lobby_menu = LobbyCreatorMenu(self)
         self.input_lobby_ip_menu = InputLobbyIPMenu(self)
         self.lobby_joiner_menu = LobbyJoinerMenu(self)
+        self.game_finish_menu = GameFinishMenu(self)
         self.current_menu: Menu = self.main_menu
         # Game variables
         self.click_pos = None
@@ -100,6 +108,13 @@ class Game:
             pygame.mouse.set_visible(False)
             self.clock.tick(Config.FPS)
             self.check_events()
+            # Revisar si terminó el juego
+            if self.game_state and hasattr(self.game_state, "game_phase"):
+                if self.game_state.game_phase == "finish":
+                    self.playing = False
+                    self.current_menu = self.game_finish_menu
+                    self.game_finish_menu.run_display = True
+                    continue
             # Posición del mouse
             mouse_x, mouse_y = pygame.mouse.get_pos()
             tank_x, tank_y = self.tank.rect.center
@@ -258,7 +273,8 @@ class Game:
 
             if self.playing:
                 if (
-                    event.type == pygame.MOUSEBUTTONDOWN and event.button == 1
+                    event.type == pygame.MOUSEBUTTONDOWN
+                    and event.button == 1
                     # and not self.tank.is_destroyed
                     and self.tank.health > 0
                 ):

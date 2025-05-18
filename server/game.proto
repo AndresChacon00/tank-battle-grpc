@@ -77,7 +77,8 @@ message BulletRemoveRequest {
 message GameState {
     repeated PlayerState players = 1; // Lista de jugadores
     repeated BulletState bullets = 2; // Lista de balas activas
-    bool game_started = 3; // Indica si el juego ha comenzado
+    string game_phase = 3; // "lobby", "playing", "finish"
+    string winner_id = 4; // Nuevo: ID del jugador ganador
 }
 
 // Obtener estado
