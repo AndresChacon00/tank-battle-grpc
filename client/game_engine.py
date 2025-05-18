@@ -12,6 +12,37 @@ from blocks import BlockTypes
 from maps import Map
 from bullet import Bullet
 from muzzleFlash import MuzzleFlash
+import threading
+
+# Cosas del servidor
+# Establecer conexion gRPC
+channel = grpc.insecure_channel("localhost:9000")
+client = GameServiceStub(channel)
+
+# Definir game_state como una variable global
+game_state = None
+
+# Modificar process_game_state para actualizar game_state
+def process_game_state(new_game_state):
+    global game_state
+    game_state = new_game_state
+
+def stream_game_state():
+    try:
+        for game_state in client.StreamGameState(Empty()):
+            # Procesar el estado del juego recibido
+            process_game_state(game_state)
+    except grpc.RpcError as e:
+        print(f"Error al recibir el stream del estado del juego: {e}")
+
+
+# Iniciar el stream en un hilo separado
+def start_stream():
+    stream_thread = threading.Thread(target=stream_game_state, daemon=True)
+    stream_thread.start()
+
+# Iniciar el stream del estado del juego
+start_stream()
 
 pygame.init()
 pygame.mixer.init()
@@ -57,13 +88,12 @@ bullets_group = pygame.sprite.Group()
 # Longitud fija del cañón (ajusta este valor según el diseño de tu tanque)
 
 
-# Cosas del servidor
-# Establecer conexion gRPC
-channel = grpc.insecure_channel("localhost:9000")
-client = GameServiceStub(channel)
+
 
 # Identificador único para el jugador
 PLAYER_ID = "player2"
+
+
 
 # Función para enviar el estado del jugador al servidor
 def send_player_state(tank):
@@ -96,14 +126,6 @@ if map_number is not None:
 else:
     print("No se pudo obtener el mapa del servidor. Usando el mapa predeterminado.")
 
-# Obtener el estado del juego desde el servidor
-def get_game_state():
-    try:
-        return client.GetGameState(Empty())
-    except grpc.RpcError as e:
-        print(f"Error al obtener el estado del juego: {e}")
-        return None
-
 # Manejar colisiones de balas con tanques
 def handle_bullet_collision(tank, bullets_group):
     """Manejar colisiones con balas"""
@@ -119,11 +141,14 @@ def handle_bullet_collision(tank, bullets_group):
         client.RemoveBullet(BulletRemoveRequest(bullet_id=bullet.bullet_id))
         # Aplicar daño
         tank.health -= bullet.damage
-
+        # Enviar estado al servidor solo si recibe daño
+        send_player_state(tank)
         if tank.health <= 0:
             print("murio")
 
-# Obtener el estado del juego desde el servidor y reconstruir la pantalla
+
+
+# Eliminar la llamada a get_game_state y usar game_state directamente
 running = True
 while running:
     clock.tick(60)
@@ -131,8 +156,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    # Obtener el estado del juego desde el servidor
-    game_state = get_game_state()
+    # Verificar si game_state está disponible
     if not game_state:
         continue
 
@@ -145,13 +169,13 @@ while running:
     for player in game_state.players:
         tank = Tank(player.player_id, player.health)
         tank.rect.center = (player.x, player.y)
-        tank.angle = player.angle  # Suponiendo que el tanque tiene un atributo 'angle'
-        # Rotar la imagen del tanque y mantener el centro
+        tank.angle = player.angle
         original_center = tank.rect.center
         tank.image = pygame.transform.rotate(tank.original_image, player.angle)
         tank.rect = tank.image.get_rect(center=original_center)
         tank_sprites.add(tank)
         tank.draw_health(screen)
+
     # Dibujar los tanques
     tank_sprites.draw(screen)
 
@@ -170,14 +194,11 @@ while running:
 
     # Procesar el evento de disparo recibido del servidor
     for bullet_state in game_state.bullets:
-       
         if bullet_state.bullet_id not in existing_bullets and bullet_state.bullet_id not in processed_bullet_ids:
-            # Crear una nueva bala si no existe y no ha sido procesada
-            bullet = Bullet((bullet_state.x, bullet_state.y), (bullet_state.dx, bullet_state.dy),PLAYER_ID)
-            bullet.bullet_id = bullet_state.bullet_id  # Asignar el bullet_id
+            bullet = Bullet((bullet_state.x, bullet_state.y), (bullet_state.dx, bullet_state.dy), PLAYER_ID)
+            bullet.bullet_id = bullet_state.bullet_id
             bullets_group.add(bullet)
             processed_bullet_ids.add(bullet_state.bullet_id)
-            print("Se ha disparado una bala " + bullet_state.bullet_id)
 
     # Eliminar balas que ya no están activas en el servidor
     for bullet in bullets_group:
@@ -188,16 +209,15 @@ while running:
             or bullet.rect.top > pygame.display.get_surface().get_height()
         ):
             try:
-                from game.game_pb2 import BulletRemoveRequest
                 client.RemoveBullet(BulletRemoveRequest(bullet_id=bullet.bullet_id))
-                print(f"Bala eliminada del servidor: {bullet.bullet_id}")
             except grpc.RpcError as e:
                 print(f"Error al eliminar la bala del servidor: {e}")
             bullet.kill()
+
     # Manejar colisiones de balas con tanques
     for tank in tank_sprites:
         handle_bullet_collision(tank, bullets_group)
-        send_player_state(tank)
+        
 
     # Actualizar las balas existentes usando su método update
     bullets_group.update()
@@ -205,6 +225,6 @@ while running:
     # Dibujar las balas
     bullets_group.draw(screen)
 
-    pygame.display.update()
+    pygame.display.flip()
 
 pygame.quit()
