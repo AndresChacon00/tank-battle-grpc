@@ -135,9 +135,7 @@ def handle_bullet_collision(tank, bullets_group):
 
     for bullet in colliding_bullets:
         # Ignorar colisión si la bala fue disparada por este tanque y tiene menos de 1 segundo
-        print("BAla impacto")
         if bullet.tank_id == tank.tank_id:
-            print("mismoid")
             continue
         # Ignorar si el tanque está muerto
         if tank.health <= 0:

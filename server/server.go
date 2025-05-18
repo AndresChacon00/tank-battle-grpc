@@ -145,10 +145,24 @@ func (s *gameServer) AddPlayer(ctx context.Context, req *game.PlayerRequest) (*g
 
     assignedID := playerIDCounter
     playerIDCounter++
+    x := 120;
+    y := 120;
+    switch assignedID {
+    case 1:
+        y = 600;
+    case 2:
+        x = 1080;
+        y = 600;
+    case 4:
+        x = 1080;
+    }
     player := &game.PlayerState{
         PlayerId:   fmt.Sprintf("%d", assignedID),
+        X: float32(x),
+        Y: float32(y),
+        Health: 100,
     }
-    s.players[req.PlayerName] = player
+    s.players[fmt.Sprintf("%d", assignedID)] = player
 
     log.Printf("Jugador agregado: Nombre=%s, ID=%d", req.PlayerName, assignedID)
 
