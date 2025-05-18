@@ -139,6 +139,9 @@ def handle_bullet_collision(tank, bullets_group):
         if bullet.tank_id == tank.tank_id:
             print("mismoid")
             continue
+        # Ignorar si el tanque está muerto
+        if tank.health <= 0:
+            continue
         # eliminar bala del servidor
         client.RemoveBullet(BulletRemoveRequest(bullet_id=bullet.bullet_id))
         # Aplicar daño

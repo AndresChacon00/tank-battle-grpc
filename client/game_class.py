@@ -116,9 +116,9 @@ class Game:
             self.blocks.draw(self.screen)
             # Draw all tanks
             self.tank_sprites.draw(self.screen)
-            # for tank in self.tank_sprites:
-            #     if isinstance(tank, Tank):
-            #         tank.draw_health(self.screen)
+            for tank in self.tank_sprites:
+                if isinstance(tank, Tank):
+                    tank.draw_health(self.screen)
             self.bullets_group.draw(self.screen)
             self.explosions_group.draw(self.screen)
             # Dibujar mira
@@ -189,28 +189,18 @@ class Game:
     def update_tanks_from_game_state(self):
         """Update all tanks from the latest game state."""
         if self.game_state and hasattr(self.game_state, "players"):
+            self.tank_sprites = pygame.sprite.Group()
             for player in self.game_state.players:
-                pid = str(player.player_id)
-                # If this is the local player's tank, skip (already managed)
-                if pid == self.player_id:
+                if player.health <= 0:
                     continue
-                # Find existing tank sprite or create a new one
-                tank = None
-                for sprite in self.tank_sprites:
-                    if (
-                        isinstance(sprite, Tank)
-                        and getattr(sprite, "tank_id", None) == pid
-                    ):
-                        tank = sprite
-                        break
-                if not tank:
-                    tank = Tank(tank_id=pid)
-                    self.tank_sprites.add(tank)
-                tank.rect.centerx = int(player.x)
-                tank.rect.centery = int(player.y)
-                tank.angle = getattr(player, "angle", 0)
-                tank.health = getattr(player, "health", 100)
-                tank.draw_health(self.screen)
+
+                tank = Tank(player.player_id, player.health, x=player.x, y=player.y)
+                tank.angle = player.angle
+                original_center = tank.rect.center
+                tank.image = pygame.transform.rotate(tank.original_image, player.angle)
+                tank.rect = tank.image.get_rect(center=original_center)
+                self.tank_sprites.add(tank)
+
         # Ensure your own tank is always present in tank_sprites
         if self.player_id:
             found = any(
@@ -263,9 +253,7 @@ class Game:
                     )
                     # Calcular el ángulo de rotación basado en la dirección de la bala
                     angle = math.degrees(math.atan2(-direction[1], direction[0]))
-                    bullet.image = pygame.transform.rotate(
-                        bullet.image, angle - 90
-                    )
+                    bullet.image = pygame.transform.rotate(bullet.image, angle - 90)
                     self.bullets_group.add(bullet)
 
                     # Enviar la bala al servidor una sola vez
