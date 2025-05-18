@@ -37,6 +37,7 @@ message PlayerState {
     float x = 2;
     float y = 3;
     float angle = 4;
+    float health = 5; // Vida del jugador
 }
 
 // Estado de una bala
@@ -47,6 +48,7 @@ message BulletState {
     float dx = 4;         // Dirección X de la bala
     float dy = 5;         // Dirección Y de la bala
     string owner_id = 6;  // ID del jugador que disparó la bala
+    float damage = 7;     // Daño que causa la bala
 }
 
 // Item de listado de jugadores

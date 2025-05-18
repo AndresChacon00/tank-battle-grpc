@@ -1,12 +1,12 @@
 package main
 
 import (
-    "context"
-    "fmt"
-    "log"
-    "net"
-    "sync"
-    "tank-battle-grpc/game"
+	"context"
+	"log"
+	"net"
+	"sync"
+	"tank-battle-grpc/game"
+	"time" // Importar el paquete de tiempo
 
     "google.golang.org/grpc"
 )
@@ -22,20 +22,12 @@ type gameServer struct {
     mapID   int                          // ID del mapa seleccionado
 }
 
-// Eliminar la lógica de actualización de balas en UpdateState
 func (s *gameServer) UpdateState(ctx context.Context, state *game.PlayerState) (*game.GameState, error) {
     s.mu.Lock()
 
     // Actualizar el estado del jugador
     s.players[state.PlayerId] = state
 
-    // Eliminar balas que salgan de los límites del mapa
-    for id, bullet := range s.bullets {
-        if bullet.X < 0 || bullet.X > 720 || bullet.Y < 0 || bullet.Y > 1200 {
-            log.Printf("Eliminando bala fuera de límites: ID=%s, Posición=(%f, %f)", id, bullet.X, bullet.Y)
-            delete(s.bullets, id)
-        }
-    }
 
     // Construir el estado del juego
     gameState := &game.GameState{}
@@ -46,37 +38,23 @@ func (s *gameServer) UpdateState(ctx context.Context, state *game.PlayerState) (
         gameState.Bullets = append(gameState.Bullets, bullet)
     }
 
-    // Depuración para verificar el estado del juego antes de devolverlo
-    //log.Printf("Estado del juego antes de devolverlo: Jugadores=%v, Balas=%v", gameState.Players, gameState.Bullets)
-	
     defer s.mu.Unlock()
     return gameState, nil
 }
 
-// Modificar AddBullet para solo registrar la posición inicial de las balas
 func (s *gameServer) AddBullet(ctx context.Context, bullet *game.BulletState) (*game.Empty, error) {
     s.mu.Lock()
-    
+
     // Verificar si el BulletId ya existe antes de agregarlo
     if _, exists := s.bullets[bullet.BulletId]; exists {
         log.Printf("Advertencia: Se intentó registrar una bala con un BulletId duplicado: %s", bullet.BulletId)
     } else {
-        s.bullets[bullet.BulletId] = &game.BulletState{
-            BulletId: bullet.BulletId,
-            X:       bullet.X,
-            Y:       bullet.Y,
-            Dx:      bullet.Dx,
-            Dy:      bullet.Dy,
-            OwnerId: bullet.OwnerId,
-        }
+        
+        s.bullets[bullet.BulletId] = bullet
         log.Printf("Bala registrada correctamente: ID=%s, Total de balas activas: %d", bullet.BulletId, len(s.bullets))
     }
 
-    // Registrar la acción de disparar una bala
-    log.Printf("Bala disparada por el jugador %s en la posición inicial (%f, %f)", bullet.OwnerId, bullet.X, bullet.Y)
-	log.Printf("Total de balas activas: %d", len(s.bullets))
-    
-	defer s.mu.Unlock()
+    defer s.mu.Unlock()
     return &game.Empty{}, nil
 }
 
@@ -107,7 +85,6 @@ func (s *gameServer) GetGameState(ctx context.Context, empty *game.Empty) (*game
         gameState.Bullets = append(gameState.Bullets, bullet)
     }
 
-	
     defer s.mu.Unlock()
     return gameState, nil
 }
@@ -158,11 +135,36 @@ func (s *gameServer) GetPlayerList(ctx context.Context, req *game.Empty) (*game.
         playerList.Players = append(playerList.Players, &game.PlayerListItem{
             PlayerId:   player.PlayerId,
         })
-    }
 
     log.Printf("Lista de jugadores solicitada: %d jugadores activos", len(playerList.Players))
     return playerList, nil
 }
+
+func (s *gameServer) StreamGameState(empty *game.Empty, stream game.GameService_StreamGameStateServer) error {
+    for {
+        s.mu.Lock()
+
+        // Construir el estado del juego
+        gameState := &game.GameState{}
+        for _, player := range s.players {
+            gameState.Players = append(gameState.Players, player)
+        }
+            gameState.Bullets = append(gameState.Bullets, bullet)
+        }
+
+        s.mu.Unlock()
+
+        // Enviar el estado del juego al cliente
+        if err := stream.Send(gameState); err != nil {
+            log.Printf("Error al enviar el estado del juego: %v", err)
+            return err
+        }
+
+        // Esperar un intervalo antes de enviar la siguiente actualización
+        time.Sleep(10 * time.Millisecond)
+    }
+}
+
 
 func main() {
     lis, err := net.Listen("tcp", ":9000")
@@ -173,7 +175,6 @@ func main() {
     grpcServer := grpc.NewServer()
 
     server := &gameServer{
-        players: make(map[string]*game.PlayerState),
         bullets: make(map[string]*game.BulletState), // Inicializar el mapa de balas
     }
     game.RegisterGameServiceServer(grpcServer, server)

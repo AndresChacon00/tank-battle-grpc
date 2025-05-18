@@ -1,44 +1,33 @@
 import pygame
 import math
-from tank import Tank
+# from tank import Tank
 
 
 class Bullet(pygame.sprite.Sprite):
     """Clase para las balas disparadas por el tanque"""
 
-    def __init__(
-        self,
-        position,
-        direction,
-        collision_group,
-        muzzle_flash_group,
-        tank_id,
-        damage=10,
-    ):
+    def __init__(self, position, direction, tank_id, damage = 10):
         super().__init__()
-        self.tank_id = tank_id  # ID del tanque que disparó la bala
-        self.damage = damage  # Daño que inflige la bala
-        self.original_image = (
-            self.get_bullet_image()
-        )  # Imagen basada en el ID del tanque
-        self.image = self.original_image
+        self.tank_id = tank_id
+        self.damage = damage
+        self.image = self.get_bullet_image()
         self.rect = self.image.get_rect(center=position)
         self.speed = 5
         self.direction = list(direction)  # Convertir la dirección a una lista
-        self.collision_group = (
-            collision_group  # Grupo de bloques con los que la bala puede colisionar
-        )
+        # self.collision_group = (
+        #     collision_group  # Grupo de bloques con los que la bala puede colisionar
+        # )
         self.bounces = 1  # Número de rebotes permitidos
         self.spawn_time = pygame.time.get_ticks()  # Tiempo de creación de la bala
 
         # Ajustar la posición del MuzzleFlash
-        muzzle_offset_x = direction[0] * 20  # Ajusta este valor según el diseño
-        muzzle_offset_y = direction[1] * 20  # Ajusta este valor según el diseño
-        muzzle_position = (position[0] + muzzle_offset_x, position[1] + muzzle_offset_y)
+        # muzzle_offset_x = direction[0] * 20  # Ajusta este valor según el diseño
+        # muzzle_offset_y = direction[1] * 20  # Ajusta este valor según el diseño
+        # muzzle_position = (position[0] + muzzle_offset_x, position[1] + muzzle_offset_y)
 
         # Crear un MuzzleFlash en la posición ajustada
-        muzzle_flash = MuzzleFlash(muzzle_position, direction)
-        muzzle_flash_group.add(muzzle_flash)
+        # muzzle_flash = MuzzleFlash(muzzle_position, direction)
+        # muzzle_flash_group.add(muzzle_flash)
 
     def update(self):
         # Mover la bala en la dirección calculada
@@ -46,74 +35,74 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.y += self.direction[1] * self.speed
 
         # Detectar colisiones con bloques sólidos
-        colliding_blocks = pygame.sprite.spritecollide(
-            self, self.collision_group, False
-        )
-        solid_collision = next(
-            (block for block in colliding_blocks if getattr(block, "solid", False)),
-            None,
-        )
+        # colliding_blocks = pygame.sprite.spritecollide(
+        #     self, self.collision_group, False
+        # )
+        # solid_collision = next(
+        #     (block for block in colliding_blocks if getattr(block, "solid", False)),
+        #     None,
+        # )
 
-        if solid_collision:
-            if self.bounces > 0:
-                # Rebote: invertir la dirección según el eje de colisión
-                if abs(self.rect.centerx - solid_collision.rect.centerx) > abs(
-                    self.rect.centery - solid_collision.rect.centery
-                ):
-                    # Colisión en el eje X: invertir dirección horizontal
-                    self.direction[0] *= -1
-                else:
-                    # Colisión en el eje Y: invertir dirección vertical
-                    self.direction[1] *= -1
-                self.bounces -= 1  # Reducir el contador de rebotes
-            else:
-                # Si no quedan rebotes, eliminar la bala
-                self.kill()
+        # if solid_collision:
+        #     if self.bounces > 0:
+        #         # Rebote: invertir la dirección según el eje de colisión
+        #         if abs(self.rect.centerx - solid_collision.rect.centerx) > abs(
+        #             self.rect.centery - solid_collision.rect.centery
+        #         ):
+        #             # Colisión en el eje X: invertir dirección horizontal
+        #             self.direction[0] *= -1
+        #         else:
+        #             # Colisión en el eje Y: invertir dirección vertical
+        #             self.direction[1] *= -1
+        #         self.bounces -= 1  # Reducir el contador de rebotes
+        #     else:
+        #         # Si no quedan rebotes, eliminar la bala
+        #         self.kill()
 
-        # Detectar colisiones con tanques
-        current_time = pygame.time.get_ticks()
-        for tank in [
-            sprite for sprite in self.collision_group if isinstance(sprite, Tank)
-        ]:
-            if self.rect.colliderect(tank.rect):
-                if tank.tank_id == self.tank_id:
-                    # Si es el tanque que disparó, esperar 1 segundo antes de destruirlo
-                    if current_time - self.spawn_time > 1000:  # 1000 ms = 1 segundo
-                        tank.is_destroyed = True  # Marcar el tanque como destruido
-                        tank.kill()  # Eliminar el tanque
-                        self.kill()  # Eliminar la bala
-                else:
-                    # Si es un tanque enemigo, destruirlo inmediatamente
-                    tank.is_destroyed = True
-                    tank.kill()
-                    self.kill()
+        # # Detectar colisiones con tanques
+        # current_time = pygame.time.get_ticks()
+        # for tank in [
+        #     sprite for sprite in self.collision_group if isinstance(sprite, Tank)
+        # ]:
+        #     if self.rect.colliderect(tank.rect):
+        #         if tank.tank_id == self.tank_id:
+        #             # Si es el tanque que disparó, esperar 1 segundo antes de destruirlo
+        #             if current_time - self.spawn_time > 1000:  # 1000 ms = 1 segundo
+        #                 tank.is_destroyed = True  # Marcar el tanque como destruido
+        #                 tank.kill()  # Eliminar el tanque
+        #                 self.kill()  # Eliminar la bala
+        #         else:
+        #             # Si es un tanque enemigo, destruirlo inmediatamente
+        #             tank.is_destroyed = True
+        #             tank.kill()
+        #             self.kill()
 
-        # Detectar colisiones con los límites de la pantalla
-        screen_width = pygame.display.get_surface().get_width()
-        screen_height = pygame.display.get_surface().get_height()
+        # # Detectar colisiones con los límites de la pantalla
+        # screen_width = pygame.display.get_surface().get_width()
+        # screen_height = pygame.display.get_surface().get_height()
 
-        if self.rect.left <= 0 or self.rect.right >= screen_width:
-            if self.bounces > 0:
-                # Rebote en el eje X
-                self.direction[0] *= -1
-                self.bounces -= 1  # Reducir el contador de rebotes
-            else:
-                # Si no quedan rebotes, eliminar la bala
-                self.kill()
+        # if self.rect.left <= 0 or self.rect.right >= screen_width:
+        #     if self.bounces > 0:
+        #         # Rebote en el eje X
+        #         self.direction[0] *= -1
+        #         self.bounces -= 1  # Reducir el contador de rebotes
+        #     else:
+        #         # Si no quedan rebotes, eliminar la bala
+        #         self.kill()
 
-        if self.rect.top <= 0 or self.rect.bottom >= screen_height:
-            if self.bounces > 0:
-                # Rebote en el eje Y
-                self.direction[1] *= -1
-                self.bounces -= 1  # Reducir el contador de rebotes
-            else:
-                # Si no quedan rebotes, eliminar la bala
-                self.kill()
+        # if self.rect.top <= 0 or self.rect.bottom >= screen_height:
+        #     if self.bounces > 0:
+        #         # Rebote en el eje Y
+        #         self.direction[1] *= -1
+        #         self.bounces -= 1  # Reducir el contador de rebotes
+        #     else:
+        #         # Si no quedan rebotes, eliminar la bala
+        #         self.kill()
 
-        # Actualizar el ángulo de la imagen basado en la dirección
-        angle = math.degrees(math.atan2(-self.direction[1], self.direction[0])) - 90
-        self.image = pygame.transform.rotate(self.original_image, angle)
-        self.rect = self.image.get_rect(center=self.rect.center)
+        # # Actualizar el ángulo de la imagen basado en la dirección
+        # angle = math.degrees(math.atan2(-self.direction[1], self.direction[0])) - 90
+        # self.image = pygame.transform.rotate(self.original_image, angle)
+        # self.rect = self.image.get_rect(center=self.rect.center)
 
     def get_bullet_image(self):
         """Devuelve la imagen de la bala según el ID del tanque"""
