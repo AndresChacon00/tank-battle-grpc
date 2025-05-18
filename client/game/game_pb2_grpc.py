@@ -79,6 +79,11 @@ class GameServiceStub(object):
                 request_serializer=game__pb2.Empty.SerializeToString,
                 response_deserializer=game__pb2.PlayerList.FromString,
                 _registered_method=True)
+        self.StartGame = channel.unary_unary(
+                '/game.GameService/StartGame',
+                request_serializer=game__pb2.Empty.SerializeToString,
+                response_deserializer=game__pb2.Empty.FromString,
+                _registered_method=True)
 
 
 class GameServiceServicer(object):
@@ -147,6 +152,13 @@ class GameServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def StartGame(self, request, context):
+        """Iniciar el juego (nuevo método)
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_GameServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -194,6 +206,11 @@ def add_GameServiceServicer_to_server(servicer, server):
                     servicer.GetPlayerList,
                     request_deserializer=game__pb2.Empty.FromString,
                     response_serializer=game__pb2.PlayerList.SerializeToString,
+            ),
+            'StartGame': grpc.unary_unary_rpc_method_handler(
+                    servicer.StartGame,
+                    request_deserializer=game__pb2.Empty.FromString,
+                    response_serializer=game__pb2.Empty.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -439,6 +456,33 @@ class GameService(object):
             '/game.GameService/GetPlayerList',
             game__pb2.Empty.SerializeToString,
             game__pb2.PlayerList.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def StartGame(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/game.GameService/StartGame',
+            game__pb2.Empty.SerializeToString,
+            game__pb2.Empty.FromString,
             options,
             channel_credentials,
             insecure,

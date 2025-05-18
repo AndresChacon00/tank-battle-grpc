@@ -329,8 +329,9 @@ func (x *BulletRemoveRequest) GetBulletId() string {
 // Estado del juego
 type GameState struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Players       []*PlayerState         `protobuf:"bytes,1,rep,name=players,proto3" json:"players,omitempty"` // Lista de jugadores
-	Bullets       []*BulletState         `protobuf:"bytes,2,rep,name=bullets,proto3" json:"bullets,omitempty"` // Lista de balas activas
+	Players       []*PlayerState         `protobuf:"bytes,1,rep,name=players,proto3" json:"players,omitempty"`                             // Lista de jugadores
+	Bullets       []*BulletState         `protobuf:"bytes,2,rep,name=bullets,proto3" json:"bullets,omitempty"`                             // Lista de balas activas
+	GameStarted   bool                   `protobuf:"varint,3,opt,name=game_started,json=gameStarted,proto3" json:"game_started,omitempty"` // Indica si el juego ha comenzado
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -377,6 +378,13 @@ func (x *GameState) GetBullets() []*BulletState {
 		return x.Bullets
 	}
 	return nil
+}
+
+func (x *GameState) GetGameStarted() bool {
+	if x != nil {
+		return x.GameStarted
+	}
+	return false
 }
 
 // Obtener estado
@@ -622,10 +630,11 @@ const file_game_proto_rawDesc = "" +
 	"PlayerList\x12.\n" +
 	"\aplayers\x18\x01 \x03(\v2\x14.game.PlayerListItemR\aplayers\"2\n" +
 	"\x13BulletRemoveRequest\x12\x1b\n" +
-	"\tbullet_id\x18\x01 \x01(\tR\bbulletId\"e\n" +
+	"\tbullet_id\x18\x01 \x01(\tR\bbulletId\"\x88\x01\n" +
 	"\tGameState\x12+\n" +
 	"\aplayers\x18\x01 \x03(\v2\x11.game.PlayerStateR\aplayers\x12+\n" +
-	"\abullets\x18\x02 \x03(\v2\x11.game.BulletStateR\abullets\"\a\n" +
+	"\abullets\x18\x02 \x03(\v2\x11.game.BulletStateR\abullets\x12!\n" +
+	"\fgame_started\x18\x03 \x01(\bR\vgameStarted\"\a\n" +
 	"\x05Empty\"+\n" +
 	"\n" +
 	"MapRequest\x12\x1d\n" +
@@ -638,7 +647,7 @@ const file_game_proto_rawDesc = "" +
 	"\vplayer_name\x18\x01 \x01(\tR\n" +
 	"playerName\"-\n" +
 	"\x0ePlayerResponse\x12\x1b\n" +
-	"\tplayer_id\x18\x01 \x01(\x05R\bplayerId2\xc1\x03\n" +
+	"\tplayer_id\x18\x01 \x01(\x05R\bplayerId2\xe8\x03\n" +
 	"\vGameService\x121\n" +
 	"\vUpdateState\x12\x11.game.PlayerState\x1a\x0f.game.GameState\x12,\n" +
 	"\fGetGameState\x12\v.game.Empty\x1a\x0f.game.GameState\x121\n" +
@@ -648,7 +657,8 @@ const file_game_proto_rawDesc = "" +
 	"\x06SetMap\x12\x10.game.MapRequest\x1a\v.game.Empty\x12(\n" +
 	"\x06GetMap\x12\v.game.Empty\x1a\x11.game.MapResponse\x126\n" +
 	"\tAddPlayer\x12\x13.game.PlayerRequest\x1a\x14.game.PlayerResponse\x12.\n" +
-	"\rGetPlayerList\x12\v.game.Empty\x1a\x10.game.PlayerListB\aZ\x05/gameb\x06proto3"
+	"\rGetPlayerList\x12\v.game.Empty\x1a\x10.game.PlayerList\x12%\n" +
+	"\tStartGame\x12\v.game.Empty\x1a\v.game.EmptyB\aZ\x05/gameb\x06proto3"
 
 var (
 	file_game_proto_rawDescOnce sync.Once
@@ -689,17 +699,19 @@ var file_game_proto_depIdxs = []int32{
 	6,  // 9: game.GameService.GetMap:input_type -> game.Empty
 	9,  // 10: game.GameService.AddPlayer:input_type -> game.PlayerRequest
 	6,  // 11: game.GameService.GetPlayerList:input_type -> game.Empty
-	5,  // 12: game.GameService.UpdateState:output_type -> game.GameState
-	5,  // 13: game.GameService.GetGameState:output_type -> game.GameState
-	5,  // 14: game.GameService.StreamGameState:output_type -> game.GameState
-	6,  // 15: game.GameService.AddBullet:output_type -> game.Empty
-	6,  // 16: game.GameService.RemoveBullet:output_type -> game.Empty
-	6,  // 17: game.GameService.SetMap:output_type -> game.Empty
-	8,  // 18: game.GameService.GetMap:output_type -> game.MapResponse
-	10, // 19: game.GameService.AddPlayer:output_type -> game.PlayerResponse
-	3,  // 20: game.GameService.GetPlayerList:output_type -> game.PlayerList
-	12, // [12:21] is the sub-list for method output_type
-	3,  // [3:12] is the sub-list for method input_type
+	6,  // 12: game.GameService.StartGame:input_type -> game.Empty
+	5,  // 13: game.GameService.UpdateState:output_type -> game.GameState
+	5,  // 14: game.GameService.GetGameState:output_type -> game.GameState
+	5,  // 15: game.GameService.StreamGameState:output_type -> game.GameState
+	6,  // 16: game.GameService.AddBullet:output_type -> game.Empty
+	6,  // 17: game.GameService.RemoveBullet:output_type -> game.Empty
+	6,  // 18: game.GameService.SetMap:output_type -> game.Empty
+	8,  // 19: game.GameService.GetMap:output_type -> game.MapResponse
+	10, // 20: game.GameService.AddPlayer:output_type -> game.PlayerResponse
+	3,  // 21: game.GameService.GetPlayerList:output_type -> game.PlayerList
+	6,  // 22: game.GameService.StartGame:output_type -> game.Empty
+	13, // [13:23] is the sub-list for method output_type
+	3,  // [3:13] is the sub-list for method input_type
 	3,  // [3:3] is the sub-list for extension type_name
 	3,  // [3:3] is the sub-list for extension extendee
 	0,  // [0:3] is the sub-list for field type_name

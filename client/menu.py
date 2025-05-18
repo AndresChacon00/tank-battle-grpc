@@ -174,11 +174,25 @@ class LobbyCreatorMenu(Menu):
             )
             self.blit_screen()
 
+            # --- NEW: If game has started, switch to playing state for all clients ---
+            if hasattr(self.game, "game_state") and self.game.game_state is not None:
+                if getattr(self.game.game_state, "game_started", False):
+                    self.game.playing = True
+                    self.run_display = False
+
     def check_input(self):
         """Actúa según la entrada del usuario"""
         if self.game.click_pos is not None:
             if self.play_button.collidepoint(self.game.click_pos):
                 self.game.send_map_to_server(self.game.map.id)
+                # --- NEW: Call StartGame RPC on the server ---
+                if hasattr(self.game, "client"):
+                    try:
+                        from game.game_pb2 import Empty
+
+                        self.game.client.StartGame(Empty())
+                    except Exception as e:
+                        print(f"Error al iniciar el juego en el servidor: {e}")
                 self.game.playing = True
                 self.run_display = False
 
@@ -314,6 +328,12 @@ class LobbyJoinerMenu(Menu):
                 color=Colors.BLACK,
             )
             self.blit_screen()
+
+            # --- NEW: If game has started, switch to playing state for all clients ---
+            if hasattr(self.game, "game_state") and self.game.game_state is not None:
+                if getattr(self.game.game_state, "game_started", False):
+                    self.game.playing = True
+                    self.run_display = False
 
     def check_input(self):
         """Actúa según la entrada del usuario"""

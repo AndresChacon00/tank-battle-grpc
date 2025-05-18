@@ -21,6 +21,7 @@ type gameServer struct {
     players map[string]*game.PlayerState
     bullets map[string]*game.BulletState // Mapa para almacenar las balas activas
     mapID   int                          // ID del mapa seleccionado
+    gameStarted bool                     // Nuevo: indica si el juego ha comenzado
 }
 
 func (s *gameServer) UpdateState(ctx context.Context, state *game.PlayerState) (*game.GameState, error) {
@@ -38,6 +39,7 @@ func (s *gameServer) UpdateState(ctx context.Context, state *game.PlayerState) (
     for _, bullet := range s.bullets {
         gameState.Bullets = append(gameState.Bullets, bullet)
     }
+    gameState.GameStarted = s.gameStarted // Nuevo: incluir estado de inicio de juego
 
     defer s.mu.Unlock()
     return gameState, nil
@@ -85,6 +87,7 @@ func (s *gameServer) GetGameState(ctx context.Context, empty *game.Empty) (*game
     for _, bullet := range s.bullets {
         gameState.Bullets = append(gameState.Bullets, bullet)
     }
+    gameState.GameStarted = s.gameStarted // Nuevo: incluir estado de inicio de juego
 
     defer s.mu.Unlock()
     return gameState, nil
@@ -154,6 +157,7 @@ func (s *gameServer) StreamGameState(empty *game.Empty, stream game.GameService_
         for _, bullet := range s.bullets {
             gameState.Bullets = append(gameState.Bullets, bullet)
         }
+        gameState.GameStarted = s.gameStarted // Nuevo: incluir estado de inicio de juego
 
         s.mu.Unlock()
 
@@ -168,6 +172,14 @@ func (s *gameServer) StreamGameState(empty *game.Empty, stream game.GameService_
     }
 }
 
+// Implementar el método StartGame para cambiar el estado y notificar a los clientes
+func (s *gameServer) StartGame(ctx context.Context, empty *game.Empty) (*game.Empty, error) {
+    s.mu.Lock()
+    s.gameStarted = true
+    log.Printf("El juego ha comenzado (gameStarted=true)")
+    s.mu.Unlock()
+    return &game.Empty{}, nil
+}
 
 func main() {
     lis, err := net.Listen("tcp", ":9000")

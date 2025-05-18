@@ -30,6 +30,9 @@ service GameService {
 
     // Obtener el listado de jugadores
     rpc GetPlayerList (Empty) returns (PlayerList);
+
+    // Iniciar el juego (nuevo método)
+    rpc StartGame (Empty) returns (Empty);
 }
 // Estado de juego y jugador
 message PlayerState {
@@ -70,6 +73,7 @@ message BulletRemoveRequest {
 message GameState {
     repeated PlayerState players = 1; // Lista de jugadores
     repeated BulletState bullets = 2; // Lista de balas activas
+    bool game_started = 3; // Indica si el juego ha comenzado
 }
 
 // Obtener estado

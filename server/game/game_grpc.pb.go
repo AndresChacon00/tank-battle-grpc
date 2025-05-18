@@ -28,6 +28,7 @@ const (
 	GameService_GetMap_FullMethodName          = "/game.GameService/GetMap"
 	GameService_AddPlayer_FullMethodName       = "/game.GameService/AddPlayer"
 	GameService_GetPlayerList_FullMethodName   = "/game.GameService/GetPlayerList"
+	GameService_StartGame_FullMethodName       = "/game.GameService/StartGame"
 )
 
 // GameServiceClient is the client API for GameService service.
@@ -52,6 +53,8 @@ type GameServiceClient interface {
 	AddPlayer(ctx context.Context, in *PlayerRequest, opts ...grpc.CallOption) (*PlayerResponse, error)
 	// Obtener el listado de jugadores
 	GetPlayerList(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*PlayerList, error)
+	// Iniciar el juego (nuevo método)
+	StartGame(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type gameServiceClient struct {
@@ -161,6 +164,16 @@ func (c *gameServiceClient) GetPlayerList(ctx context.Context, in *Empty, opts .
 	return out, nil
 }
 
+func (c *gameServiceClient) StartGame(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, GameService_StartGame_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GameServiceServer is the server API for GameService service.
 // All implementations must embed UnimplementedGameServiceServer
 // for forward compatibility.
@@ -183,6 +196,8 @@ type GameServiceServer interface {
 	AddPlayer(context.Context, *PlayerRequest) (*PlayerResponse, error)
 	// Obtener el listado de jugadores
 	GetPlayerList(context.Context, *Empty) (*PlayerList, error)
+	// Iniciar el juego (nuevo método)
+	StartGame(context.Context, *Empty) (*Empty, error)
 	mustEmbedUnimplementedGameServiceServer()
 }
 
@@ -219,6 +234,9 @@ func (UnimplementedGameServiceServer) AddPlayer(context.Context, *PlayerRequest)
 }
 func (UnimplementedGameServiceServer) GetPlayerList(context.Context, *Empty) (*PlayerList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPlayerList not implemented")
+}
+func (UnimplementedGameServiceServer) StartGame(context.Context, *Empty) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StartGame not implemented")
 }
 func (UnimplementedGameServiceServer) mustEmbedUnimplementedGameServiceServer() {}
 func (UnimplementedGameServiceServer) testEmbeddedByValue()                     {}
@@ -396,6 +414,24 @@ func _GameService_GetPlayerList_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GameService_StartGame_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServiceServer).StartGame(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GameService_StartGame_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServiceServer).StartGame(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GameService_ServiceDesc is the grpc.ServiceDesc for GameService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -434,6 +470,10 @@ var GameService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetPlayerList",
 			Handler:    _GameService_GetPlayerList_Handler,
+		},
+		{
+			MethodName: "StartGame",
+			Handler:    _GameService_StartGame_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

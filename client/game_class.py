@@ -2,6 +2,7 @@ import pygame
 import math
 import grpc
 import uuid
+import threading
 from typing import Union
 from game.game_pb2_grpc import GameServiceStub
 from game.game_pb2 import (
@@ -70,6 +71,21 @@ class Game:
         self.map = Map(1, MAP_1_LAYOUT)
         self.blocks = self.map.generate_map()
 
+        self.game_state = None  # Holds the latest GameState from the server
+        self._start_game_state_stream()
+
+    def _start_game_state_stream(self):
+        def stream():
+            if not hasattr(self, "client"):
+                return
+            try:
+                for state in self.client.StreamGameState(Empty()):
+                    self.game_state = state
+            except Exception as e:
+                print(f"Error en StreamGameState: {e}")
+
+        threading.Thread(target=stream, daemon=True).start()
+
     def game_loop(self):
         """Bucle principal del juego."""
         pygame.mouse.set_visible(True)
@@ -126,8 +142,7 @@ class Game:
 
             if self.playing:
                 if (
-                    event.type == pygame.MOUSEBUTTONDOWN
-                    and event.button == 1
+                    event.type == pygame.MOUSEBUTTONDOWN and event.button == 1
                     # and not self.tank.is_destroyed
                 ):
                     # Disparar
