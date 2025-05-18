@@ -159,7 +159,7 @@ class Tank(pygame.sprite.Sprite):
             ).convert_alpha()
         else:
             return pygame.image.load(
-                "assets/Retina/tankBody_gray_outline.png"
+                "assets/Retina/tankBody_sand_outline.png"
             ).convert_alpha()
 
     def draw_health(self, screen):
@@ -206,7 +206,7 @@ class TankCannon(pygame.sprite.Sprite):
         """Devuelve la imagen del cañón según el color del tanque"""
         if self.tank.tank_id == "1":
             return pygame.image.load(
-                "assets/Retina/tankBlue_barrel1_outline.png"
+                "assets/Retina/tankBlue_barrel2_outline.png"
             ).convert_alpha()
         elif self.tank.tank_id == "2":
             return pygame.image.load(
@@ -214,11 +214,11 @@ class TankCannon(pygame.sprite.Sprite):
             ).convert_alpha()
         elif self.tank.tank_id == "3":
             return pygame.image.load(
-                "assets/Retina/tankGreen_barrel1_outline.png"
+                "assets/Retina/tankGreen_barrel3_outline.png"
             ).convert_alpha()
         else:
             return pygame.image.load(
-                "assets/Retina/tankGray_barrel1_outline.png"
+                "assets/Retina/tankSand_barrel2_outline.png"
             ).convert_alpha()
 
 

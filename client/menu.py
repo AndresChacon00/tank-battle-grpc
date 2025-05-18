@@ -99,7 +99,7 @@ class MainMenu(Menu):
 
 
 class LobbyCreatorMenu(Menu):
-    """Clase que representa el menú de la sala de espera"""
+    """Clase que representa el menú de la sala de espera (creador)"""
 
     def __init__(self, game: "Game"):
         super().__init__(game)
@@ -109,12 +109,17 @@ class LobbyCreatorMenu(Menu):
         self.quit_button = pygame.Rect(self.mid_w - 100, self.mid_h + 210, 200, 50)
         # Obtener la IP local
         self.local_ip = self.get_local_ip()
-        # Lista de jugadores
+        # Lista de jugadores (por ejemplo, con player_id "1", "2", etc.)
         self.players = ["Player 1", "Player 2"]
         # Logo reducido en la esquina superior izquierda
         self.logo = pygame.image.load("assets/menu/game-logo.png")
         self.logo_small = pygame.transform.scale(self.logo, (80, 80))
         self.logo_rect = self.logo_small.get_rect(topleft=(20, 20))
+        # Cargar imágenes de tanques
+        self.blue_tank_img = pygame.image.load("assets/Retina/tank_blue.png").convert_alpha()
+        self.red_tank_img = pygame.image.load("assets/Retina/tank_red.png").convert_alpha()
+        self.green_tank_img = pygame.image.load("assets/Retina/tank_green.png").convert_alpha()
+        self.sand_tank_img = pygame.image.load("assets/Retina/tank_sand.png").convert_alpha()
 
     def get_local_ip(self):
         try:
@@ -129,7 +134,6 @@ class LobbyCreatorMenu(Menu):
             return "127.0.0.1"
 
     def display_menu(self):
-        """Muestra el menú principal"""
         self.run_display = True
         while self.run_display:
             self.game.check_events()
@@ -140,24 +144,43 @@ class LobbyCreatorMenu(Menu):
             self.game.screen.blit(self.logo_small, self.logo_rect)
             # Mostrar la IP local
             self.game.draw_text(
-                f"Sala de espera - IP de la sala: {self.local_ip}",
+                f"Sala de espera - IP: {self.local_ip}",
                 28,
                 self.mid_w,
                 self.mid_h - 120,
                 color=Colors.BLACK,
             )
-            # Mostrar lista de jugadores
+            # Mostrar lista de jugadores con imagen y mayor separación
             if player_list is not None:
+                # Usamos un offset vertical mayor, por ejemplo 60 px por jugador
                 for player in player_list.players:
+                    player_y = self.mid_h - 80 + (int(player.player_id) - 1) * 60
+                    # Dibuja el nombre centrado
                     self.game.draw_text(
                         f"Jugador {player.player_id}",
                         24,
                         self.mid_w,
-                        self.mid_h - 60 + int(player.player_id) * 30,
+                        player_y,
                         color=Colors.BLACK,
                     )
+                    # Seleccionar imagen según el ID del jugador
+                    if player.player_id == "1":
+                        tank_img = self.blue_tank_img
+                    elif player.player_id == "2":
+                        tank_img = self.red_tank_img
+                    elif player.player_id == "3":
+                        tank_img = self.green_tank_img
+                    elif player.player_id == "4":
+                        tank_img = self.sand_tank_img
+                    else:
+                        tank_img = None
 
-            # Botones
+                    if tank_img:
+                        # Escalar la imagen a un tamaño adecuado (por ejemplo, 40x40)
+                        tank_img_small = pygame.transform.scale(tank_img, (40, 40))
+                        # Ubicar la imagen a la izquierda del nombre; ajusta la coordenada X (por ejemplo, mid_w - 220)
+                        self.game.screen.blit(tank_img_small, (self.mid_w - 125, player_y - 20))
+            # Dibujar botones
             pygame.draw.rect(self.game.screen, Colors.BLACK, self.play_button, 2)
             self.game.draw_text(
                 "Iniciar partida",
@@ -176,7 +199,6 @@ class LobbyCreatorMenu(Menu):
             )
             self.blit_screen()
 
-            # --- NEW: If game has started, switch to playing state for all clients ---
             if hasattr(self.game, "game_state") and self.game.game_state is not None:
                 if getattr(self.game.game_state, "game_started", False):
                     self.game.playing = True
@@ -288,6 +310,11 @@ class LobbyJoinerMenu(Menu):
         self.logo = pygame.image.load("assets/menu/game-logo.png")
         self.logo_small = pygame.transform.scale(self.logo, (80, 80))
         self.logo_rect = self.logo_small.get_rect(topleft=(20, 20))
+        # Cargar imágenes de tanques (agregar esta parte)
+        self.blue_tank_img = pygame.image.load("assets/Retina/tank_blue.png").convert_alpha()
+        self.red_tank_img = pygame.image.load("assets/Retina/tank_red.png").convert_alpha()
+        self.green_tank_img = pygame.image.load("assets/Retina/tank_green.png").convert_alpha()
+        self.sand_tank_img = pygame.image.load("assets/Retina/tank_sand.png").convert_alpha()
 
     def display_menu(self):
         """Muestra el menú principal"""
@@ -299,7 +326,7 @@ class LobbyJoinerMenu(Menu):
             self.game.screen.fill(Colors.PALE_YELLOW)
             # Logo en la esquina
             self.game.screen.blit(self.logo_small, self.logo_rect)
-            # Mostrar la IP local
+            # Mostrar la IP de la sala
             self.game.draw_text(
                 f"Sala de espera - IP de la sala: {self.game.server_ip}",
                 28,
@@ -307,18 +334,32 @@ class LobbyJoinerMenu(Menu):
                 self.mid_h - 120,
                 color=Colors.BLACK,
             )
-            # Mostrar lista de jugadores
+            # Mostrar lista de jugadores con imagen y mayor separación
             if player_list is not None:
                 for player in player_list.players:
+                    player_y = self.mid_h - 80 + (int(player.player_id) - 1) * 60
                     self.game.draw_text(
                         f"Jugador {player.player_id}",
                         24,
                         self.mid_w,
-                        self.mid_h - 60 + int(player.player_id) * 30,
+                        player_y,
                         color=Colors.BLACK,
                     )
+                    if player.player_id == "1":
+                        tank_img = self.blue_tank_img
+                    elif player.player_id == "2":
+                        tank_img = self.red_tank_img
+                    elif player.player_id == "3":
+                        tank_img = self.green_tank_img
+                    elif player.player_id == "4":
+                        tank_img = self.sand_tank_img
+                    else:
+                        tank_img = None
 
-            # Botones
+                    if tank_img:
+                        tank_img_small = pygame.transform.scale(tank_img, (40, 40))
+                        self.game.screen.blit(tank_img_small, (self.mid_w - 125, player_y - 20))
+            # Botón Volver
             pygame.draw.rect(self.game.screen, Colors.BLACK, self.quit_button, 2)
             self.game.draw_text(
                 "Volver",
@@ -328,8 +369,8 @@ class LobbyJoinerMenu(Menu):
                 color=Colors.BLACK,
             )
             self.blit_screen()
-
-            # --- NEW: If game has started, switch to playing state for all clients ---
+            
+            # Si el juego ya inició, salir del menú
             if hasattr(self.game, "game_state") and self.game.game_state is not None:
                 if getattr(self.game.game_state, "game_started", False):
                     self.game.playing = True

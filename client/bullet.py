@@ -121,7 +121,7 @@ class Bullet(pygame.sprite.Sprite):
             ).convert_alpha()
         else:
             return pygame.image.load(
-                "assets/Retina/bulletDark1_outline.png"
+                "assets/Retina/bulletSand1_outline.png"
             ).convert_alpha()
 
 
