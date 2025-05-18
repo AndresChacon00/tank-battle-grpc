@@ -124,25 +124,6 @@ class Tank(pygame.sprite.Sprite):
         if self.rect.top < 0:
             self.rect.top = 0
 
-    def handle_bullet_collision(self, bullets_group):
-        """Manejar colisiones con balas"""
-        colliding_bullets = pygame.sprite.spritecollide(self, bullets_group, False)
-
-        for bullet in colliding_bullets:
-            # Ignorar colisión si la bala fue disparada por este tanque y tiene menos de 1 segundo
-            print("BAla impacto")
-            if bullet.tank_id == self.tank_id:
-                print("mismoid")
-                continue
-
-            # Aplicar daño
-            self.health -= bullet.damage
-
-            # bullet.kill()
-            if self.health <= 0:
-                print("murio")
-            #    self.kill()
-
     def get_tank_image(self):
         """Devuelve la imagen del tanque según el color"""
         if self.tank_id == "1":
