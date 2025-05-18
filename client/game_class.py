@@ -104,7 +104,14 @@ class Game:
             # Actualizar entidades
             self.send_player_state(self.tank)
             self.tank.update(self.blocks)
-            self.cannon.update()
+
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            tank_x, tank_y = self.tank.rect.center
+            dx = mouse_x - tank_x
+            dy = mouse_y - tank_y
+            mouse_angle = math.degrees(math.atan2(-dy, dx)) + 90
+            self.cannon.update(mouse_angle)
+
             self.bullets_group.update()
             self.explosions_group.update()
             # Clear the screen before drawing

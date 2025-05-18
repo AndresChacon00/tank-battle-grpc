@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\ngame.proto\x12\x04game\"U\n\x0bPlayerState\x12\x11\n\tplayer_id\x18\x01 \x01(\t\x12\t\n\x01x\x18\x02 \x01(\x02\x12\t\n\x01y\x18\x03 \x01(\x02\x12\r\n\x05\x61ngle\x18\x04 \x01(\x02\x12\x0e\n\x06health\x18\x05 \x01(\x02\"p\n\x0b\x42ulletState\x12\x11\n\tbullet_id\x18\x01 \x01(\t\x12\t\n\x01x\x18\x02 \x01(\x02\x12\t\n\x01y\x18\x03 \x01(\x02\x12\n\n\x02\x64x\x18\x04 \x01(\x02\x12\n\n\x02\x64y\x18\x05 \x01(\x02\x12\x10\n\x08owner_id\x18\x06 \x01(\t\x12\x0e\n\x06\x64\x61mage\x18\x07 \x01(\x02\"#\n\x0ePlayerListItem\x12\x11\n\tplayer_id\x18\x01 \x01(\t\"3\n\nPlayerList\x12%\n\x07players\x18\x01 \x03(\x0b\x32\x14.game.PlayerListItem\"(\n\x13\x42ulletRemoveRequest\x12\x11\n\tbullet_id\x18\x01 \x01(\t\"i\n\tGameState\x12\"\n\x07players\x18\x01 \x03(\x0b\x32\x11.game.PlayerState\x12\"\n\x07\x62ullets\x18\x02 \x03(\x0b\x32\x11.game.BulletState\x12\x14\n\x0cgame_started\x18\x03 \x01(\x08\"\x07\n\x05\x45mpty\" \n\nMapRequest\x12\x12\n\nmap_number\x18\x01 \x01(\x05\"!\n\x0bMapResponse\x12\x12\n\nmap_number\x18\x01 \x01(\x05\"$\n\rPlayerRequest\x12\x13\n\x0bplayer_name\x18\x01 \x01(\t\"#\n\x0ePlayerResponse\x12\x11\n\tplayer_id\x18\x01 \x01(\x05\x32\xa5\x04\n\x0bGameService\x12\x31\n\x0bUpdateState\x12\x11.game.PlayerState\x1a\x0f.game.GameState\x12;\n\x15UpdateStateFromEngine\x12\x11.game.PlayerState\x1a\x0f.game.GameState\x12,\n\x0cGetGameState\x12\x0b.game.Empty\x1a\x0f.game.GameState\x12\x31\n\x0fStreamGameState\x12\x0b.game.Empty\x1a\x0f.game.GameState0\x01\x12+\n\tAddBullet\x12\x11.game.BulletState\x1a\x0b.game.Empty\x12\x36\n\x0cRemoveBullet\x12\x19.game.BulletRemoveRequest\x1a\x0b.game.Empty\x12\'\n\x06SetMap\x12\x10.game.MapRequest\x1a\x0b.game.Empty\x12(\n\x06GetMap\x12\x0b.game.Empty\x1a\x11.game.MapResponse\x12\x36\n\tAddPlayer\x12\x13.game.PlayerRequest\x1a\x14.game.PlayerResponse\x12.\n\rGetPlayerList\x12\x0b.game.Empty\x1a\x10.game.PlayerList\x12%\n\tStartGame\x12\x0b.game.Empty\x1a\x0b.game.EmptyB\x07Z\x05/gameb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\ngame.proto\x12\x04game\"k\n\x0bPlayerState\x12\x11\n\tplayer_id\x18\x01 \x01(\t\x12\t\n\x01x\x18\x02 \x01(\x02\x12\t\n\x01y\x18\x03 \x01(\x02\x12\r\n\x05\x61ngle\x18\x04 \x01(\x02\x12\x0e\n\x06health\x18\x05 \x01(\x02\x12\x14\n\x0c\x63\x61nnon_angle\x18\x06 \x01(\x02\"p\n\x0b\x42ulletState\x12\x11\n\tbullet_id\x18\x01 \x01(\t\x12\t\n\x01x\x18\x02 \x01(\x02\x12\t\n\x01y\x18\x03 \x01(\x02\x12\n\n\x02\x64x\x18\x04 \x01(\x02\x12\n\n\x02\x64y\x18\x05 \x01(\x02\x12\x10\n\x08owner_id\x18\x06 \x01(\t\x12\x0e\n\x06\x64\x61mage\x18\x07 \x01(\x02\"#\n\x0ePlayerListItem\x12\x11\n\tplayer_id\x18\x01 \x01(\t\"3\n\nPlayerList\x12%\n\x07players\x18\x01 \x03(\x0b\x32\x14.game.PlayerListItem\"(\n\x13\x42ulletRemoveRequest\x12\x11\n\tbullet_id\x18\x01 \x01(\t\"i\n\tGameState\x12\"\n\x07players\x18\x01 \x03(\x0b\x32\x11.game.PlayerState\x12\"\n\x07\x62ullets\x18\x02 \x03(\x0b\x32\x11.game.BulletState\x12\x14\n\x0cgame_started\x18\x03 \x01(\x08\"\x07\n\x05\x45mpty\" \n\nMapRequest\x12\x12\n\nmap_number\x18\x01 \x01(\x05\"!\n\x0bMapResponse\x12\x12\n\nmap_number\x18\x01 \x01(\x05\"$\n\rPlayerRequest\x12\x13\n\x0bplayer_name\x18\x01 \x01(\t\"#\n\x0ePlayerResponse\x12\x11\n\tplayer_id\x18\x01 \x01(\x05\x32\xa5\x04\n\x0bGameService\x12\x31\n\x0bUpdateState\x12\x11.game.PlayerState\x1a\x0f.game.GameState\x12;\n\x15UpdateStateFromEngine\x12\x11.game.PlayerState\x1a\x0f.game.GameState\x12,\n\x0cGetGameState\x12\x0b.game.Empty\x1a\x0f.game.GameState\x12\x31\n\x0fStreamGameState\x12\x0b.game.Empty\x1a\x0f.game.GameState0\x01\x12+\n\tAddBullet\x12\x11.game.BulletState\x1a\x0b.game.Empty\x12\x36\n\x0cRemoveBullet\x12\x19.game.BulletRemoveRequest\x1a\x0b.game.Empty\x12\'\n\x06SetMap\x12\x10.game.MapRequest\x1a\x0b.game.Empty\x12(\n\x06GetMap\x12\x0b.game.Empty\x1a\x11.game.MapResponse\x12\x36\n\tAddPlayer\x12\x13.game.PlayerRequest\x1a\x14.game.PlayerResponse\x12.\n\rGetPlayerList\x12\x0b.game.Empty\x1a\x10.game.PlayerList\x12%\n\tStartGame\x12\x0b.game.Empty\x1a\x0b.game.EmptyB\x07Z\x05/gameb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -33,27 +33,27 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
   _globals['DESCRIPTOR']._serialized_options = b'Z\005/game'
   _globals['_PLAYERSTATE']._serialized_start=20
-  _globals['_PLAYERSTATE']._serialized_end=105
-  _globals['_BULLETSTATE']._serialized_start=107
-  _globals['_BULLETSTATE']._serialized_end=219
-  _globals['_PLAYERLISTITEM']._serialized_start=221
-  _globals['_PLAYERLISTITEM']._serialized_end=256
-  _globals['_PLAYERLIST']._serialized_start=258
-  _globals['_PLAYERLIST']._serialized_end=309
-  _globals['_BULLETREMOVEREQUEST']._serialized_start=311
-  _globals['_BULLETREMOVEREQUEST']._serialized_end=351
-  _globals['_GAMESTATE']._serialized_start=353
-  _globals['_GAMESTATE']._serialized_end=458
-  _globals['_EMPTY']._serialized_start=460
-  _globals['_EMPTY']._serialized_end=467
-  _globals['_MAPREQUEST']._serialized_start=469
-  _globals['_MAPREQUEST']._serialized_end=501
-  _globals['_MAPRESPONSE']._serialized_start=503
-  _globals['_MAPRESPONSE']._serialized_end=536
-  _globals['_PLAYERREQUEST']._serialized_start=538
-  _globals['_PLAYERREQUEST']._serialized_end=574
-  _globals['_PLAYERRESPONSE']._serialized_start=576
-  _globals['_PLAYERRESPONSE']._serialized_end=611
-  _globals['_GAMESERVICE']._serialized_start=614
-  _globals['_GAMESERVICE']._serialized_end=1163
+  _globals['_PLAYERSTATE']._serialized_end=127
+  _globals['_BULLETSTATE']._serialized_start=129
+  _globals['_BULLETSTATE']._serialized_end=241
+  _globals['_PLAYERLISTITEM']._serialized_start=243
+  _globals['_PLAYERLISTITEM']._serialized_end=278
+  _globals['_PLAYERLIST']._serialized_start=280
+  _globals['_PLAYERLIST']._serialized_end=331
+  _globals['_BULLETREMOVEREQUEST']._serialized_start=333
+  _globals['_BULLETREMOVEREQUEST']._serialized_end=373
+  _globals['_GAMESTATE']._serialized_start=375
+  _globals['_GAMESTATE']._serialized_end=480
+  _globals['_EMPTY']._serialized_start=482
+  _globals['_EMPTY']._serialized_end=489
+  _globals['_MAPREQUEST']._serialized_start=491
+  _globals['_MAPREQUEST']._serialized_end=523
+  _globals['_MAPRESPONSE']._serialized_start=525
+  _globals['_MAPRESPONSE']._serialized_end=558
+  _globals['_PLAYERREQUEST']._serialized_start=560
+  _globals['_PLAYERREQUEST']._serialized_end=596
+  _globals['_PLAYERRESPONSE']._serialized_start=598
+  _globals['_PLAYERRESPONSE']._serialized_end=633
+  _globals['_GAMESERVICE']._serialized_start=636
+  _globals['_GAMESERVICE']._serialized_end=1185
 # @@protoc_insertion_point(module_scope)

@@ -28,7 +28,8 @@ type PlayerState struct {
 	X             float32                `protobuf:"fixed32,2,opt,name=x,proto3" json:"x,omitempty"`
 	Y             float32                `protobuf:"fixed32,3,opt,name=y,proto3" json:"y,omitempty"`
 	Angle         float32                `protobuf:"fixed32,4,opt,name=angle,proto3" json:"angle,omitempty"`
-	Health        float32                `protobuf:"fixed32,5,opt,name=health,proto3" json:"health,omitempty"` // Vida del jugador
+	Health        float32                `protobuf:"fixed32,5,opt,name=health,proto3" json:"health,omitempty"`                              // Vida del jugador
+	CannonAngle   float32                `protobuf:"fixed32,6,opt,name=cannon_angle,json=cannonAngle,proto3" json:"cannon_angle,omitempty"` // Ángulo del cañón del tanque
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -94,6 +95,13 @@ func (x *PlayerState) GetAngle() float32 {
 func (x *PlayerState) GetHealth() float32 {
 	if x != nil {
 		return x.Health
+	}
+	return 0
+}
+
+func (x *PlayerState) GetCannonAngle() float32 {
+	if x != nil {
+		return x.CannonAngle
 	}
 	return 0
 }
@@ -609,13 +617,14 @@ var File_game_proto protoreflect.FileDescriptor
 const file_game_proto_rawDesc = "" +
 	"\n" +
 	"\n" +
-	"game.proto\x12\x04game\"t\n" +
+	"game.proto\x12\x04game\"\x97\x01\n" +
 	"\vPlayerState\x12\x1b\n" +
 	"\tplayer_id\x18\x01 \x01(\tR\bplayerId\x12\f\n" +
 	"\x01x\x18\x02 \x01(\x02R\x01x\x12\f\n" +
 	"\x01y\x18\x03 \x01(\x02R\x01y\x12\x14\n" +
 	"\x05angle\x18\x04 \x01(\x02R\x05angle\x12\x16\n" +
-	"\x06health\x18\x05 \x01(\x02R\x06health\"\x99\x01\n" +
+	"\x06health\x18\x05 \x01(\x02R\x06health\x12!\n" +
+	"\fcannon_angle\x18\x06 \x01(\x02R\vcannonAngle\"\x99\x01\n" +
 	"\vBulletState\x12\x1b\n" +
 	"\tbullet_id\x18\x01 \x01(\tR\bbulletId\x12\f\n" +
 	"\x01x\x18\x02 \x01(\x02R\x01x\x12\f\n" +
