@@ -7,24 +7,99 @@ service GameService {
     // Actualiza el estado del jugador y envia una actualizacion
     rpc UpdateState (PlayerState) returns (GameState);
 
+    // Actualiza el estado del jugador desde el engine
+    rpc UpdateStateFromEngine (PlayerState) returns (GameState);
+
     // Obtener estado del juego
     rpc GetGameState (Empty) returns (GameState);
 
     // Devuelve actualizaciones en tiempo real
     rpc StreamGameState (Empty) returns (stream GameState);
+
+    // Agregar una bala al servidor
+    rpc AddBullet (BulletState) returns (Empty);
+
+    // Eliminar una bala del servidor
+    rpc RemoveBullet (BulletRemoveRequest) returns (Empty);
+
+    // Establecer el mapa que se va a usar
+    rpc SetMap (MapRequest) returns (Empty);
+
+    // Obtener el mapa actual
+    rpc GetMap (Empty) returns (MapResponse);
+
+    // Añadir un método para agregar nuevos jugadores
+    rpc AddPlayer (PlayerRequest) returns (PlayerResponse);
+
+    // Obtener el listado de jugadores
+    rpc GetPlayerList (Empty) returns (PlayerList);
+
+    // Iniciar el juego (nuevo método)
+    rpc StartGame (Empty) returns (Empty);
 }
 // Estado de juego y jugador
 message PlayerState {
     string player_id = 1;
     float x = 2;
     float y = 3;
+    float angle = 4;
+    float health = 5; // Vida del jugador
+    float cannon_angle = 6; // Ángulo del cañón del tanque
 }
 
+// Estado de una bala
+message BulletState {
+    string bullet_id = 1; // Identificador único de la bala
+    float x = 2;          // Posición X de la bala
+    float y = 3;          // Posición Y de la bala
+    float dx = 4;         // Dirección X de la bala
+    float dy = 5;         // Dirección Y de la bala
+    string owner_id = 6;  // ID del jugador que disparó la bala
+    float damage = 7;     // Daño que causa la bala
+}
+
+// Item de listado de jugadores
+message PlayerListItem {
+    string player_id = 1;
+}
+
+// Listado de jugadores
+message PlayerList {
+    repeated PlayerListItem players = 1;
+}
+
+// Mensaje para eliminar una bala
+message BulletRemoveRequest {
+    string bullet_id = 1; // ID de la bala a eliminar
+}
+
+// Estado del juego
 message GameState {
-    repeated PlayerState players = 1;
+    repeated PlayerState players = 1; // Lista de jugadores
+    repeated BulletState bullets = 2; // Lista de balas activas
+    string game_phase = 3; // "lobby", "playing", "finish"
+    string winner_id = 4; // Nuevo: ID del jugador ganador
 }
-
-
 
 // Obtener estado
 message Empty {}
+
+// Mensaje para establecer el mapa
+message MapRequest {
+    int32 map_number = 1;
+}
+
+// Mensaje para responder con el mapa actual
+message MapResponse {
+    int32 map_number = 1;
+}
+
+// Mensaje para solicitar la adición de un nuevo jugador
+message PlayerRequest {
+    string player_name = 1; // Nombre del jugador
+}
+
+// Mensaje para responder con el ID asignado al jugador
+message PlayerResponse {
+    int32 player_id = 1; // ID único asignado al jugador
+}
