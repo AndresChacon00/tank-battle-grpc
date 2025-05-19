@@ -18,6 +18,7 @@ class Tank(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(x, y))
         self.speed_x = 0
         self.speed_y = 0
+        self.max_speed = 3
         self.angle = 0
         self.target_angle = 0  # Nuevo: Ángulo objetivo
 
@@ -35,7 +36,7 @@ class Tank(pygame.sprite.Sprite):
         else:
             return Config.WIDTH - 120, 120  # Esquina superior derecha (por defecto)
 
-    def update(self, blocks: pygame.sprite.Group):
+    def update(self, blocks: pygame.sprite.Group, joystick=None):
         self.speed_x = 0
         self.speed_y = 0
         keystate = pygame.key.get_pressed()
@@ -124,6 +125,10 @@ class Tank(pygame.sprite.Sprite):
         if self.rect.top < 0:
             self.rect.top = 0
 
+        # Joystick
+        if joystick is not None:
+            self.handle_joystick(joystick)
+
     def get_tank_image(self):
         """Devuelve la imagen del tanque según el color"""
         if self.tank_id == "1":
@@ -149,6 +154,40 @@ class Tank(pygame.sprite.Sprite):
         life_text = self.font.render(f"{self.health}", True, (255, 0, 0))
         text_rect = life_text.get_rect(center=(self.rect.centerx, self.rect.top - 10))
         screen.blit(life_text, text_rect)
+
+    def handle_joystick(self, joystick: pygame.joystick.JoystickType):
+        """Manejar el movimiento del tanque y la rotación del cañón con un joystick"""
+        if joystick:
+            # Movimiento del tanque (joystick izquierdo)
+            move_x = joystick.get_axis(0)  # Eje X del joystick izquierdo
+            move_y = joystick.get_axis(1)  # Eje Y del joystick izquierdo
+            self.speed_x = move_x * self.max_speed
+            self.speed_y = move_y * self.max_speed
+
+            # Calcular el ángulo objetivo basado en el joystick
+            if abs(move_x) > 0.1 or abs(move_y) > 0.1:  # Evitar ruido en el joystick
+                self.target_angle = math.degrees(math.atan2(-move_y, move_x)) + 90
+                self.target_angle %= 360
+
+            # Rotación gradual hacia el ángulo objetivo
+            rotation_speed = 5  # Velocidad de rotación (grados por frame)
+            angle_difference = (self.target_angle - self.angle + 360) % 360
+
+            # Determinar la dirección de rotación más corta
+            if angle_difference > 180:
+                # Rotar en sentido antihorario
+                self.angle -= rotation_speed
+                if self.angle < 0:
+                    self.angle += 360  # Mantener el ángulo en el rango [0, 360]
+            else:
+                # Rotar en sentido horario
+                self.angle += rotation_speed
+                if self.angle >= 360:
+                    self.angle -= 360  # Mantener el ángulo en el rango [0, 360]
+
+            # Asegurarse de no sobrepasar el ángulo objetivo
+            if abs(angle_difference) < rotation_speed:
+                self.angle = self.target_angle
 
 
 class TankCannon(pygame.sprite.Sprite):
