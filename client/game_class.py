@@ -74,9 +74,12 @@ class Game:
         self.map = Map(1, MAP_1_LAYOUT)
         self.blocks = self.map.generate_map()
 
-        self.game_state = None  # Holds the latest GameState from the server
+        # Holds the latest GameState from the server
+        self.game_state = None
 
-        self.tanks = {}  # Store all tanks by player_id
+        # Joystick support
+        self.joystick = None
+        self.r2_pressed = None
 
     def init_tank(self, tank_id: str):
         """Inicializa el tanque del jugador."""
@@ -88,6 +91,13 @@ class Game:
         # self.tank_sprites.add(self.tank)
         # self.cannon_sprites.add(self.cannon)
         self.send_player_state(self.tank, self.cannon)
+
+    def init_joystick(self):
+        """Inicializa el joystick si está disponible."""
+        if pygame.joystick.get_count() > 0:
+            self.joystick = pygame.joystick.Joystick(0)
+            self.joystick.init()
+            print(f"Joystick inicializado: {self.joystick.get_name()}")
 
     def _start_game_state_stream(self):
         def stream():
@@ -127,7 +137,7 @@ class Game:
             self.update_bullets_from_game_state()
             # Actualizar entidades
             self.send_player_state(self.tank, self.cannon)
-            self.tank.update(self.blocks)
+            self.tank.update(self.blocks, joystick=self.joystick)
             self.cannon.update(mouse_angle)
             self.bullets_group.update()
             self.explosions_group.update()
@@ -314,6 +324,42 @@ class Game:
                     self.click_pos = pygame.mouse.get_pos()
                 elif event.type == pygame.KEYDOWN:
                     self.key_pressed = event.key
+
+        # Joystick events
+        if self.joystick:
+            current_r2_state = self.joystick.get_button(10)
+            if current_r2_state and not self.r2_pressed:
+                print("Botón R2 presionado")
+                if not self.tank.health <= 0:
+                    # Calcular la dirección del cañón
+                    cannon_angle = self.cannon.angle - 90
+                    rad_angle = math.radians(cannon_angle)
+                    direction = (
+                        math.cos(rad_angle),
+                        -math.sin(rad_angle),
+                    )
+
+                    # Calcular la posición inicial de la bala
+                    bullet_start_x = (
+                        self.tank.rect.centerx + cannon_length * direction[0]
+                    )
+                    bullet_start_y = (
+                        self.tank.rect.centery + cannon_length * direction[1]
+                    )
+                    bullet_start_pos = (bullet_start_x, bullet_start_y)
+
+                    # Crear una bala con la rotación del cañón
+                    bullet = Bullet(
+                        bullet_start_pos,
+                        direction,
+                        tank_id=self.tank.tank_id,
+                    )
+                    bullet.image = pygame.transform.rotate(bullet.image, cannon_angle)
+                    self.bullets_group.add(bullet)
+                    self.send_bullet(bullet)
+
+            # Actualizar el estado del botón R2
+            self.r2_pressed = current_r2_state
 
     def reset_keys(self):
         """Reinicia las teclas de movimiento."""
