@@ -85,7 +85,6 @@ class MainMenu(Menu):
         if self.game.click_pos is not None:
             if self.start_lobby_button.collidepoint(self.game.click_pos):
                 self.game.playing = False
-                self.game.add_player_to_server("Host")
                 self.game.current_menu = self.game.start_lobby_menu
                 self.run_display = False
             elif self.join_lobby_button.collidepoint(self.game.click_pos):
@@ -116,10 +115,18 @@ class LobbyCreatorMenu(Menu):
         self.logo_small = pygame.transform.scale(self.logo, (80, 80))
         self.logo_rect = self.logo_small.get_rect(topleft=(20, 20))
         # Cargar imágenes de tanques
-        self.blue_tank_img = pygame.image.load("assets/Retina/tank_blue.png").convert_alpha()
-        self.red_tank_img = pygame.image.load("assets/Retina/tank_red.png").convert_alpha()
-        self.green_tank_img = pygame.image.load("assets/Retina/tank_green.png").convert_alpha()
-        self.sand_tank_img = pygame.image.load("assets/Retina/tank_sand.png").convert_alpha()
+        self.blue_tank_img = pygame.image.load(
+            "assets/Retina/tank_blue.png"
+        ).convert_alpha()
+        self.red_tank_img = pygame.image.load(
+            "assets/Retina/tank_red.png"
+        ).convert_alpha()
+        self.green_tank_img = pygame.image.load(
+            "assets/Retina/tank_green.png"
+        ).convert_alpha()
+        self.sand_tank_img = pygame.image.load(
+            "assets/Retina/tank_sand.png"
+        ).convert_alpha()
 
     def get_local_ip(self):
         try:
@@ -127,8 +134,6 @@ class LobbyCreatorMenu(Menu):
             s.connect(("8.8.8.8", 80))
             ip = s.getsockname()[0]
             s.close()
-            self.game.server_ip = "localhost"
-            self.game.join_server()
             return ip
         except Exception:
             return "127.0.0.1"
@@ -136,6 +141,10 @@ class LobbyCreatorMenu(Menu):
     def display_menu(self):
         self.run_display = True
         while self.run_display:
+            if self.game.client is None:
+                self.game.server_ip = "localhost"
+                self.game.join_server()
+                self.game.add_player_to_server("Host")
             self.game.check_events()
             self.check_input()
             self.game.screen.fill(Colors.PALE_YELLOW)
@@ -179,7 +188,9 @@ class LobbyCreatorMenu(Menu):
                         # Escalar la imagen a un tamaño adecuado (por ejemplo, 40x40)
                         tank_img_small = pygame.transform.scale(tank_img, (40, 40))
                         # Ubicar la imagen a la izquierda del nombre; ajusta la coordenada X (por ejemplo, mid_w - 220)
-                        self.game.screen.blit(tank_img_small, (self.mid_w - 125, player_y - 20))
+                        self.game.screen.blit(
+                            tank_img_small, (self.mid_w - 125, player_y - 20)
+                        )
             # Dibujar botones
             pygame.draw.rect(self.game.screen, Colors.BLACK, self.play_button, 2)
             self.game.draw_text(
@@ -288,6 +299,7 @@ class InputLobbyIPMenu(Menu):
             # Botón Unirse
             if self.join_button.collidepoint(self.game.click_pos):
                 self.game.server_ip = self.input_box_component.text
+                self.game.join_server()
                 self.game.add_player_to_server("Otro")
                 self.run_display = False
                 self.game.current_menu = self.game.lobby_joiner_menu
@@ -311,10 +323,18 @@ class LobbyJoinerMenu(Menu):
         self.logo_small = pygame.transform.scale(self.logo, (80, 80))
         self.logo_rect = self.logo_small.get_rect(topleft=(20, 20))
         # Cargar imágenes de tanques (agregar esta parte)
-        self.blue_tank_img = pygame.image.load("assets/Retina/tank_blue.png").convert_alpha()
-        self.red_tank_img = pygame.image.load("assets/Retina/tank_red.png").convert_alpha()
-        self.green_tank_img = pygame.image.load("assets/Retina/tank_green.png").convert_alpha()
-        self.sand_tank_img = pygame.image.load("assets/Retina/tank_sand.png").convert_alpha()
+        self.blue_tank_img = pygame.image.load(
+            "assets/Retina/tank_blue.png"
+        ).convert_alpha()
+        self.red_tank_img = pygame.image.load(
+            "assets/Retina/tank_red.png"
+        ).convert_alpha()
+        self.green_tank_img = pygame.image.load(
+            "assets/Retina/tank_green.png"
+        ).convert_alpha()
+        self.sand_tank_img = pygame.image.load(
+            "assets/Retina/tank_sand.png"
+        ).convert_alpha()
 
     def display_menu(self):
         """Muestra el menú principal"""
@@ -358,7 +378,9 @@ class LobbyJoinerMenu(Menu):
 
                     if tank_img:
                         tank_img_small = pygame.transform.scale(tank_img, (40, 40))
-                        self.game.screen.blit(tank_img_small, (self.mid_w - 125, player_y - 20))
+                        self.game.screen.blit(
+                            tank_img_small, (self.mid_w - 125, player_y - 20)
+                        )
             # Botón Volver
             pygame.draw.rect(self.game.screen, Colors.BLACK, self.quit_button, 2)
             self.game.draw_text(
@@ -369,7 +391,7 @@ class LobbyJoinerMenu(Menu):
                 color=Colors.BLACK,
             )
             self.blit_screen()
-            
+
             # Si el juego ya inició, salir del menú
             if hasattr(self.game, "game_state") and self.game.game_state is not None:
                 if self.game.game_state.game_phase == "playing":
@@ -391,11 +413,18 @@ class GameFinishMenu(Menu):
     def __init__(self, game: "Game"):
         super().__init__(game)
         self.quit_x, self.quit_y = self.mid_w, self.mid_h + 120
-        self.quit_button = pygame.Rect(self.mid_w - 200, self.mid_h + 210, 300, 50)
+        self.quit_button = pygame.Rect(self.mid_w - 150, self.mid_h + 210, 300, 50)
         # Logo reducido en la esquina superior izquierda
         self.logo = pygame.image.load("assets/menu/game-logo.png")
         self.logo_small = pygame.transform.scale(self.logo, (80, 80))
         self.logo_rect = self.logo_small.get_rect(topleft=(20, 20))
+        # Cargar imágenes de tanques
+        self.tank_images = {
+            "1": pygame.image.load("assets/Retina/tank_blue.png").convert_alpha(),
+            "2": pygame.image.load("assets/Retina/tank_red.png").convert_alpha(),
+            "3": pygame.image.load("assets/Retina/tank_green.png").convert_alpha(),
+            "4": pygame.image.load("assets/Retina/tank_sand.png").convert_alpha(),
+        }
 
     def display_menu(self):
         """Muestra el menú de fin de juego"""
@@ -415,14 +444,23 @@ class GameFinishMenu(Menu):
                 self.mid_h - 120,
                 color=Colors.BLACK,
             )
+            winner_id = None
             if hasattr(self.game, "game_state") and self.game.game_state is not None:
+                winner_id = getattr(self.game.game_state, "winner_id", None)
                 self.game.draw_text(
-                    f"Ganador: Jugador {self.game.game_state.winner_id}",
+                    f"Ganador: Jugador {winner_id}",
                     24,
                     self.mid_w,
                     self.mid_h - 60,
                     color=Colors.BLACK,
                 )
+                # Mostrar imagen del tanque ganador
+                tank_img = self.tank_images.get(str(winner_id))
+                if tank_img:
+                    tank_img_big = pygame.transform.scale(tank_img, (80, 80))
+                    self.game.screen.blit(
+                        tank_img_big, (self.mid_w - 40, self.mid_h - 40)
+                    )
             # Botones
             pygame.draw.rect(self.game.screen, Colors.BLACK, self.quit_button, 2)
             self.game.draw_text(

@@ -66,6 +66,7 @@ class Game:
         self.server_ip: Union[str, None] = None
         self.player_id = None
         self.player_name = "Jugador 0"
+        self.client: Union[GameServiceStub, None] = None
 
         self.explosions_group = pygame.sprite.Group()
         self.bullets_group = pygame.sprite.Group()
@@ -74,7 +75,6 @@ class Game:
         self.blocks = self.map.generate_map()
 
         self.game_state = None  # Holds the latest GameState from the server
-        self._start_game_state_stream()
 
         self.tanks = {}  # Store all tanks by player_id
 
@@ -91,7 +91,7 @@ class Game:
 
     def _start_game_state_stream(self):
         def stream():
-            if not hasattr(self, "client"):
+            if not hasattr(self, "client") or self.client is None:
                 return
             try:
                 for state in self.client.StreamGameState(Empty()):
@@ -335,22 +335,24 @@ class Game:
     def add_player_to_server(self, player_name: str):
         """Agregar jugador al servidor"""
         try:
-            response = self.client.AddPlayer(PlayerRequest(player_name=player_name))
-            print(f"Jugador añadido: Nombre={player_name}, ID={response.player_id}")
-            self.player_id = str(response.player_id)
-            self.player_name = f"Jugador {self.player_id}"
-            self.init_tank(self.player_id)  # Inicializar el tanque del jugador
-            return str(response.player_id)
+            if self.client is not None:
+                response = self.client.AddPlayer(PlayerRequest(player_name=player_name))
+                print(f"Jugador añadido: Nombre={player_name}, ID={response.player_id}")
+                self.player_id = str(response.player_id)
+                self.player_name = f"Jugador {self.player_id}"
+                self.init_tank(self.player_id)  # Inicializar el tanque del jugador
+                return str(response.player_id)
         except grpc.RpcError as e:
             print(f"Error al añadir el jugador al servidor: {e}")
             return None
 
     def send_map_to_server(self, map_id: int):
         try:
-            self.client.SetMap(
-                MapRequest(map_number=map_id)
-            )  # Usar el nombre correcto del campo
-            print(f"Mapa {map_id} enviado al servidor correctamente.")
+            if self.client is not None:
+                self.client.SetMap(
+                    MapRequest(map_number=map_id)
+                )  # Usar el nombre correcto del campo
+                print(f"Mapa {map_id} enviado al servidor correctamente.")
         except grpc.RpcError as e:
             print(f"Error al enviar el mapa al servidor: {e}")
 
@@ -358,6 +360,7 @@ class Game:
         """Establecer conexión con el servidor"""
         self.channel = grpc.insecure_channel(f"{self.server_ip}:9000")
         self.client = GameServiceStub(self.channel)
+        self._start_game_state_stream()
 
     def send_bullet(self, bullet: Bullet):
         """Enviar la bala al servidor"""
@@ -373,9 +376,10 @@ class Game:
             damage=bullet.damage,
         )
         try:
-            self.client.AddBullet(
-                bullet_state
-            )  # Llamar al método AddBullet en el servidor
+            if self.client is not None:
+                self.client.AddBullet(
+                    bullet_state
+                )  # Llamar al método AddBullet en el servidor
         except grpc.RpcError as e:
             print(f"Error al enviar la bala al servidor: {e}")
 
@@ -392,14 +396,16 @@ class Game:
 
         # Enviar el estado del jugador al servidor
         try:
-            self.client.UpdateState(player_state)
+            if self.client is not None:
+                self.client.UpdateState(player_state)
         except grpc.RpcError as e:
             print(f"Error al enviar el estado del jugador: {e}")
 
     def get_game_state(self):
         """Obtener el estado del juego desde el servidor"""
         try:
-            return self.client.GetGameState(Empty())
+            if self.client is not None:
+                return self.client.GetGameState(Empty())
         except grpc.RpcError as e:
             print(f"Error al obtener el estado del juego: {e}")
             return None
@@ -407,7 +413,8 @@ class Game:
     def get_player_list(self):
         """Obtener la lista de jugadores desde el servidor"""
         try:
-            return self.client.GetPlayerList(Empty())
+            if self.client is not None:
+                return self.client.GetPlayerList(Empty())
         except grpc.RpcError as e:
             print(f"Error al obtener la lista de jugadores: {e}")
             return None
