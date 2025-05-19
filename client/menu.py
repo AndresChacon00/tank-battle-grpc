@@ -221,13 +221,14 @@ class LobbyCreatorMenu(Menu):
             if self.play_button.collidepoint(self.game.click_pos):
                 self.game.send_map_to_server(self.game.map.id)
                 # --- NEW: Call StartGame RPC on the server ---
-                if hasattr(self.game, "client"):
+                if hasattr(self.game, "client") and self.game.client is not None:
                     try:
                         self.game.client.StartGame(Empty())
+                        self.game.init_joystick()
+                        self.game.playing = True
+                        self.run_display = False
                     except Exception as e:
                         print(f"Error al iniciar el juego en el servidor: {e}")
-                self.game.playing = True
-                self.run_display = False
 
             elif self.quit_button.collidepoint(self.game.click_pos):
                 self.game.playing = False
@@ -395,6 +396,7 @@ class LobbyJoinerMenu(Menu):
             # Si el juego ya inició, salir del menú
             if hasattr(self.game, "game_state") and self.game.game_state is not None:
                 if self.game.game_state.game_phase == "playing":
+                    self.game.init_joystick()
                     self.game.playing = True
                     self.run_display = False
 
